@@ -47,11 +47,11 @@ try {
   ok('鍵盤走動', p1[1] < p0[1] - 0.8, [p0, p1]);
 
   // 掩燈與眼睛
-  await page.keyboard.press('KeyF'); await wait(2800);
+  await page.keyboard.press('Semicolon'); await wait(2800);
   const dark = await ev(() => ({ lamp: DENG.g.p.lampOn, adapt: DENG.g.p.adapt, eye: document.getElementById('eye-num').textContent, ex: document.getElementById('expose').textContent }));
   ok('掩燈、眼睛慢慢習慣、顯示「隱」', !dark.lamp && dark.adapt > 0.95 && dark.ex.includes('隱'), dark);
   await shot('03-dark-adapted');
-  await page.keyboard.press('KeyF'); await wait(200);
+  await page.keyboard.press('Semicolon'); await wait(200);
 
   // 照見的蓄撲：「噬」字與紅圈
   await ev(() => { const g = DENG.g; g.tp(19.5, 3.5); const e = g.pos[0]; g.place(e, 21.0, 3.5, 'chase'); e.lastKnown = { x: 19.5, y: 3.5 }; e.stateT = 0; });
@@ -92,19 +92,19 @@ try {
   // 借火：讀咒、火停在對準的地方
   await ev(() => { const g = DENG.g; g.tp(14.5, 13.5); DENG.snap(); g.p.ink = 3; });
   await page.mouse.move(640 + 160, 400); await wait(100);
-  await page.keyboard.press('Digit1'); await wait(1400);
+  await page.keyboard.press('Comma'); await wait(1400);
   const lure = await ev(() => ({ n: DENG.g.lures.length, ink: DENG.g.p.ink }));
   ok('借火：火停在前方、扣一點墨', lure.n === 1 && lure.ink === 2, lure);
   await shot('08-borrow-fire');
 
   // 讀咒中搖鈴：合書不耗墨
-  await page.keyboard.press('Digit1'); await wait(500); await page.keyboard.press('KeyK'); await wait(200);
+  await page.keyboard.press('Comma'); await wait(500); await page.keyboard.press('KeyK'); await wait(200);
   const bl = await ev(() => ({ ink: DENG.g.p.ink, reading: !!DENG.g.p.reading, log: document.getElementById('log').textContent }));
   ok('讀咒中搖鈴：讀咒中斷，書墨未耗', bl.ink === 2 && !bl.reading && bl.log.includes('書墨未耗'), bl);
 
   // 封戶：站在廊口旁
   await ev(() => { const g = DENG.g; g.tp(18.5, 17.4); });
-  await page.keyboard.press('Digit2'); await wait(1100);
+  await page.keyboard.press('Period'); await wait(1100);
   const sealN = await ev(() => DENG.g.sealed.size);
   ok('封戶：廊口封住', sealN === 1, sealN);
   await shot('09-seal-door');
@@ -137,6 +137,18 @@ try {
   await shot('12-pause');
   await page.keyboard.press('Escape'); await wait(150);
   ok('Esc 繼續', await ev(() => !DENG.paused));
+  await page.keyboard.press('KeyP'); await wait(100);
+  const pp = await ev(() => DENG.paused);
+  await page.keyboard.press('KeyP'); await wait(100);
+  ok('P 也能暫停與繼續', pp && await ev(() => !DENG.paused));
+  // 舊的鍵（F、空白、E、1、2）已拿掉：按了不該有作用
+  // 站在名印旁邊按舊鍵：E 按住一秒多也取不到印，F、空白不會掩燈，1、2 不會讀咒
+  await ev(() => { const g = DENG.g; const a = g.altars.find((q) => q.key === 'name'); g.tp(a.x + 0.8, a.y); DENG.snap(); g.p.ink = 3; });
+  const before = await ev(() => ({ lamp: DENG.g.p.lampOn, ink: DENG.g.p.ink }));
+  for (const k of ['KeyF', 'Space', 'Digit1', 'Digit2']) { await page.keyboard.press(k); await wait(60); }
+  await page.keyboard.down('KeyE'); await wait(1300); await page.keyboard.up('KeyE');
+  const after = await ev(() => ({ lamp: DENG.g.p.lampOn, ink: DENG.g.p.ink, reads: DENG.g.stats.reads + DENG.g.stats.readCancel, taken: DENG.g.altars.find((q) => q.key === 'name').taken }));
+  ok('舊的 F、空白、E、1、2 不再有作用', after.lamp === before.lamp && after.ink === before.ink && !after.taken, { before, after });
 
   // 失去焦點：自動暫停、放開按鍵
   await page.keyboard.down('KeyD'); await wait(100);
@@ -149,15 +161,15 @@ try {
 
   // 取兩印、推門閂、出宅
   await ev(() => { const g = DENG.g; const a = g.altars.find((q) => q.key === 'name'); g.tp(a.x + 0.8, a.y); });
-  await page.keyboard.down('KeyE'); await wait(1250); await page.keyboard.up('KeyE');
+  await page.keyboard.down('KeyU'); await wait(1250); await page.keyboard.up('KeyU');
   await ev(() => { const g = DENG.g; const a = g.altars.find((q) => q.key === 'breath'); g.tp(a.x - 0.8, a.y); });
-  await page.keyboard.down('KeyE'); await wait(1250); await page.keyboard.up('KeyE');
+  await page.keyboard.down('KeyU'); await wait(1250); await page.keyboard.up('KeyU');
   await calm();
   const seals = await ev(() => ({ s: DENG.g.seals, ready: DENG.g.exitReady, goal: document.getElementById('goal').textContent }));
   ok('取兩印：可以推門', seals.s.name && seals.s.breath && seals.ready && seals.goal.includes('可以推開'), seals);
   await ev(() => { DENG.g.tp(20.0, 26.4); });
   await wait(200); await shot('13-gate');
-  await page.keyboard.down('KeyE'); await wait(1750); await page.keyboard.up('KeyE');
+  await page.keyboard.down('KeyU'); await wait(1750); await page.keyboard.up('KeyU');
   ok('推開門閂', await ev(() => DENG.g.exitOpen));
   await page.keyboard.down('KeyS'); await wait(600); await page.keyboard.up('KeyS'); await wait(300);
   const end = await ev(() => ({ st: DENG.g.state, title: document.getElementById('end-title').textContent }));

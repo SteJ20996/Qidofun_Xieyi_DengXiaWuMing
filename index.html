@@ -23,7 +23,7 @@
   <div id="expose"></div>
   <div id="topright">
     <div id="goal"></div>
-    <div class="hudbtns"><button id="btn-mute" title="音效開關">音效</button><button id="btn-pause" title="暫停（Esc）">暫停</button></div>
+    <div class="hudbtns"><button id="btn-mute" title="音效開關">音效</button><button id="btn-pause" title="暫停（P 或 Esc）">暫停</button></div>
   </div>
   <div id="log" aria-live="polite"></div>
   <div id="hint" class="hidden"></div>
@@ -34,12 +34,12 @@
     <div class="tool book" id="t-book" title="《燼琅嬛》：讀咒時不能走，一走就合上書，不耗墨。被咬、魄貼身也會中斷。">
       <b>書</b><small>燼琅嬛</small>
       <div class="pages">
-        <button data-act="read1" id="pg-borrow" title="借火：在對準的地方點一團火，燒十五秒。照得到路，也能取暖；魄會被火吸引過去。站進火光裡，你也會被看見。"><kbd>1</kbd>借火</button>
-        <button data-act="read2" id="pg-seal" title="封戶：要站在廊口旁。把廊口封住十秒，人、魄、劍、鈴、火都過不去，只有光透得過。"><kbd>2</kbd>封戶</button>
+        <button data-act="read1" id="pg-borrow" title="借火（《 鍵，也就是逗號鍵）：在對準的地方點一團火，燒十五秒。照得到路，也能取暖；魄會被火吸引過去。站進火光裡，你也會被看見。"><kbd>《</kbd>借火</button>
+        <button data-act="read2" id="pg-seal" title="封戶（》鍵，也就是句號鍵）：要站在廊口旁。把廊口封住十秒，人、魄、劍、鈴、火都過不去，只有光透得過。"><kbd>》</kbd>封戶</button>
       </div>
       <em id="ink-n"></em>
     </div>
-    <button class="tool" id="t-lamp" data-act="lamp" title="手燈：點著看得清身邊，但魄從遠處就看得見你。掩燈後，眼睛會慢慢習慣黑暗。"><b>燈</b><kbd>F</kbd><small id="lamp-s">點著</small></button>
+    <button class="tool" id="t-lamp" data-act="lamp" title="手燈（：鍵，也就是分號鍵）：點著看得清身邊，但魄從遠處就看得見你。掩燈後，眼睛會慢慢習慣黑暗。"><b>燈</b><kbd>：</kbd><small id="lamp-s">點著</small></button>
   </div>
   <canvas id="minimap" width="200" height="140" title="走過的地方：只記牆、屏、門與印，不記魄"></canvas>
 </div>
@@ -54,16 +54,17 @@
     <div class="keys">
       <div><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>／方向鍵</span><b>走動</b></div>
       <div><span>滑鼠</span><b>對準（不用滑鼠就朝走的方向）</b></div>
-      <div><span><kbd>F</kbd>／<kbd>空白</kbd></span><b>點燈、掩燈</b></div>
-      <div><span><kbd>E</kbd>（按住）</span><b>取印、推門閂</b></div>
       <div><span><kbd>J</kbd>／左鍵</span><b>桃木劍</b></div>
       <div><span><kbd>K</kbd></span><b>銅鈴</b></div>
       <div><span><kbd>L</kbd>／右鍵</span><b>火符</b></div>
-      <div><span><kbd>1</kbd> <kbd>2</kbd></span><b>《燼琅嬛》：借火、封戶</b></div>
-      <div><span><kbd>Esc</kbd></span><b>暫停</b></div>
+      <div><span><kbd>：</kbd></span><b>點燈、掩燈（分號鍵）</b></div>
+      <div><span><kbd>《</kbd> <kbd>》</kbd></span><b>《燼琅嬛》：借火、封戶（逗號鍵、句號鍵）</b></div>
+      <div><span><kbd>U</kbd>（按住）</span><b>取印、推門閂</b></div>
+      <div><span><kbd>P</kbd>／<kbd>Esc</kbd></span><b>暫停</b></div>
     </div>
     <button id="btn-start" class="big">入宅</button>
     <div class="dim small">Enter 也可以開始<span id="best"></span></div>
+    <div class="dim small">左手 WASD 走位，右手 U I O P J K L ：M《》操作；不必按 Shift。</div>
     <div class="dim small" id="touchnote">這一版是試做：一個關卡，只做了鍵盤與滑鼠。</div>
   </div>
 </div>

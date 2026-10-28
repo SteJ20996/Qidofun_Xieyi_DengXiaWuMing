@@ -23,10 +23,10 @@
     bite: '被咬了。護心衣先擋下寒傷（「護」少一格）。護持用完，咬中就直接加寒意。',
     biteBare: '護持沒了，咬中就直接加寒意。寒意滿了就失魂。',
     bell: '鈴聲把身邊的魄震開。可是紙宅擋不住聲音：附近的魄都會往這裡來，睡著的也會醒。',
-    altar: '按住 E 取印。取印時不能動，被咬就要重來。',
+    altar: '按住 U 取印。取印時不能動，被咬就要重來。',
     seal1: '取到一印，寒意退了一些，也補了護持、火符與書墨。宅裡有東西醒了。',
-    seal2: '兩印到手。回大門，按住 E 推開門閂（要一秒半）。魄也往玄關去了。',
-    gate: '按住 E 推開門閂。推的時候不能動，被咬就要重來。魄在附近時，可以先借火把它引開，或封住它過來的廊口。',
+    seal2: '兩印到手。回大門，按住 U 推開門閂（要一秒半）。魄也往玄關去了。',
+    gate: '按住 U 推開門閂。推的時候不能動，被咬就要重來。魄在附近時，可以先借火把它引開，或封住它過來的廊口。',
     chill: '寒意很高。到燭火或借火旁邊可以取暖，但站在火光裡，魄看得見你。'
   };
   const SPELL = { borrow: '借火', seal: '封戶' };
@@ -118,7 +118,7 @@
         case 'noInk': SFX.play('fail'); log('書墨用完了。取印時會補一點'); break;
         case 'noTalisman': SFX.play('fail'); log('火符用完了'); break;
         case 'cooldown': if (e.what === 'bell') log(`銅鈴還在響，${Math.ceil(e.left)} 秒後再搖`); break;
-        case 'busy': log(e.what === 'sword' || e.what === 'fire' ? (g.p.reading ? '讀咒中只能搖鈴（K）' : '取印中，先放開 E') : '手上正忙'); break;
+        case 'busy': log(e.what === 'sword' || e.what === 'fire' ? (g.p.reading ? '讀咒中只能搖鈴（K）' : '取印中，先放開 U') : '手上正忙'); break;
         case 'sealDone': log('封戶：這個廊口十秒內誰也過不去', 'good'); break;
         case 'sealEnd': log('封戶散了'); break;
         case 'borrowDone': log('借火：火會燒十五秒，魄會被火吸引過去', 'good'); break;
@@ -140,19 +140,22 @@
 
   // ---------- 輸入 ----------
   const MOVE = { KeyW: [0, -1], ArrowUp: [0, -1], KeyS: [0, 1], ArrowDown: [0, 1], KeyA: [-1, 0], ArrowLeft: [-1, 0], KeyD: [1, 0], ArrowRight: [1, 0] };
-  const ACT = { KeyJ: 'sword', KeyK: 'bell', KeyL: 'fire', KeyF: 'lamp', Space: 'lamp', Digit1: 'read1', Digit2: 'read2', Numpad1: 'read1', Numpad2: 'read2' };
+  // 左手 WASD 走位，其餘全在右手（擁有者 2026-10-28）：J 劍、K 鈴、L 火符、；燈、《 借火、》封戶、U 取印與推門閂（按住）、P 暫停。
+  // 用實體鍵位（ev.code），中文輸入法開著、有沒有按 Shift 都一樣。I、O、M 先空著。
+  const ACT = { KeyJ: 'sword', KeyK: 'bell', KeyL: 'fire', Semicolon: 'lamp', Comma: 'read1', Period: 'read2' };
+  const HOLD = 'KeyU';
   addEventListener('keydown', (ev) => {
-    if (ev.code === 'Space' || ev.code.startsWith('Arrow')) ev.preventDefault();
+    if (ev.code.startsWith('Arrow') || ev.code === 'Space') ev.preventDefault();
     if (!$('start').classList.contains('hidden')) { if (ev.code === 'Enter' || ev.code === 'NumpadEnter') { ev.preventDefault(); begin(); } return; }
     if (!$('end').classList.contains('hidden')) { if (ev.code === 'Enter' || ev.code === 'NumpadEnter') { ev.preventDefault(); newGame(); } return; }
-    if (ev.code === 'Escape') { setPause(!paused); return; }
+    if (ev.code === 'Escape' || ev.code === 'KeyP') { setPause(!paused); return; }
     if (paused || !running) return;
     if (MOVE[ev.code]) keys.add(ev.code);
     if (ev.repeat) return;
     if (ACT[ev.code]) press[ACT[ev.code]] = true;
-    if (ev.code === 'KeyE') holdTake = true;
+    if (ev.code === HOLD) holdTake = true;
   });
-  addEventListener('keyup', (ev) => { keys.delete(ev.code); if (ev.code === 'KeyE') holdTake = false; });
+  addEventListener('keyup', (ev) => { keys.delete(ev.code); if (ev.code === HOLD) holdTake = false; });
   addEventListener('blur', () => { keys.clear(); holdTake = false; if (running && !paused) setPause(true, 'blur'); });
   document.addEventListener('visibilitychange', () => { if (document.hidden) { keys.clear(); holdTake = false; if (running && !paused) setPause(true, 'blur'); } });
   addEventListener('mousemove', (ev) => { mouse.x = ev.clientX; mouse.y = ev.clientY; mouse.t = performance.now(); mouse.in = true; });
