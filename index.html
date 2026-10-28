@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>燈下無明 · 紙宅試夜</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="world"></canvas>
+
+<div id="hud" class="hidden">
+  <div id="seal" title="燈下無明"><span>燈</span><span>下</span><span>無</span><span>明</span></div>
+  <div id="bars">
+    <div class="hbar chill" title="寒意：被咬、久留在魄身邊都會上升；滿了就失魂。只有在火邊才會退。"><b>寒</b><div class="track"><div class="fill" id="chill-fill"></div></div><span id="chill-num"></span></div>
+    <div class="hbar armor" title="護持：護心衣先擋下被咬的寒傷，一格擋一次；用掉不會自己回來，取印時補一格。"><b>護</b><div class="track segs"><div class="fill" id="armor-fill"></div></div><span id="armor-num"></span></div>
+    <div class="hbar eye" title="目：掩燈後，眼睛慢慢習慣黑暗，看得比點燈時更遠。點燈或站進光裡就重來。"><b>目</b><div class="track"><div class="fill" id="eye-fill"></div></div><span id="eye-num"></span></div>
+  </div>
+  <div id="expose"></div>
+  <div id="topright">
+    <div id="goal"></div>
+    <div class="hudbtns"><button id="btn-mute" title="音效開關">音效</button><button id="btn-pause" title="暫停（Esc）">暫停</button></div>
+  </div>
+  <div id="log" aria-live="polite"></div>
+  <div id="hint" class="hidden"></div>
+  <div id="tools">
+    <button class="tool" id="t-sword" data-act="sword" title="桃木劍：朝對準的方向揮一劍。打中能打斷蓄撲，但擋不住下一次撲，打了就要退。"><b>劍</b><kbd>J</kbd><i class="cd"></i><small>桃木劍</small></button>
+    <button class="tool" id="t-bell" data-act="bell" title="銅鈴：把身邊的魄震開、愣住一會兒。不耗東西，但鈴聲穿得過紙牆，附近的魄都會往這裡來。讀咒時也能搖。"><b>鈴</b><kbd>K</kbd><i class="cd"></i><small>銅鈴</small></button>
+    <button class="tool" id="t-fire" data-act="fire" title="火符：朝對準的方向丟出去，碰到第一隻魄或牆就燒起來，附近的魄都會被燒到。"><b>符</b><kbd>L</kbd><em id="fire-n"></em><small>火符</small></button>
+    <div class="tool book" id="t-book" title="《燼琅嬛》：讀咒時不能走，一走就合上書，不耗墨。被咬、魄貼身也會中斷。">
+      <b>書</b><small>燼琅嬛</small>
+      <div class="pages">
+        <button data-act="read1" id="pg-borrow" title="借火：在對準的地方點一團火，燒十五秒。照得到路，也能取暖；魄會被火吸引過去。站進火光裡，你也會被看見。"><kbd>1</kbd>借火</button>
+        <button data-act="read2" id="pg-seal" title="封戶：要站在廊口旁。把廊口封住十秒，人、魄、劍、鈴、火都過不去，只有光透得過。"><kbd>2</kbd>封戶</button>
+      </div>
+      <em id="ink-n"></em>
+    </div>
+    <button class="tool" id="t-lamp" data-act="lamp" title="手燈：點著看得清身邊，但魄從遠處就看得見你。掩燈後，眼睛會慢慢習慣黑暗。"><b>燈</b><kbd>F</kbd><small id="lamp-s">點著</small></button>
+  </div>
+  <canvas id="minimap" width="200" height="140" title="走過的地方：只記牆、屏、門與印，不記魄"></canvas>
+</div>
+
+<div id="start" class="overlay">
+  <div class="panel startpanel">
+    <div class="titleseal"><span>燈</span><span>下</span><span>無</span><span>明</span></div>
+    <h1>燈下無明</h1>
+    <div class="sub">紙宅 · 試夜</div>
+    <p class="story">紙糊的宅子，夜裡有魄。今晚是你的試夜：取回<b>名印</b>與<b>息印</b>，再從大門出來。</p>
+    <p class="story">點著燈，看得清身邊，魄卻從遠處就看見你。掩了燈，眼睛會慢慢習慣黑暗，看得比點燈時更遠。</p>
+    <table class="keys">
+      <tr><td><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>／方向鍵</td><td>走動</td><td>滑鼠</td><td>對準（不用滑鼠就朝走的方向）</td></tr>
+      <tr><td><kbd>F</kbd>／<kbd>空白</kbd></td><td>點燈、掩燈</td><td><kbd>E</kbd>（按住）</td><td>取印</td></tr>
+      <tr><td><kbd>J</kbd>／左鍵</td><td>桃木劍</td><td><kbd>K</kbd></td><td>銅鈴</td></tr>
+      <tr><td><kbd>L</kbd>／右鍵</td><td>火符</td><td><kbd>1</kbd> <kbd>2</kbd></td><td>《燼琅嬛》：借火、封戶</td></tr>
+      <tr><td><kbd>Esc</kbd></td><td>暫停</td><td></td><td></td></tr>
+    </table>
+    <button id="btn-start" class="big">入宅</button>
+    <div class="dim small">Enter 也可以開始<span id="best"></span></div>
+    <div class="dim small" id="touchnote">這一版是試做：一個關卡，只做了鍵盤與滑鼠。</div>
+  </div>
+</div>
+
+<div id="pause" class="overlay hidden">
+  <div class="panel">
+    <h2>暫停</h2>
+    <p class="dim small" id="pause-why"></p>
+    <div class="row"><button id="btn-resume" class="big">繼續</button><button id="btn-restart">重來</button><button id="btn-mute2">音效</button></div>
+    <ul class="rules">
+      <li><b>燈</b>：點著看得清，但魄從九格外就看得見你；隔著紙屏也看得到你的燈光。掩燈時，魄要靠到兩格左右才察覺。</li>
+      <li><b>噬</b>：魄撲之前會停下來蓄力（約半秒）。看得見時頭上有「噬」字與紅圈；黑暗裡只有一聲嘶。退出紅圈，它就撲空，會愣一下。</li>
+      <li><b>寒</b>：被咬時護心衣先擋；久留在魄身邊會直接加寒意。只有在燭火、借火旁邊才會退，但站在火光裡，魄看得見你。</li>
+      <li><b>鈴</b>：震開身邊的魄，不耗東西；但紙宅擋不住聲音，附近的魄都會過來，睡著的也會醒。</li>
+      <li><b>封戶</b>：擋住廊口十秒，人與魄都過不去，劍、鈴、火、咬也都過不去，只有光透得過。</li>
+      <li>魄被打散後，過一陣子會在別處凝回來。</li>
+    </ul>
+  </div>
+</div>
+
+<div id="end" class="overlay hidden">
+  <div class="panel">
+    <div id="end-seal" class="endseal"></div>
+    <h2 id="end-title"></h2>
+    <p id="end-text"></p>
+    <table id="end-stats" class="stats"></table>
+    <button id="btn-again" class="big">再一夜</button>
+    <div class="dim small">Enter 也可以</div>
+  </div>
+</div>
+
+<script src="src/rules.js"></script>
+<script src="src/map.js"></script>
+<script src="src/engine.js"></script>
+<script src="src/render.js"></script>
+<script src="src/sfx.js"></script>
+<script src="src/ui.js"></script>
+</body>
+</html>
