@@ -8,7 +8,7 @@
 
 - 起點：擁有者 2026-10-26 的〈《燈下無明》攻防自查與修正〉md。md 提到的源碼包沒有上傳，這一版是照 md 從頭重做（2026-10-28），md 的數值照用。
 - 2026-10-28 審視 md 列了八個漏洞與預設做法；擁有者回覆「你有什麼好的建議？可以跟著你的建議先走，看看做出來的demo」。所以 `docs/DESIGN.md` 第 1、2、4 節標「要擁有者確認」的都還沒定案：標題的玩法、材質表、劍定位成「打了就跑」、寒意只在火邊退、鈴聲引魄、第二隻魄、兩印後推門閂一秒半且魄守玄關、借火引魄、劍落空分原因。擁有者改了哪一條，就照改並記在這裡。
-- **還沒有 repo**。系列慣例是一作一個 repo（`SteJ20996/Qidofun_Xieyi_<拼音>`），建議 `Qidofun_Xieyi_DengXiaWuMing`，要擁有者自己建；建好後把這個資料夾推上去。在那之前，完整原始碼都內嵌在私人 Artifact 的單檔裡（用 Artifact 的 read 讀得回來）。
+- Repo：`SteJ20996/Qidofun_Xieyi_DengXiaWuMing`（擁有者 2026-10-28 建好）。`main` 只有建立時的 Initial commit；開發在工作分支 `claude/xieyi-deng`（照《力透紙背》的 `claude/xieyi-zhan`）。要不要開 PR、合進 `main`，照擁有者的意思。
 - 私人試玩頁（claude.ai Artifact，只有擁有者看得到）：https://claude.ai/artifact/97AkBkGAZwMwZcMcgU3qw6 。每次更新都發佈到同一個網址（用 `dist/xieyi-deng.html`），不要另開新的。
 
 ## 語言
@@ -27,7 +27,7 @@
 
    **遊戲入口（點開即玩）：** https://claude.ai/artifact/97AkBkGAZwMwZcMcgU3qw6
 
-6. 提交；有 repo 之後推到工作分支。要不要開 PR、合進 `main`，照擁有者的意思。
+6. 提交、推到工作分支 `claude/xieyi-deng`。要不要開 PR、合進 `main`，照擁有者的意思。
 
 ## 位置
 
