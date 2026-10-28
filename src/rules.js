@@ -21,7 +21,7 @@
       patrol: 1.2, investigate: 2.0, chase: 2.7,          // 人走 3.2，直路跑得掉，停下來做事就會被追上
       windStart: 0.75, biteR: 0.95, windT: 0.45,           // 靠到 0.75 格才蓄，蓄撲時停步，結算時看人還在不在 0.95 格內
       whiffT: 0.55, recoilT: 0.7, bite: 18,                // 撲空僵 0.55 秒（反擊窗口）；咬中後退開 0.7 秒
-      auraR: 1.4, aura: 5,                                 // 久留身邊每秒 +5 寒意，不經護心衣
+      auraR: 1.4, aura: 7,                                 // 久留身邊每秒 +7 寒意，不經護心衣
       reformT: 14, formT: 1.5, formClear: 2.5, formRepick: 3, reformFar: 8,
       searchT: 4, searchR: 2.5, loseT: 0.25, lureR: 10, lingerMin: 1, lingerMax: 2.2,
       repath: 0.35, stuckT: 1.2
@@ -48,8 +48,8 @@
     // 取暖：火邊每秒退 4 點寒意，但站在火光裡就是暴露
     WARM: { r: 1.6, rate: 4 },
 
-    // 取印：按住 E 一秒；取印處補給
-    TAKE: { t: 1.0, reach: 1.1, armor: 18, talisman: 1, ink: 1, chill: -15 },
+    // 取印：按住 E 一秒；取印處補給。兩印到手後，大門要按住 E 一秒半推開門閂（最後一個要停下來的地方）
+    TAKE: { t: 1.0, reach: 1.1, armor: 18, talisman: 1, ink: 1, chill: -15, gate: 1.5, gateReach: 1.3 },
 
     // 魄的巡行點
     WAY: {

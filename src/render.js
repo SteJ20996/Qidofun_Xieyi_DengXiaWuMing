@@ -4,6 +4,7 @@
   const FONT = '"LXGW WenKai TC", "Kaiti TC", "BiauKai", "DFKai-SB", "Noto Serif TC", serif';
   const C = { ink: '#0d0c0b', wall: '#211d19', paper: '#ebe0c6', court: '#ddd6c4', screen: '#f2e8d0', red: '#b4392a', gold: '#d9a441', po: '#3c4247', poDark: '#cfeee6' };
   const TS = 48;   // 底圖每格幾像素
+  const RM = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;   // 減少動態：不抖、不晃
   const hyp = Math.hypot;
 
   let cv, ctx, g, art, mask, mctx, warm, wctx, cam = { x: 0, y: 0, s: 40 }, fx = [], floats = [], t = 0;
@@ -195,7 +196,7 @@
       if (!g.exitOpen) ctx.fillRect(sx(e.x), sy(e.y), cam.s, cam.s * 0.9);
     }
     const ex = g.m.exits;
-    if (ex.length) { const cx = (ex[0].x + ex[ex.length - 1].x + 1) / 2, cy = ex[0].y + 0.45; glyph('門', cx, cy, 0.8, g.exitOpen ? '#7a5a2a' : '#e8d9b8', { a: g.exitOpen ? 0.55 : 0.9 }); }
+    if (ex.length) { const cx = (ex[0].x + ex[ex.length - 1].x + 1) / 2, cy = ex[0].y + 0.45; glyph('門', cx, cy, 0.8, g.exitOpen ? '#7a5a2a' : '#e8d9b8', { a: g.exitOpen ? 0.55 : 0.9 }); if (g.exitReady && !g.exitOpen) glyph('閂', cx, cy - 0.85, 0.36, '#e8c860', { a: 0.6 + 0.4 * Math.abs(Math.sin(t * 3)), stroke: 3, strokeColor: 'rgba(40,20,10,.8)' }); }
     // 封戶：紙條橫過廊口
     for (const [, s] of g.sealed) {
       const blink = s.t < 2 ? 0.45 + 0.55 * Math.abs(Math.sin(t * 9)) : 1;
@@ -241,7 +242,7 @@
           const f = 1 - Math.max(0, e.goneT) / P.formT, s = e.formSpot;
           for (let k = 0; k < 14; k++) { const a = k * 2.4 + t * 2, r = (1 - f) * 1.4 + 0.15; ctx.fillStyle = `rgba(40,44,48,${0.25 + 0.5 * f})`; ctx.beginPath(); ctx.arc(sx(s.x + Math.cos(a) * r), sy(s.y + Math.sin(a) * r), 0.05 * cam.s, 0, Math.PI * 2); ctx.fill(); }
           glyph('魄', s.x, s.y, 0.8, C.po, { a: 0.15 + 0.35 * f });
-          glyph('凝', s.x, s.y - 0.85, 0.32, '#5c6168', { a: 0.6 });
+          glyph('凝', s.x, s.y - 0.9, 0.4, C.red, { a: 0.55 + 0.45 * f, stroke: 3, strokeColor: 'rgba(236,226,200,.8)' });
         }
         continue;
       }
@@ -249,12 +250,17 @@
       if (!vis) continue;
       const hpF = Math.max(0.25, e.hp / P.hp);
       let ox = 0, oy = 0;
-      if (e.state === 'stagger') { ox = (Math.random() - 0.5) * 0.08; oy = (Math.random() - 0.5) * 0.08; }
-      if (e.state === 'windup') { ox = (Math.random() - 0.5) * 0.05; }
-      const wob = 1 + 0.05 * Math.sin(t * 3 + e.id), x = e.x + ox, y = e.y + oy;
+      if (!RM && e.state === 'stagger') { ox = (Math.random() - 0.5) * 0.08; oy = (Math.random() - 0.5) * 0.08; }
+      if (!RM && e.state === 'windup') { ox = (Math.random() - 0.5) * 0.05; }
+      const wob = RM ? 1 : 1 + 0.05 * Math.sin(t * 3 + e.id), x = e.x + ox, y = e.y + oy;
       const dorm = e.state === 'dormant';
-      if (vis.mode === 'silhouette') {
-        glyph('魄', x, y, 0.9, 'rgba(30,24,20,1)', { a: 0.55 * vis.a, filter: 'blur(3px)', scale: wob });
+      if (vis.mode === 'silhouette') {   // 剪影：影子落在視線穿過的那片紙屏上，像皮影戲
+        let hit = null;
+        MAP.walk(g.p.x, g.p.y, x, y, (tx, ty) => { if (g.m.at(tx, ty) === T.SCREEN) { hit = [tx + 0.5, ty + 0.5]; return true; } return false; });
+        if (hit) {
+          const dx = x - g.p.x, dy = y - g.p.y, L2 = dx * dx + dy * dy || 1, u = ((hit[0] - g.p.x) * dx + (hit[1] - g.p.y) * dy) / L2;
+          glyph('魄', g.p.x + dx * u, g.p.y + dy * u, 1.05, 'rgba(22,18,14,1)', { a: Math.min(0.85, 0.45 + 0.5 * vis.a), filter: 'blur(1.2px)', scale: wob });
+        }
         continue;
       }
       if (vis.mode === 'dark') {
@@ -280,11 +286,11 @@
   function drawPlayer() {
     const p = g.p, x = p.x, y = p.y;
     // 讀咒與取印的進度圈
-    const prog = p.reading ? p.reading.t / p.reading.dur : p.taking ? p.taking.t / R.TAKE.t : 0;
+    const prog = p.reading ? p.reading.t / p.reading.dur : p.taking ? p.taking.t / p.taking.dur : 0;
     if (prog > 0) {
       ctx.strokeStyle = p.reading ? 'rgba(150,40,30,.85)' : 'rgba(180,57,42,.9)'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.arc(sx(x), sy(y), 0.55 * cam.s, -Math.PI / 2, -Math.PI / 2 + prog * Math.PI * 2); ctx.stroke();
-      glyph(p.reading ? (p.reading.spell === 'seal' ? '封戶' : '借火') : '取印', x, y - 0.85, 0.3, '#7a2a1e', { stroke: 3 });
+      glyph(p.reading ? (p.reading.spell === 'seal' ? '封戶' : '借火') : p.taking.gate ? '推門' : '取印', x, y - 0.85, 0.3, '#7a2a1e', { stroke: 3 });
     }
     ctx.fillStyle = C.paper; ctx.strokeStyle = '#1c1a17'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(sx(x), sy(y), p.r * cam.s, 0, Math.PI * 2); ctx.fill(); ctx.stroke();

@@ -5,8 +5,10 @@
   --ui: "Noto Serif TC", "Noto Serif CJK TC", "PingFang TC", "Microsoft JhengHei", "WenQuanYi Zen Hei", serif;
 }
 * { box-sizing: border-box; }
+/* 刻意只有一種樣子（墨夜加宣紙面板，同系列不跟系統深淺色走），所以每個顏色都寫死、背景也明寫 */
+:root { color-scheme: dark; }
 html, body { margin: 0; height: 100%; overflow: hidden; background: var(--night); color: var(--ink); font-family: var(--ui); }
-body { color-scheme: dark; }
+body { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 canvas#world { position: fixed; inset: 0; display: block; cursor: crosshair; touch-action: none; }
 .hidden { display: none !important; }
 kbd { display: inline-block; min-width: 1.3em; padding: 0 .3em; border: 1px solid var(--ink-2); border-radius: 3px; font: 12px/1.5 var(--ui); text-align: center; background: rgba(255,255,255,.4); margin: 0 1px; color: var(--ink); }
@@ -62,10 +64,11 @@ button:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 #log div { font: 15px var(--font); color: var(--ink); background: rgba(239,229,207,.88); border-left: 3px solid var(--ink-2); padding: 3px 10px; border-radius: 2px; animation: logfade 5s ease forwards; }
 #log div.warn { border-left-color: var(--red); color: var(--red-2); }
 #log div.good { border-left-color: #3f7f74; }
+@media (prefers-reduced-motion: reduce) { #log div, .hbar.chill.high .track { animation: none !important; } }
 @keyframes logfade { 0% { opacity: 0; transform: translateX(-8px); } 6% { opacity: 1; transform: none; } 80% { opacity: 1; } 100% { opacity: 0; } }
 
 /* 提示（教學） */
-#hint { position: absolute; left: 50%; bottom: 112px; transform: translateX(-50%); max-width: min(560px, 86vw); font: 17px/1.55 var(--font); color: var(--ink); background: rgba(239,229,207,.95); border: 1.5px solid var(--ink); border-radius: 4px; padding: 8px 16px 8px 40px; box-shadow: 0 3px 12px rgba(0,0,0,.4); cursor: pointer; }
+#hint { position: absolute; left: 50%; top: calc(12px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); max-width: min(560px, calc(100vw - 760px), 86vw); min-width: min(320px, 86vw); font: 16px/1.55 var(--font); color: var(--ink); background: rgba(239,229,207,.95); border: 1.5px solid var(--ink); border-radius: 4px; padding: 8px 16px 8px 40px; box-shadow: 0 3px 12px rgba(0,0,0,.4); cursor: pointer; }
 #hint::before { content: '提'; position: absolute; left: 9px; top: 9px; width: 22px; height: 22px; background: var(--red); color: #f7efe0; display: grid; place-items: center; font-size: 14px; border-radius: 3px; }
 
 /* 五件裝備與燈 */
@@ -102,10 +105,10 @@ h2 { font: 32px/1.2 var(--font); margin: 4px 0 10px; letter-spacing: 4px; }
 .sub { font-size: 18px; color: var(--ink-2); letter-spacing: 4px; margin-bottom: 12px; }
 .story { font-size: 17px; line-height: 1.65; margin: 6px auto; max-width: 34em; }
 .story b { color: var(--red-2); font-weight: normal; }
-table.keys { margin: 12px auto; border-collapse: collapse; font-size: 14px; text-align: left; }
-table.keys td { padding: 3px 8px; }
-table.keys td:nth-child(odd) { text-align: right; white-space: nowrap; }
-table.keys td:nth-child(2) { padding-right: 22px; }
+.keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 4px 18px; margin: 12px auto; max-width: 600px; font-size: 14px; text-align: left; }
+.keys div { display: flex; gap: 10px; align-items: baseline; }
+.keys span { flex: 0 0 8.6em; text-align: right; white-space: nowrap; }
+.keys b { font-weight: normal; }
 button.big { font: 22px var(--font); padding: 6px 34px; margin: 10px 6px 6px; background: var(--ink); color: var(--paper); border: 2px solid var(--ink); border-radius: 4px; cursor: pointer; letter-spacing: 4px; }
 button.big:hover { background: var(--red); border-color: var(--red); }
 .panel .row button:not(.big) { font: 17px var(--font); padding: 6px 18px; margin: 10px 4px 6px; background: transparent; border: 1.5px solid var(--ink); border-radius: 4px; cursor: pointer; color: var(--ink); }
@@ -123,4 +126,6 @@ table.stats td:first-child { text-align: right; color: var(--ink-2); }
   .tool { min-width: 48px; padding: 5px 6px 3px; } .tool > b { font-size: 20px; } .tool small { display: none; }
   .pages button { padding: 13px 6px 4px; font-size: 14px; }
   #log { top: 140px; }
+  #hint { top: auto; bottom: 96px; max-width: 92vw; }
 }
+@media (max-width: 1100px) and (min-width: 761px) { #hint { top: auto; bottom: 100px; max-width: 70vw; } }

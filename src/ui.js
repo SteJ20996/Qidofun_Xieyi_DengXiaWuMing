@@ -25,7 +25,8 @@
     bell: '鈴聲把身邊的魄震開。可是紙宅擋不住聲音：附近的魄都會往這裡來，睡著的也會醒。',
     altar: '按住 E 取印。取印時不能動，被咬就要重來。',
     seal1: '取到一印，寒意退了一些，也補了護持、火符與書墨。宅裡有東西醒了。',
-    seal2: '兩印到手，大門開了。魄也往玄關去了。',
+    seal2: '兩印到手。回大門，按住 E 推開門閂（要一秒半）。魄也往玄關去了。',
+    gate: '按住 E 推開門閂。推的時候不能動，被咬就要重來。魄在附近時，可以先借火把它引開，或封住它過來的廊口。',
     chill: '寒意很高。到燭火或借火旁邊可以取暖，但站在火光裡，魄看得見你。'
   };
   const SPELL = { borrow: '借火', seal: '封戶' };
@@ -121,13 +122,14 @@
         case 'sealDone': log('封戶：這個廊口十秒內誰也過不去', 'good'); break;
         case 'sealEnd': log('封戶散了'); break;
         case 'borrowDone': log('借火：火會燒十五秒，魄會被火吸引過去', 'good'); break;
-        case 'takeStart': log('取印中……'); break;
-        case 'takeCancel': if (e.why === 'bite') log('被咬，取印要重來', 'warn'); break;
+        case 'takeStart': log(e.key === 'gate' ? '推門閂……' : '取印中……'); break;
+        case 'takeCancel': if (e.why === 'bite') log('被咬，要重來', 'warn'); break;
         case 'seal': SFX.play('seal'); log('取得' + e.glyph + '印', 'good'); break;
         case 'wake': SFX.play('wake'); log(e.why === 'bell' ? '鈴聲吵醒了什麼' : e.why === 'touch' ? '你撞醒了一隻魄' : '宅裡有東西醒了', 'warn'); break;
         case 'disperse': SFX.play('disperse'); log('魄散了，過一陣子會在別處凝回來', 'good'); break;
         case 'reformStart': if (g.spotVisible(e)) log('那裡有東西在凝形', 'warn'); break;
-        case 'exitOpen': SFX.play('door'); log('大門開了', 'good'); break;
+        case 'exitReady': log('兩印到手：回大門推開門閂', 'good'); break;
+        case 'gateOpen': SFX.play('door'); log('門閂推開了，快出去', 'good'); break;
         case 'pickup': log('撿到一張火符', 'good'); break;
         case 'lamp': SFX.play('lamp', e.on); break;
         case 'win': endGame(true); break;
@@ -188,7 +190,7 @@
     const ex = g.exposedNow, xe = $('expose');
     xe.className = ex ? 'on' : 'off';
     xe.innerHTML = ex ? '<b>顯</b>' + (p.lampOn ? '燈亮著，魄從遠處看得見你' : '你站在光裡，魄看得見你') : '<b>隱</b>魄要靠很近才察覺';
-    $('goal').innerHTML = `<span class="s${g.seals.name ? ' got' : ''}"><i>名</i>印</span><span class="s${g.seals.breath ? ' got' : ''}"><i>息</i>印</span><span class="door${g.exitOpen ? ' open' : ''}">大門${g.exitOpen ? '開了' : '關著'}</span>`;
+    $('goal').innerHTML = `<span class="s${g.seals.name ? ' got' : ''}"><i>名</i>印</span><span class="s${g.seals.breath ? ' got' : ''}"><i>息</i>印</span><span class="door${g.exitOpen ? ' open' : ''}">大門${g.exitOpen ? '開了' : g.exitReady ? '可以推開' : '關著'}</span>`;
     $('t-sword').style.setProperty('--cd', p.swordCD / R.SWORD.cd);
     $('t-bell').style.setProperty('--cd', p.bellCD / R.BELL.cd);
     $('fire-n').textContent = '×' + p.talismans;
@@ -235,7 +237,7 @@
   if (window.matchMedia && matchMedia('(pointer: coarse)').matches && !matchMedia('(pointer: fine)').matches) $('touchnote').textContent = '這一版是試做，只做了鍵盤與滑鼠；手機上還不能玩。';
 
   // 先在背景擺好宅子（開始畫面後面看得到一點點）
-  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, setPause, get paused() { return paused; }, get running() { return running; }, keys, g: null };
+  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, setPause, snap() { snap = true; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
   g = E.create({ seed: seedFromUrl() }); window.DENG.g = g; RD.setGame(g); g.drain();
   const fontReady = document.fonts && document.fonts.load ? document.fonts.load('32px "LXGW WenKai TC"', '燈下無明魄噬人火封') : Promise.resolve();
   fontReady.catch(() => {}).then(() => { RD.rebuild(); window.DENG.ready = true; });

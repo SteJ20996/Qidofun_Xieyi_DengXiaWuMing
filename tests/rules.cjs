@@ -261,8 +261,15 @@ const doorRoom = (set) => { for (let y = 1; y < 15; y++) set(5, y, '#'); set(5, 
   ok('取第一印：補給、另一隻魄醒來', g.seals.name && g.pos[1].state !== 'dormant' && p.talismans === 4 && p.ink === 3, { seals: g.seals, s2: g.pos[1].state });
   const b = g.altars.find((q) => q.key === 'breath');
   g.tp(b.x - 0.8, b.y); run(g, R.TAKE.t + 0.05, { hold: { take: true } });
-  ok('取兩印：大門開', g.exitOpen);
-  g.tp(20, 26.4); run(g, 1.0, { mx: 0, my: 1 });
+  ok('取兩印：可以推門，但門還關著', g.exitReady && !g.exitOpen);
+  g.tp(20, 26.4); run(g, 0.5, { mx: 0, my: 1 });
+  ok('沒推門閂，走不出去', g.state === 'play' && g.p.y < 27, +g.p.y.toFixed(2));
+  for (const e of g.pos) put(g, e, 2.5 + e.id, 2.5, 'recover');
+  run(g, 0.8, { hold: { take: true } }); run(g, STEP, {});
+  ok('推門閂中途放開：要重來', !g.exitOpen && !g.p.taking);
+  run(g, R.TAKE.gate + 0.05, { hold: { take: true } });
+  ok('按住 E 一秒半推開門閂', g.exitOpen);
+  run(g, 1.0, { mx: 0, my: 1 });
   ok('走出大門就出宅', g.state === 'win', g.state);
 }
 { // 取印時被咬要重來；放開 E 也要重來

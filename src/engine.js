@@ -157,7 +157,7 @@
     const lo = Object.assign({ armor: R.P.armorMax, talismans: R.P.talismans, ink: R.P.ink }, opt.loadout || {});
     const g = {
       R, m, seed, rand: rng(seed), t: 0, state: 'play', events: [], acc: 0, nid: 1,
-      exitOpen: false, seals: { name: false, breath: false },
+      exitReady: false, exitOpen: false, seals: { name: false, breath: false },
       sealed: new Map(), lures: [], flashes: [], shots: [],
       explored: new Uint8Array(m.W * m.H), hints: new Set(), press: {}, exposedNow: true,
       stats: { bites: 0, whiffs: 0, swordHits: 0, swordMiss: 0, bells: 0, fires: 0, booms: 0, reads: 0, readCancel: 0, sealsPlaced: 0, lures: 0, disperse: 0, interrupts: 0, maxChill: 0, stuck: 0, armorLost: 0, takes: 0 }
@@ -172,6 +172,7 @@
       stuck: 0, sample: { x: s.x, y: s.y, t: 0 }, vis: null, sees: false, lureId: 0
     }));
     g.altars = m.altars.map((a) => Object.assign({ taken: false }, a));
+    if (m.exits.length) g.gate = { x: (m.exits[0].x + m.exits[m.exits.length - 1].x + 1) / 2, y: m.exits[0].y };
     g.pickups = m.pickups.map((p) => Object.assign({ taken: false }, p));
     Object.assign(g, api(g));
     hint(g, 'start');
@@ -328,7 +329,7 @@
     emit(g, 'reform', { id: e.id, x: e.x, y: e.y });
   }
   function updatePo(g, e, dt) {
-    if (e.state === 'dormant') { e.vis = poVis(g, e); return; }
+    if (e.state === 'dormant') { e.vis = poVis(g, e); e.sample = { x: e.x, y: e.y, t: g.t }; return; }   // 睡著時不算卡住
     if (e.state === 'gone') { updateGone(g, e, dt); return; }
     if (e.burnT > 0) { e.burnT -= dt; e.hp -= R.FIRE.burn * dt; if (e.hp <= 0) { disperse(g, e, 'burn'); return; } }   // 灼燒只扣血
     if (e.kt > 0) { const s = Math.min(dt, e.kt); moveEnt(g, e, e.kvx * s, e.kvy * s); e.kt -= s; }
@@ -561,13 +562,15 @@
   function tryTake(g) {
     const p = g.p;
     if (p.reading || p.act || p.taking) return;
+    if (g.exitReady && !g.exitOpen && g.gate && dist(p, g.gate) <= R.TAKE.gateReach) { p.taking = { gate: true, t: 0, dur: R.TAKE.gate }; emit(g, 'takeStart', { key: 'gate' }); return; }
     const a = g.altars.find((q) => !q.taken && dist(p, q) <= R.TAKE.reach);
     if (!a) return;
-    p.taking = { a, t: 0 };
+    p.taking = { a, t: 0, dur: R.TAKE.t };
     emit(g, 'takeStart', { key: a.key });
   }
   function completeTake(g) {
     const p = g.p, a = p.taking.a, K = R.TAKE;
+    if (p.taking.gate) { p.taking = null; g.exitOpen = true; emit(g, 'gateOpen'); return; }
     p.taking = null; a.taken = true; g.seals[a.key] = true; g.stats.takes++;
     p.armor = Math.min(R.P.armorMax, p.armor + K.armor);
     p.talismans = Math.min(R.P.talismanMax, p.talismans + K.talisman);
@@ -579,14 +582,14 @@
       for (const e of g.pos) wake(g, e, a, 'seal');
       hint(g, 'seal1');
     } else {
-      g.exitOpen = true;
+      g.exitReady = true;
       const hall = R.WAY.hall.map(([x, y]) => [x + 0.5, y + 0.5]);
       for (const e of g.pos) {
         if (e.state === 'dormant') wake(g, e, { x: R.HALL[0], y: R.HALL[1] }, 'seal');
-        e.way = e.way.concat(hall);
-        if (awake(e) && ['patrol', 'search', 'lure'].includes(e.state)) { e.state = 'investigate'; e.stateT = 0; e.lastKnown = { x: R.HALL[0], y: R.HALL[1] }; }
+        e.way = hall;   // 兩印到手後，兩隻魄都守在玄關一帶
+        if (awake(e) && ['patrol', 'search', 'lure', 'investigate'].includes(e.state)) { e.state = 'investigate'; e.stateT = 0; e.goal = null; e.path = null; e.lastKnown = { x: R.HALL[0], y: R.HALL[1] }; }
       }
-      emit(g, 'exitOpen');
+      emit(g, 'exitReady');
       hint(g, 'seal2');
     }
   }
@@ -629,6 +632,7 @@
     if (hold.take && !p.taking) tryTake(g);
     for (const k of g.pickups) if (!k.taken && dist(p, k) < 0.6) { k.taken = true; p.talismans = Math.min(R.P.talismanMax, p.talismans + 1); emit(g, 'pickup', { kind: k.kind }); }
     if (!g.hints.has('altar') && g.altars.some((a) => !a.taken && dist(p, a) < 2)) hint(g, 'altar');
+    if (g.exitReady && !g.exitOpen && g.gate && dist(p, g.gate) < 2.5) hint(g, 'gate');
     // 暴露與眼睛
     const ambient = lightAt(g, p.x, p.y, true);
     g.exposedNow = p.lampOn || ambient > R.EXPOSE.light;
@@ -661,7 +665,7 @@
     // 取印
     if (p.taking) {
       if (p.bitten) cancelTake(g, 'bite');
-      else { p.taking.t += dt; if (p.taking.t >= R.TAKE.t) completeTake(g); }
+      else { p.taking.t += dt; if (p.taking.t >= p.taking.dur) completeTake(g); }
     }
     // 取暖：燭與借火旁（站在火光裡，同時也是暴露）
     for (const s of sources(g, true)) if (s.fire && hyp(s.x - p.x, s.y - p.y) <= R.WARM.r && hitClear(g, s.x, s.y, p.x, p.y)) { p.chill = Math.max(0, p.chill - R.WARM.rate * dt); break; }

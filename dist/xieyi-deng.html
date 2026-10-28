@@ -1,0 +1,1874 @@
+<title>燈下無明</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* 燈下無明 —— 介面樣式：墨夜為底，面板是宣紙，硃砂印（色票沿用「寫意」系列） */
+:root {
+  --paper: #efe5cf; --paper-2: #e6d9bd; --ink: #1c1a17; --ink-2: #4a4238; --dim: #8a7f6c; --red: #b4392a; --red-2: #8f2c20; --gold: #c49634; --night: #0d0c0b;
+  --font: "LXGW WenKai TC", "BiauKai", "DFKai-SB", "標楷體", "Kaiti TC", "Noto Serif TC", "WenQuanYi Zen Hei", serif;
+  --ui: "Noto Serif TC", "Noto Serif CJK TC", "PingFang TC", "Microsoft JhengHei", "WenQuanYi Zen Hei", serif;
+}
+* { box-sizing: border-box; }
+/* 刻意只有一種樣子（墨夜加宣紙面板，同系列不跟系統深淺色走），所以每個顏色都寫死、背景也明寫 */
+:root { color-scheme: dark; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--night); color: var(--ink); font-family: var(--ui); }
+body { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+canvas#world { position: fixed; inset: 0; display: block; cursor: crosshair; touch-action: none; }
+.hidden { display: none !important; }
+kbd { display: inline-block; min-width: 1.3em; padding: 0 .3em; border: 1px solid var(--ink-2); border-radius: 3px; font: 12px/1.5 var(--ui); text-align: center; background: rgba(255,255,255,.4); margin: 0 1px; color: var(--ink); }
+.dim { color: var(--dim); }
+.small { font-size: 13px; }
+button { font-family: var(--font); }
+button:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+#hud { position: fixed; inset: 0; pointer-events: none; }
+#hud > * { pointer-events: auto; }
+
+/* 硃砂印：四字二乘二，照印章的讀法右起直下（燈下在右，無明在左） */
+#seal, .titleseal { background: var(--red); color: #f7efe0; border-radius: 4px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; place-items: center; font-family: var(--font); box-shadow: 0 2px 0 rgba(0,0,0,.25), inset 0 0 0 2px rgba(255,255,255,.35); transform: rotate(-3deg); }
+#seal { position: absolute; left: calc(16px + env(safe-area-inset-left, 0px)); top: calc(12px + env(safe-area-inset-top, 0px)); width: 58px; height: 58px; font-size: 20px; }
+#seal span:nth-child(1), .titleseal span:nth-child(1) { grid-column: 2; grid-row: 1; }
+#seal span:nth-child(2), .titleseal span:nth-child(2) { grid-column: 2; grid-row: 2; }
+#seal span:nth-child(3), .titleseal span:nth-child(3) { grid-column: 1; grid-row: 1; }
+#seal span:nth-child(4), .titleseal span:nth-child(4) { grid-column: 1; grid-row: 2; }
+
+/* 寒、護、目 */
+#bars { position: absolute; left: calc(88px + env(safe-area-inset-left, 0px)); top: calc(12px + env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; gap: 5px; background: rgba(239,229,207,.88); padding: 6px 10px; border-radius: 4px; border: 1px solid rgba(28,26,23,.4); }
+.hbar { display: flex; align-items: center; gap: 8px; font: 16px/1 var(--font); }
+.hbar b { font-weight: normal; width: 1.1em; }
+.hbar .track { position: relative; width: min(170px, 18vw); height: 12px; border: 1.5px solid rgba(28,26,23,.7); border-radius: 7px; background: rgba(239,229,207,.6); overflow: hidden; }
+.hbar .fill { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--p, 0) * 100%); transition: width .1s linear; }
+.hbar.chill .fill { background: linear-gradient(180deg, #cfe8f4, #5f95b4); }
+.hbar.chill.high .track { animation: chill-pulse 1s ease-in-out infinite; }
+@keyframes chill-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(95,149,180,0); } 50% { box-shadow: 0 0 0 3px rgba(95,149,180,.6); } }
+.hbar.armor .fill { background: linear-gradient(180deg, #8f7fbf, #4d3f80); }
+.hbar.armor .segs::after { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(28,26,23,.7), rgba(28,26,23,.7)), linear-gradient(rgba(28,26,23,.7), rgba(28,26,23,.7)); background-size: 1.5px 100%; background-repeat: no-repeat; background-position: 33.33% 0, 66.67% 0; }
+.hbar.eye .fill { background: linear-gradient(180deg, #a8d8cf, #3f7f74); }
+.hbar span { font: 12px var(--ui); color: var(--ink-2); min-width: 3.6em; white-space: nowrap; }
+
+/* 顯／隱 */
+#expose { position: absolute; left: calc(88px + env(safe-area-inset-left, 0px)); top: calc(102px + env(safe-area-inset-top, 0px)); font: 15px var(--font); padding: 3px 10px; border-radius: 4px; background: rgba(239,229,207,.88); border: 1px solid rgba(28,26,23,.4); }
+#expose b { font-weight: normal; font-size: 19px; margin-right: 6px; }
+#expose.on b { color: var(--red); }
+#expose.off b { color: #3f7f74; }
+
+#topright { position: absolute; right: calc(14px + env(safe-area-inset-right, 0px)); top: calc(12px + env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+#goal { font: 16px var(--font); color: var(--ink-2); background: rgba(239,229,207,.9); padding: 5px 12px; border: 1px solid rgba(28,26,23,.4); border-radius: 4px; display: flex; gap: 12px; align-items: center; }
+#goal .s { display: inline-flex; align-items: center; gap: 4px; }
+#goal .s i { font-style: normal; display: inline-grid; place-items: center; width: 22px; height: 22px; border: 1.5px solid var(--red); color: var(--red); border-radius: 3px; font-size: 14px; }
+#goal .s.got i { background: var(--red); color: #f7efe0; }
+#goal .door.open { color: var(--red); }
+.hudbtns { display: flex; gap: 6px; }
+.hudbtns button { font: 14px var(--font); padding: 4px 12px; border: 1.5px solid var(--ink); background: rgba(239,229,207,.88); color: var(--ink); border-radius: 3px; cursor: pointer; }
+.hudbtns button:hover { background: var(--ink); color: var(--paper); }
+.hudbtns button.off { text-decoration: line-through; color: var(--dim); }
+
+/* 旁側文字 */
+#log { position: absolute; left: calc(16px + env(safe-area-inset-left, 0px)); top: 150px; display: flex; flex-direction: column; gap: 4px; max-width: min(320px, 40vw); pointer-events: none !important; }
+#log div { font: 15px var(--font); color: var(--ink); background: rgba(239,229,207,.88); border-left: 3px solid var(--ink-2); padding: 3px 10px; border-radius: 2px; animation: logfade 5s ease forwards; }
+#log div.warn { border-left-color: var(--red); color: var(--red-2); }
+#log div.good { border-left-color: #3f7f74; }
+@media (prefers-reduced-motion: reduce) { #log div, .hbar.chill.high .track { animation: none !important; } }
+@keyframes logfade { 0% { opacity: 0; transform: translateX(-8px); } 6% { opacity: 1; transform: none; } 80% { opacity: 1; } 100% { opacity: 0; } }
+
+/* 提示（教學） */
+#hint { position: absolute; left: 50%; top: calc(12px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); max-width: min(560px, calc(100vw - 760px), 86vw); min-width: min(320px, 86vw); font: 16px/1.55 var(--font); color: var(--ink); background: rgba(239,229,207,.95); border: 1.5px solid var(--ink); border-radius: 4px; padding: 8px 16px 8px 40px; box-shadow: 0 3px 12px rgba(0,0,0,.4); cursor: pointer; }
+#hint::before { content: '提'; position: absolute; left: 9px; top: 9px; width: 22px; height: 22px; background: var(--red); color: #f7efe0; display: grid; place-items: center; font-size: 14px; border-radius: 3px; }
+
+/* 五件裝備與燈 */
+#tools { position: absolute; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); display: flex; gap: 8px; align-items: stretch; }
+.tool { position: relative; min-width: 64px; padding: 6px 10px 4px; border: 1.5px solid var(--ink); background: rgba(239,229,207,.92); color: var(--ink); border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 1px; overflow: hidden; font-family: var(--font); }
+.tool > b { font-weight: normal; font-size: 24px; line-height: 1.1; }
+.tool small { font-size: 12px; color: var(--ink-2); }
+.tool kbd { position: absolute; right: 3px; top: 3px; font-size: 10px; padding: 0 3px; }
+.tool .cd { position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--cd, 0) * 100%); background: rgba(28,26,23,.32); pointer-events: none; }
+.tool em { position: absolute; left: 5px; top: 3px; font: 12px var(--ui); font-style: normal; color: var(--red-2); }
+.tool.off { opacity: .5; }
+.tool.busy { box-shadow: 0 0 0 2px var(--red); }
+.tool.book { flex-direction: row; gap: 8px; cursor: default; padding-right: 8px; }
+.tool.book > b, .tool.book > small { align-self: center; }
+.tool.book > small { writing-mode: vertical-rl; letter-spacing: 1px; }
+.tool.book em { position: static; align-self: center; writing-mode: vertical-rl; font-size: 13px; letter-spacing: 1px; color: var(--ink); }
+.pages { display: flex; gap: 4px; }
+.pages button { position: relative; font: 16px var(--font); padding: 14px 10px 6px; border: 1px solid var(--ink-2); background: #f6eedb; color: var(--ink); border-radius: 3px; cursor: pointer; }
+.pages button kbd { position: absolute; left: 3px; top: 2px; font-size: 10px; }
+.pages button.off { opacity: .45; }
+.pages button.reading { background: var(--red); color: #f7efe0; }
+#t-lamp.covered { background: rgba(40,36,32,.92); color: #e9dfc7; }
+#t-lamp.covered small { color: #c9bfa7; }
+#t-lamp.covered kbd { color: var(--ink); }
+#minimap { position: absolute; right: calc(14px + env(safe-area-inset-right, 0px)); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); width: 200px; height: 140px; background: rgba(13,12,11,.75); border: 1.5px solid rgba(239,229,207,.5); border-radius: 4px; image-rendering: pixelated; }
+
+/* 面板 */
+.overlay { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(8,7,6,.72); z-index: 5; overflow: auto; padding: 16px; }
+.panel { background: var(--paper); border: 2px solid var(--ink); border-radius: 6px; padding: 22px 30px; max-width: min(720px, 94vw); box-shadow: 0 10px 40px rgba(0,0,0,.6); text-align: center; font-family: var(--font); }
+.startpanel { position: relative; }
+.titleseal { width: 76px; height: 76px; font-size: 27px; margin: 0 auto 6px; }
+h1 { font: 46px/1.1 var(--font); margin: 6px 0 2px; letter-spacing: 6px; }
+h2 { font: 32px/1.2 var(--font); margin: 4px 0 10px; letter-spacing: 4px; }
+.sub { font-size: 18px; color: var(--ink-2); letter-spacing: 4px; margin-bottom: 12px; }
+.story { font-size: 17px; line-height: 1.65; margin: 6px auto; max-width: 34em; }
+.story b { color: var(--red-2); font-weight: normal; }
+.keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 4px 18px; margin: 12px auto; max-width: 600px; font-size: 14px; text-align: left; }
+.keys div { display: flex; gap: 10px; align-items: baseline; }
+.keys span { flex: 0 0 8.6em; text-align: right; white-space: nowrap; }
+.keys b { font-weight: normal; }
+button.big { font: 22px var(--font); padding: 6px 34px; margin: 10px 6px 6px; background: var(--ink); color: var(--paper); border: 2px solid var(--ink); border-radius: 4px; cursor: pointer; letter-spacing: 4px; }
+button.big:hover { background: var(--red); border-color: var(--red); }
+.panel .row button:not(.big) { font: 17px var(--font); padding: 6px 18px; margin: 10px 4px 6px; background: transparent; border: 1.5px solid var(--ink); border-radius: 4px; cursor: pointer; color: var(--ink); }
+ul.rules { text-align: left; font-size: 15px; line-height: 1.6; margin: 12px 0 0; padding-left: 1.2em; }
+ul.rules b { color: var(--red-2); font-weight: normal; }
+.endseal { width: 70px; height: 70px; margin: 0 auto; background: var(--red); color: #f7efe0; display: grid; place-items: center; font: 34px var(--font); border-radius: 5px; transform: rotate(-4deg); }
+.endseal.lose { background: #3f4b55; }
+table.stats { margin: 10px auto; font-size: 15px; border-collapse: collapse; }
+table.stats td { padding: 2px 12px; text-align: left; }
+table.stats td:first-child { text-align: right; color: var(--ink-2); }
+
+@media (max-width: 760px) {
+  #bars { left: 76px; } #seal { width: 50px; height: 50px; font-size: 17px; }
+  #minimap { width: 120px; height: 84px; }
+  .tool { min-width: 48px; padding: 5px 6px 3px; } .tool > b { font-size: 20px; } .tool small { display: none; }
+  .pages button { padding: 13px 6px 4px; font-size: 14px; }
+  #log { top: 140px; }
+  #hint { top: auto; bottom: 96px; max-width: 92vw; }
+}
+@media (max-width: 1100px) and (min-width: 761px) { #hint { top: auto; bottom: 100px; max-width: 70vw; } }
+
+</style>
+<canvas id="world"></canvas>
+
+<div id="hud" class="hidden">
+  <div id="seal" title="燈下無明"><span>燈</span><span>下</span><span>無</span><span>明</span></div>
+  <div id="bars">
+    <div class="hbar chill" title="寒意：被咬、久留在魄身邊都會上升；滿了就失魂。只有在火邊才會退。"><b>寒</b><div class="track"><div class="fill" id="chill-fill"></div></div><span id="chill-num"></span></div>
+    <div class="hbar armor" title="護持：護心衣先擋下被咬的寒傷，一格擋一次；用掉不會自己回來，取印時補一格。"><b>護</b><div class="track segs"><div class="fill" id="armor-fill"></div></div><span id="armor-num"></span></div>
+    <div class="hbar eye" title="目：掩燈後，眼睛慢慢習慣黑暗，看得比點燈時更遠。點燈或站進光裡就重來。"><b>目</b><div class="track"><div class="fill" id="eye-fill"></div></div><span id="eye-num"></span></div>
+  </div>
+  <div id="expose"></div>
+  <div id="topright">
+    <div id="goal"></div>
+    <div class="hudbtns"><button id="btn-mute" title="音效開關">音效</button><button id="btn-pause" title="暫停（Esc）">暫停</button></div>
+  </div>
+  <div id="log" aria-live="polite"></div>
+  <div id="hint" class="hidden"></div>
+  <div id="tools">
+    <button class="tool" id="t-sword" data-act="sword" title="桃木劍：朝對準的方向揮一劍。打中能打斷蓄撲，但擋不住下一次撲，打了就要退。"><b>劍</b><kbd>J</kbd><i class="cd"></i><small>桃木劍</small></button>
+    <button class="tool" id="t-bell" data-act="bell" title="銅鈴：把身邊的魄震開、愣住一會兒。不耗東西，但鈴聲穿得過紙牆，附近的魄都會往這裡來。讀咒時也能搖。"><b>鈴</b><kbd>K</kbd><i class="cd"></i><small>銅鈴</small></button>
+    <button class="tool" id="t-fire" data-act="fire" title="火符：朝對準的方向丟出去，碰到第一隻魄或牆就燒起來，附近的魄都會被燒到。"><b>符</b><kbd>L</kbd><em id="fire-n"></em><small>火符</small></button>
+    <div class="tool book" id="t-book" title="《燼琅嬛》：讀咒時不能走，一走就合上書，不耗墨。被咬、魄貼身也會中斷。">
+      <b>書</b><small>燼琅嬛</small>
+      <div class="pages">
+        <button data-act="read1" id="pg-borrow" title="借火：在對準的地方點一團火，燒十五秒。照得到路，也能取暖；魄會被火吸引過去。站進火光裡，你也會被看見。"><kbd>1</kbd>借火</button>
+        <button data-act="read2" id="pg-seal" title="封戶：要站在廊口旁。把廊口封住十秒，人、魄、劍、鈴、火都過不去，只有光透得過。"><kbd>2</kbd>封戶</button>
+      </div>
+      <em id="ink-n"></em>
+    </div>
+    <button class="tool" id="t-lamp" data-act="lamp" title="手燈：點著看得清身邊，但魄從遠處就看得見你。掩燈後，眼睛會慢慢習慣黑暗。"><b>燈</b><kbd>F</kbd><small id="lamp-s">點著</small></button>
+  </div>
+  <canvas id="minimap" width="200" height="140" title="走過的地方：只記牆、屏、門與印，不記魄"></canvas>
+</div>
+
+<div id="start" class="overlay">
+  <div class="panel startpanel">
+    <div class="titleseal"><span>燈</span><span>下</span><span>無</span><span>明</span></div>
+    <h1>燈下無明</h1>
+    <div class="sub">紙宅 · 試夜</div>
+    <p class="story">紙糊的宅子，夜裡有魄。今晚是你的試夜：取回<b>名印</b>與<b>息印</b>，再從大門出來。</p>
+    <p class="story">點著燈，看得清身邊，魄卻從遠處就看見你。掩了燈，眼睛會慢慢習慣黑暗，看得比點燈時更遠。</p>
+    <div class="keys">
+      <div><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>／方向鍵</span><b>走動</b></div>
+      <div><span>滑鼠</span><b>對準（不用滑鼠就朝走的方向）</b></div>
+      <div><span><kbd>F</kbd>／<kbd>空白</kbd></span><b>點燈、掩燈</b></div>
+      <div><span><kbd>E</kbd>（按住）</span><b>取印、推門閂</b></div>
+      <div><span><kbd>J</kbd>／左鍵</span><b>桃木劍</b></div>
+      <div><span><kbd>K</kbd></span><b>銅鈴</b></div>
+      <div><span><kbd>L</kbd>／右鍵</span><b>火符</b></div>
+      <div><span><kbd>1</kbd> <kbd>2</kbd></span><b>《燼琅嬛》：借火、封戶</b></div>
+      <div><span><kbd>Esc</kbd></span><b>暫停</b></div>
+    </div>
+    <button id="btn-start" class="big">入宅</button>
+    <div class="dim small">Enter 也可以開始<span id="best"></span></div>
+    <div class="dim small" id="touchnote">這一版是試做：一個關卡，只做了鍵盤與滑鼠。</div>
+  </div>
+</div>
+
+<div id="pause" class="overlay hidden">
+  <div class="panel">
+    <h2>暫停</h2>
+    <p class="dim small" id="pause-why"></p>
+    <div class="row"><button id="btn-resume" class="big">繼續</button><button id="btn-restart">重來</button><button id="btn-mute2">音效</button></div>
+    <ul class="rules">
+      <li><b>燈</b>：點著看得清，但魄從九格外就看得見你；隔著紙屏也看得到你的燈光。掩燈時，魄要靠到兩格左右才察覺。</li>
+      <li><b>噬</b>：魄撲之前會停下來蓄力（約半秒）。看得見時頭上有「噬」字與紅圈；黑暗裡只有一聲嘶。退出紅圈，它就撲空，會愣一下。</li>
+      <li><b>寒</b>：被咬時護心衣先擋；久留在魄身邊會直接加寒意。只有在燭火、借火旁邊才會退，但站在火光裡，魄看得見你。</li>
+      <li><b>鈴</b>：震開身邊的魄，不耗東西；但紙宅擋不住聲音，附近的魄都會過來，睡著的也會醒。</li>
+      <li><b>封戶</b>：擋住廊口十秒，人與魄都過不去，劍、鈴、火、咬也都過不去，只有光透得過。</li>
+      <li>魄被打散後，過一陣子會在別處凝回來。</li>
+    </ul>
+  </div>
+</div>
+
+<div id="end" class="overlay hidden">
+  <div class="panel">
+    <div id="end-seal" class="endseal"></div>
+    <h2 id="end-title"></h2>
+    <p id="end-text"></p>
+    <table id="end-stats" class="stats"></table>
+    <button id="btn-again" class="big">再一夜</button>
+    <div class="dim small">Enter 也可以</div>
+  </div>
+</div>
+
+<script>
+// 燈下無明 —— 規則表：所有數值都在這裡，調平衡只動這個檔。
+// 單位：距離是「格」，時間是「秒」。來源：2026-10-26 攻防自查 md 的數值，加上 2026-10-28 審視後的預設（見 docs/DESIGN.md）。
+(function (root) {
+  const R = {
+    TITLE: '燈下無明', SUB: '紙宅 · 試夜', VERSION: '0.1',
+    STEP: 1 / 120,          // 固定步長：畫面幾 Hz 都一樣（120Hz、144Hz、60Hz、卡頓）
+    MAX_FRAME: 0.1,         // 一幀最多補 0.1 秒；切分頁回來不會一下跳好幾秒
+
+    // 人
+    P: { r: 0.3, speed: 3.2, chillMax: 100, armorMax: 54, talismans: 3, talismanMax: 5, ink: 3, inkMax: 3, biteKnock: 0.2 },
+
+    // 手燈與「燈下無明」：點燈看得清近處，卻從遠處就被看見；掩燈後眼睛慢慢習慣黑暗，看得更遠
+    LAMP: { r: 4.2, adaptT: 2.5, adaptR: 5.5, glare: 0.35, adaptLoss: 0.3 },
+
+    // 暴露：點燈或站在別的光裡（借火、燭、火光）就算暴露
+    EXPOSE: { light: 0.35, see: 9, seeScreen: 6, dark: 2.2 },
+
+    // 魄
+    PO: {
+      hp: 60, r: 0.35,
+      patrol: 1.2, investigate: 2.0, chase: 2.7,          // 人走 3.2，直路跑得掉，停下來做事就會被追上
+      windStart: 0.75, biteR: 0.95, windT: 0.45,           // 靠到 0.75 格才蓄，蓄撲時停步，結算時看人還在不在 0.95 格內
+      whiffT: 0.55, recoilT: 0.7, bite: 18,                // 撲空僵 0.55 秒（反擊窗口）；咬中後退開 0.7 秒
+      auraR: 1.4, aura: 7,                                 // 久留身邊每秒 +7 寒意，不經護心衣
+      reformT: 14, formT: 1.5, formClear: 2.5, formRepick: 3, reformFar: 8,
+      searchT: 4, searchR: 2.5, loseT: 0.25, lureR: 10, lingerMin: 1, lingerMax: 2.2,
+      repath: 0.35, stuckT: 1.2
+    },
+
+    // 桃木劍：數值照 md（傷 24、退 0.35、停 0.12、間隔 1.05）；定位改成「打了就跑」
+    SWORD: { dmg: 24, knock: 0.35, stagger: 0.12, cd: 1.05, windup: 0.10, reach: 1.2, arc: 65 },
+
+    // 銅鈴：不耗東西，但聲音穿得過紙牆，會把魄引來（免費的工具用「暴露」付代價）
+    BELL: { r: 2.4, knock: 1.4, stun: 1.2, dmg: 6, cd: 7, hear: 12 },
+
+    // 火符：射線碰到第一隻魄或牆就引燃；灼燒只扣血
+    FIRE: { range: 4.6, speed: 16, windup: 0.15, boom: 1.3, dmg: 26, burn: 6, burnT: 3, stagger: 0.25, knock: 0.3, flashR: 2.5, flashT: 0.5 },
+
+    // 《燼琅嬛》兩頁咒：讀咒時不能走（一走就合書，不耗墨）；被咬、魄貼身也會中斷
+    BOOK: {
+      borrow: { cost: 1, read: 1.2, range: 5, life: 15, r: 3.2, I: 0.9 },  // 借火：照路、引魄、取暖
+      seal: { cost: 1, read: 0.9, reach: 1.6, life: 10 }                   // 封戶：擋住一切，只讓光透過
+    },
+
+    // 光源
+    LIGHT: { lamp: { r: 4.2, I: 1 }, candle: { r: 2.8, I: 0.85 }, screen: 0.45, paperGlow: 0.35 },
+
+    // 取暖：火邊每秒退 4 點寒意，但站在火光裡就是暴露
+    WARM: { r: 1.6, rate: 4 },
+
+    // 取印：按住 E 一秒；取印處補給。兩印到手後，大門要按住 E 一秒半推開門閂（最後一個要停下來的地方）
+    TAKE: { t: 1.0, reach: 1.1, armor: 18, talisman: 1, ink: 1, chill: -15, gate: 1.5, gateReach: 1.3 },
+
+    // 魄的巡行點
+    WAY: {
+      po1: [[12, 2], [27, 2], [19, 6], [12, 6], [27, 6], [19, 2], [13, 9], [26, 9], [13, 17], [26, 17], [16, 13], [23, 13]],
+      po2: [[33, 10], [36, 16], [33, 20], [36, 25], [33, 2], [36, 6], [25, 20], [27, 25]],
+      hall: [[12, 20], [27, 20], [12, 25], [27, 25], [19, 21]]   // 兩印到手後，兩隻魄都會到玄關一帶
+    },
+    HALL: [19.5, 21.5]
+  };
+  root.R = R;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+</script>
+<script>
+// 燈下無明 —— 紙宅的地圖與格子走訪。
+// 地圖記號：# 牆　= 紙屏　o 井欄（矮，只擋走路）　d 廊口（可封戶）　X 大門（兩印到手才開）
+//           S 起點　1 名印　2 息印　c 燭　p 魄（醒著）　q 魄（睡著）　f 火符
+(function (root) {
+  const ROWS = [
+    '########################################',  // 0
+    '#........#c..................c#........#',  // 1
+    '#........#....................#........#',  // 2
+    '#..1.....#.........p..........#.....2..#',  // 3
+    '#........d.....#........#.....d........#',  // 4
+    '#........#....................#........#',  // 5
+    '#......c.#....................#.c......#',  // 6
+    '#........#....................#........#',  // 7
+    '####d#####====d==========d====#####d####',  // 8
+    '#........=....................=........#',  // 9
+    '#........=.c..................=........#',  // 10
+    '#........=...===..............=........#',  // 11
+    '#........=.........oo.........=........#',  // 12
+    '#=====...d.........oo.........d...=====#',  // 13
+    '#........=....................=........#',  // 14
+    '#........=..............===...=........#',  // 15
+    '#........=..................c.=........#',  // 16
+    '#........=....................=........#',  // 17
+    '####d##############d###############d####',  // 18
+    '#........#....................#........#',  // 19
+    '#........#....................#........#',  // 20
+    '#........#....................#........#',  // 21
+    '#........d....................d........#',  // 22
+    '#........#......========......#........#',  // 23
+    '#........#....................#....q...#',  // 24
+    '#.f......#.........S..........#........#',  // 25
+    '#........#....................#........#',  // 26
+    '###################XX###################'   // 27
+  ];
+
+  // 格子種類
+  const T = { FLOOR: 0, WALL: 1, SCREEN: 2, LOW: 3, DOOR: 4, EXIT: 5 };
+  // 房間名（給提示與小地圖用）：[名字, x0, y0, x1, y1]
+  const ROOMS = [
+    ['書房', 1, 1, 8, 7], ['正廳', 10, 1, 29, 7], ['祠堂', 31, 1, 38, 7],
+    ['西廂', 1, 9, 8, 17], ['天井', 10, 9, 29, 17], ['東廂', 31, 9, 38, 17],
+    ['雜物間', 1, 19, 8, 26], ['玄關', 10, 19, 29, 26], ['偏房', 31, 19, 38, 26]
+  ];
+
+  function parse(rows) {
+    rows = rows || ROWS;   // 測試可以給自己的場地
+    const H = rows.length, W = rows[0].length;
+    for (const r of rows) if (r.length !== W) throw new Error('地圖每列要一樣寬');
+    const t = new Uint8Array(W * H);
+    const m = { W, H, t, start: null, altars: [], candles: [], po: [], pickups: [], exits: [], doors: [] };
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const ch = rows[y][x], i = y * W + x;
+      let k = T.FLOOR;
+      if (ch === '#') k = T.WALL;
+      else if (ch === '=') k = T.SCREEN;
+      else if (ch === 'o') k = T.LOW;
+      else if (ch === 'd') { k = T.DOOR; m.doors.push({ x, y, i }); }
+      else if (ch === 'X') { k = T.EXIT; m.exits.push({ x, y, i }); }
+      else if (ch === 'S') m.start = { x: x + 0.5, y: y + 0.5 };
+      else if (ch === '1') m.altars.push({ key: 'name', glyph: '名', x: x + 0.5, y: y + 0.5 });
+      else if (ch === '2') m.altars.push({ key: 'breath', glyph: '息', x: x + 0.5, y: y + 0.5 });
+      else if (ch === 'c') m.candles.push({ x: x + 0.5, y: y + 0.5 });
+      else if (ch === 'p') m.po.push({ x: x + 0.5, y: y + 0.5, dormant: false });
+      else if (ch === 'q') m.po.push({ x: x + 0.5, y: y + 0.5, dormant: true });
+      else if (ch === 'f') m.pickups.push({ kind: 'talisman', x: x + 0.5, y: y + 0.5 });
+      t[i] = k;
+    }
+    m.at = (x, y) => (x < 0 || y < 0 || x >= W || y >= H) ? T.WALL : t[y * W + x];
+    m.room = (x, y) => { for (const r of ROOMS) if (x >= r[1] && x <= r[3] + 1 && y >= r[2] && y <= r[4] + 1) return r[0]; return ''; };
+    return m;
+  }
+
+  // 沿線段走過的每一格（含起點那格），依序呼叫 fn(tx, ty)；fn 回傳 true 就停。
+  // 線段剛好穿過格角時，兩旁的格都會走到，光與視線不會從兩堵斜靠的牆縫漏過去。
+  function walk(x0, y0, x1, y1, fn) {
+    let tx = Math.floor(x0), ty = Math.floor(y0);
+    const ex = Math.floor(x1), ey = Math.floor(y1);
+    const dx = x1 - x0, dy = y1 - y0;
+    const sx = dx > 0 ? 1 : dx < 0 ? -1 : 0, sy = dy > 0 ? 1 : dy < 0 ? -1 : 0;
+    const tdx = sx ? Math.abs(1 / dx) : Infinity, tdy = sy ? Math.abs(1 / dy) : Infinity;
+    let tmx = sx > 0 ? (tx + 1 - x0) / dx : sx < 0 ? (tx - x0) / dx : Infinity;
+    let tmy = sy > 0 ? (ty + 1 - y0) / dy : sy < 0 ? (ty - y0) / dy : Infinity;
+    if (fn(tx, ty)) return true;
+    let guard = 0;
+    while ((tx !== ex || ty !== ey) && guard++ < 400) {
+      if (Math.min(tmx, tmy) > 1 + 1e-9) break;
+      if (Math.abs(tmx - tmy) < 1e-9) {
+        if (fn(tx + sx, ty)) return true;
+        if (fn(tx, ty + sy)) return true;
+        tx += sx; ty += sy; tmx += tdx; tmy += tdy;
+      } else if (tmx < tmy) { tx += sx; tmx += tdx; }
+      else { ty += sy; tmy += tdy; }
+      if (fn(tx, ty)) return true;
+    }
+    return false;
+  }
+
+  root.MAP = { ROWS, T, ROOMS, parse, walk };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+</script>
+<script>
+// 燈下無明 —— 引擎：只有規則與狀態，不碰畫面（Node 測試直接跑這個檔）。
+// 每一步的順序（照 md 第 2 節，並補上審視時發現的情況）：
+//   人（走動、點掩燈、按鍵起手）→ 魄（感知、追、蓄撲結算、寒意）→ 人出手（劍、符）→ 飛符
+//   → 讀咒：先查中斷（被咬、魄貼身）再完成 → 取印 → 取暖 → 勝負
+(function (root) {
+  const R = root.R, MAP = root.MAP, T = MAP.T;
+  const hyp = Math.hypot, PI = Math.PI;
+  const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+  const angDiff = (a, b) => { let d = (a - b) % (2 * PI); if (d > PI) d -= 2 * PI; if (d < -PI) d += 2 * PI; return Math.abs(d); };
+  function rng(seed) {
+    let a = seed >>> 0;
+    return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+
+  // ---------- 格子判定 ----------
+  // 擋走路：牆、紙屏、井欄、關著的大門、封戶（已在封印格裡的魄可以離開）
+  function blocksMove(g, tx, ty, ent) {
+    const k = g.m.at(tx, ty);
+    if (k === T.WALL || k === T.SCREEN || k === T.LOW) return true;
+    if (k === T.EXIT) return !(g.exitOpen && ent === g.p);
+    if (k === T.DOOR) { const s = g.sealed.get(ty * g.m.W + tx); if (s) return !(ent && ent.kind === 'po' && s.exempt.has(ent.id)); }
+    return false;
+  }
+  // 擋劍、鈴、符、咬、寒意：牆、紙屏、關著的大門、封戶（井欄矮，不擋）
+  function blocksHit(g, tx, ty) {
+    const k = g.m.at(tx, ty);
+    if (k === T.WALL || k === T.SCREEN) return true;
+    if (k === T.EXIT) return !g.exitOpen;
+    if (k === T.DOOR) return g.sealed.has(ty * g.m.W + tx);
+    return false;
+  }
+  const hitClear = (g, x0, y0, x1, y1) => !MAP.walk(x0, y0, x1, y1, (tx, ty) => blocksHit(g, tx, ty));
+
+  // 視線：'clear' 看得清；'paper' 隔著紙屏（只看得到光與剪影）；'blocked' 隔著牆。終點那一格不算擋。
+  function sightLine(g, x0, y0, x1, y1) {
+    const ex = Math.floor(x1), ey = Math.floor(y1), sx = Math.floor(x0), sy = Math.floor(y0);
+    let paper = false;
+    const blocked = MAP.walk(x0, y0, x1, y1, (tx, ty) => {
+      if ((tx === ex && ty === ey) || (tx === sx && ty === sy)) return false;
+      const k = g.m.at(tx, ty);
+      if (k === T.WALL || (k === T.EXIT && !g.exitOpen)) return true;
+      if (k === T.SCREEN) paper = true;
+      return false;
+    });
+    return blocked ? 'blocked' : paper ? 'paper' : 'clear';
+  }
+  // 透光率：牆 0，紙屏每道 ×0.45，其餘 1（光源那一格與終點那一格不算）
+  function transmission(g, x0, y0, x1, y1) {
+    const ex = Math.floor(x1), ey = Math.floor(y1), sx = Math.floor(x0), sy = Math.floor(y0);
+    let tr = 1;
+    MAP.walk(x0, y0, x1, y1, (tx, ty) => {
+      if ((tx === ex && ty === ey) || (tx === sx && ty === sy)) return false;
+      const k = g.m.at(tx, ty);
+      if (k === T.WALL || (k === T.EXIT && !g.exitOpen)) { tr = 0; return true; }
+      if (k === T.SCREEN) tr *= R.LIGHT.screen;
+      return false;
+    });
+    return tr;
+  }
+
+  // ---------- 光 ----------
+  function sources(g, exclLamp) {
+    const out = [];
+    const p = g.p;
+    if (p.lampOn && !exclLamp) out.push({ kind: 'lamp', x: p.x, y: p.y, r: R.LIGHT.lamp.r, I: R.LIGHT.lamp.I });
+    for (const c of g.m.candles) out.push({ kind: 'candle', x: c.x, y: c.y, r: R.LIGHT.candle.r, I: R.LIGHT.candle.I, fire: true });
+    for (const l of g.lures) out.push({ kind: 'lure', x: l.x, y: l.y, r: R.BOOK.borrow.r, I: R.BOOK.borrow.I * Math.min(1, l.t / 2), fire: true });
+    for (const f of g.flashes) out.push({ kind: 'flash', x: f.x, y: f.y, r: R.FIRE.flashR, I: f.t / R.FIRE.flashT });
+    return out;
+  }
+  function lightFrom(g, s, x, y) {
+    const d = hyp(x - s.x, y - s.y);
+    if (d >= s.r) return 0;
+    const f = Math.pow(1 - d / s.r, 0.9) * s.I;
+    if (f <= 0.003) return 0;
+    return f * transmission(g, s.x, s.y, x, y);
+  }
+  function lightAt(g, x, y, exclLamp) {
+    let dark = 1;
+    for (const s of sources(g, exclLamp)) dark *= 1 - Math.min(1, lightFrom(g, s, x, y));
+    return 1 - dark;
+  }
+
+  // ---------- 移動與碰撞 ----------
+  function circleBlocked(g, ent, x, y, r) {
+    for (let ty = Math.floor(y - r); ty <= Math.floor(y + r); ty++)
+      for (let tx = Math.floor(x - r); tx <= Math.floor(x + r); tx++) {
+        if (!blocksMove(g, tx, ty, ent)) continue;
+        const cx = clamp(x, tx, tx + 1), cy = clamp(y, ty, ty + 1);
+        if (hyp(x - cx, y - cy) < r - 1e-6) return true;
+      }
+    return false;
+  }
+  function pushOut(g, ent) {
+    const r = ent.r;
+    for (let it = 0; it < 4; it++) {
+      let moved = false;
+      for (let ty = Math.floor(ent.y - r); ty <= Math.floor(ent.y + r); ty++)
+        for (let tx = Math.floor(ent.x - r); tx <= Math.floor(ent.x + r); tx++) {
+          if (!blocksMove(g, tx, ty, ent)) continue;
+          const cx = clamp(ent.x, tx, tx + 1), cy = clamp(ent.y, ty, ty + 1);
+          const dx = ent.x - cx, dy = ent.y - cy, d = hyp(dx, dy);
+          if (d >= r) continue;
+          if (d > 1e-6) { ent.x += (dx / d) * (r - d); ent.y += (dy / d) * (r - d); }
+          else {
+            const l = ent.x - tx, rr = tx + 1 - ent.x, u = ent.y - ty, b = ty + 1 - ent.y, mn = Math.min(l, rr, u, b);
+            if (mn === l) ent.x = tx - r; else if (mn === rr) ent.x = tx + 1 + r; else if (mn === u) ent.y = ty - r; else ent.y = ty + 1 + r;
+          }
+          moved = true;
+        }
+      if (!moved) break;
+    }
+  }
+  function moveEnt(g, ent, dx, dy) {
+    const n = Math.max(1, Math.ceil(Math.max(Math.abs(dx), Math.abs(dy)) / 0.1));
+    for (let k = 0; k < n; k++) { ent.x += dx / n; pushOut(g, ent); ent.y += dy / n; pushOut(g, ent); }
+  }
+  // 帶半徑的直線可走：每 0.12 格查一次
+  function clearMove(g, ent, x0, y0, x1, y1) {
+    const d = hyp(x1 - x0, y1 - y0), n = Math.max(1, Math.ceil(d / 0.12));
+    for (let k = 1; k <= n; k++) { const f = k / n; if (circleBlocked(g, ent, x0 + (x1 - x0) * f, y0 + (y1 - y0) * f, ent.r)) return false; }
+    return true;
+  }
+  // 尋路：八方向、不切牆角的寬度優先；走不到就走到離目標最近、走得到的那一格（例如被封戶擋住時在門前等）
+  function findPath(g, ent, gx, gy) {
+    const W = g.m.W, H = g.m.H, N = W * H;
+    const prev = g._prev || (g._prev = new Int32Array(N)), seen = g._seen || (g._seen = new Uint8Array(N));
+    seen.fill(0);
+    const sx = Math.floor(ent.x), sy = Math.floor(ent.y), s = sy * W + sx, goal = gy * W + gx;
+    const q = [s]; seen[s] = 1; prev[s] = -1;
+    let best = s, bestD = hyp(sx - gx, sy - gy);
+    const ok = (x, y) => x >= 0 && y >= 0 && x < W && y < H && !blocksMove(g, x, y, ent);
+    for (let qi = 0; qi < q.length; qi++) {
+      const i = q[qi], x = i % W, y = (i / W) | 0;
+      if (i === goal) { best = i; break; }
+      const d = hyp(x - gx, y - gy);
+      if (d < bestD) { bestD = d; best = i; }
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        if (!dx && !dy) continue;
+        const nx = x + dx, ny = y + dy, ni = ny * W + nx;
+        if (nx < 0 || ny < 0 || nx >= W || ny >= H || seen[ni] || !ok(nx, ny)) continue;
+        if (dx && dy && (!ok(x + dx, y) || !ok(x, y + dy))) continue;
+        seen[ni] = 1; prev[ni] = i; q.push(ni);
+      }
+    }
+    const path = [];
+    for (let i = best; i !== -1 && i !== s; i = prev[i]) path.push([(i % W) + 0.5, ((i / W) | 0) + 0.5]);
+    path.reverse();
+    return { path, reach: best === goal };
+  }
+
+  // ---------- 建立一局 ----------
+  function create(opt) {
+    opt = opt || {};
+    const m = MAP.parse(opt.rows);
+    const seed = opt.seed == null ? 1 : opt.seed;
+    const lo = Object.assign({ armor: R.P.armorMax, talismans: R.P.talismans, ink: R.P.ink }, opt.loadout || {});
+    const g = {
+      R, m, seed, rand: rng(seed), t: 0, state: 'play', events: [], acc: 0, nid: 1,
+      exitReady: false, exitOpen: false, seals: { name: false, breath: false },
+      sealed: new Map(), lures: [], flashes: [], shots: [],
+      explored: new Uint8Array(m.W * m.H), hints: new Set(), press: {}, exposedNow: true,
+      stats: { bites: 0, whiffs: 0, swordHits: 0, swordMiss: 0, bells: 0, fires: 0, booms: 0, reads: 0, readCancel: 0, sealsPlaced: 0, lures: 0, disperse: 0, interrupts: 0, maxChill: 0, stuck: 0, armorLost: 0, takes: 0 }
+    };
+    g.p = { kind: 'p', x: m.start.x, y: m.start.y, r: R.P.r, aim: -PI / 2, lampOn: true, adapt: 0, chill: 0, armor: lo.armor, talismans: lo.talismans, ink: lo.ink,
+      swordCD: 0, bellCD: 0, act: null, reading: null, taking: null, bitten: false, moving: false };
+    g.pos = m.po.map((s, i) => ({
+      kind: 'po', id: i + 1, x: s.x, y: s.y, r: R.PO.r, hp: R.PO.hp, state: s.dormant ? 'dormant' : 'patrol',
+      way: (opt.way || (i === 0 ? R.WAY.po1 : R.WAY.po2)).map(([x, y]) => [x + 0.5, y + 0.5]),
+      goal: null, linger: 0, lastKnown: null, lostT: 0, path: null, pathGoal: -1, repathT: 0, waiting: 0,
+      windT: 0, windVisible: false, stateT: 0, stag: 0, kvx: 0, kvy: 0, kt: 0, burnT: 0, goneT: 0, formSpot: null, formWait: 0,
+      stuck: 0, sample: { x: s.x, y: s.y, t: 0 }, vis: null, sees: false, lureId: 0
+    }));
+    g.altars = m.altars.map((a) => Object.assign({ taken: false }, a));
+    if (m.exits.length) g.gate = { x: (m.exits[0].x + m.exits[m.exits.length - 1].x + 1) / 2, y: m.exits[0].y };
+    g.pickups = m.pickups.map((p) => Object.assign({ taken: false }, p));
+    Object.assign(g, api(g));
+    hint(g, 'start');
+    return g;
+  }
+
+  function emit(g, type, o) { const e = Object.assign({ type, t: g.t }, o || {}); g.events.push(e); if (g.events.length > 400) g.events.splice(0, g.events.length - 400); return e; }
+  function hint(g, key, o) { if (g.hints.has(key)) return; g.hints.add(key); emit(g, 'hint', Object.assign({ key }, o || {})); }
+  function addChill(g, amt) { const p = g.p; p.chill = clamp(p.chill + amt, 0, R.P.chillMax); if (p.chill > g.stats.maxChill) g.stats.maxChill = p.chill; }
+  const tangible = (e) => e.state !== 'gone';
+  const awake = (e) => e.state !== 'gone' && e.state !== 'dormant';
+  const dist = (a, b) => hyp(a.x - b.x, a.y - b.y);
+
+  // ---------- 看見與被看見 ----------
+  function exposed(g) { return g.p.lampOn || lightAt(g, g.p.x, g.p.y, true) > R.EXPOSE.light; }
+  function poSees(g, e) {
+    const p = g.p, d = dist(p, e);
+    if (d > R.EXPOSE.see) return false;
+    const line = sightLine(g, e.x, e.y, p.x, p.y);
+    if (line === 'blocked') return false;
+    if (g.exposedNow) return line === 'clear' ? true : d <= R.EXPOSE.seeScreen;   // 紙擋得住人，擋不住燈
+    return line === 'clear' && d <= R.EXPOSE.dark;
+  }
+  // 人看不看得見這隻魄：lit 照見；dark 眼睛習慣黑暗後看見微光；silhouette 隔著紙屏看到剪影
+  function poVis(g, e) {
+    if (!tangible(e)) return null;
+    const p = g.p, d = dist(p, e);
+    if (d > 12) return null;
+    const line = sightLine(g, p.x, p.y, e.x, e.y);
+    if (line === 'blocked') return null;
+    const L = lightAt(g, e.x, e.y, false);
+    if (line === 'paper') return L >= 0.3 && d <= 9 ? { mode: 'silhouette', a: Math.min(1, L) } : null;
+    if (L >= 0.15) return { mode: 'lit', a: Math.min(1, 0.35 + L) };
+    if (!p.lampOn && p.adapt > 0.15 && d <= p.adapt * R.LAMP.adaptR) return { mode: 'dark', a: p.adapt * (1 - d / (R.LAMP.adaptR + 1)) };
+    return null;
+  }
+  // 凝形的地方看不看得見（同一套規則，只是那裡還沒有魄）
+  function spotVisible(g, s) {
+    const p = g.p, d = dist(p, s);
+    if (d > 12) return false;
+    if (sightLine(g, p.x, p.y, s.x, s.y) !== 'clear') return false;
+    if (lightAt(g, s.x, s.y, false) >= 0.15) return true;
+    return !p.lampOn && p.adapt > 0.15 && d <= p.adapt * R.LAMP.adaptR;
+  }
+
+  // ---------- 魄 ----------
+  function stepTo(g, e, x, y, speed, dt) {
+    const dx = x - e.x, dy = y - e.y, d = hyp(dx, dy);
+    if (d < 1e-6) return 0;
+    const s = Math.min(speed * dt, d);
+    moveEnt(g, e, (dx / d) * s, (dy / d) * s);
+    return s;
+  }
+  // 能安全直達就直接走（md：同格追尋）；要繞牆才用尋路
+  function moveToward(g, e, goal, speed, dt) {
+    e.waiting = 0;
+    if (clearMove(g, e, e.x, e.y, goal.x, goal.y)) { e.path = null; stepTo(g, e, goal.x, goal.y, speed, dt); return; }
+    const W = g.m.W, gtx = Math.floor(goal.x), gty = Math.floor(goal.y), gi = gty * W + gtx;
+    e.repathT -= dt;
+    if (!e.path || e.repathT <= 0 || e.pathGoal !== gi) { const r = findPath(g, e, gtx, gty); e.path = r.path; e.reach = r.reach; e.repathT = R.PO.repath; e.pathGoal = gi; }
+    while (e.path.length && hyp(e.path[0][0] - e.x, e.path[0][1] - e.y) < 0.25) e.path.shift();
+    if (!e.path.length) { e.waiting = 1; return; }   // 走不到（封戶擋住）：在最近的地方等
+    let k = 0;
+    for (let i = Math.min(e.path.length - 1, 5); i > 0; i--) if (clearMove(g, e, e.x, e.y, e.path[i][0], e.path[i][1])) { k = i; break; }
+    stepTo(g, e, e.path[k][0], e.path[k][1], speed, dt);
+  }
+  function nextWay(g, e) {
+    const w = e.way;
+    let i = Math.floor(g.rand() * w.length);
+    if (e.goal && w.length > 1 && w[i][0] === e.goal.x && w[i][1] === e.goal.y) i = (i + 1) % w.length;
+    e.goal = { x: w[i][0], y: w[i][1] };
+    e.linger = R.PO.lingerMin + g.rand() * (R.PO.lingerMax - R.PO.lingerMin);
+  }
+  function searchGoal(g, e) {
+    const c = e.lastKnown || e;
+    for (let k = 0; k < 10; k++) {
+      const a = g.rand() * 2 * PI, r = 0.5 + g.rand() * R.PO.searchR, x = c.x + Math.cos(a) * r, y = c.y + Math.sin(a) * r;
+      if (!circleBlocked(g, e, x, y, e.r)) return { x, y };
+    }
+    return { x: c.x, y: c.y };
+  }
+  function lureFor(g, e) {
+    let best = null, bd = R.PO.lureR;
+    for (const l of g.lures) { if (l.t < 1) continue; const d = dist(e, l); if (d < bd) { bd = d; best = l; } }
+    return best;
+  }
+  function resume(g, e) { e.state = e.sees ? 'chase' : e.lastKnown ? 'investigate' : 'patrol'; e.goal = null; }
+  function wake(g, e, at, why) {
+    if (e.state !== 'dormant') return;
+    e.state = 'investigate'; e.lastKnown = { x: at.x, y: at.y }; e.goal = null;
+    emit(g, 'wake', { id: e.id, why, x: e.x, y: e.y });
+  }
+  function startWindup(g, e) {
+    e.state = 'windup'; e.windT = R.PO.windT;
+    const v = poVis(g, e);
+    e.windVisible = !!(v && (v.mode === 'lit' || v.mode === 'dark'));
+    emit(g, 'windup', { id: e.id, visible: e.windVisible, x: e.x, y: e.y, dx: e.x - g.p.x, dist: dist(e, g.p) });
+    if (e.windVisible) hint(g, 'windup');
+  }
+  function resolveBite(g, e) {
+    const p = g.p, d = dist(p, e);
+    if (d <= R.PO.biteR && hitClear(g, e.x, e.y, p.x, p.y)) {
+      const a = Math.min(p.armor, R.PO.bite);
+      p.armor -= a; g.stats.armorLost += a; addChill(g, R.PO.bite - a);
+      p.bitten = true; g.stats.bites++;
+      if (d > 1e-6) moveEnt(g, p, ((p.x - e.x) / d) * R.P.biteKnock, ((p.y - e.y) / d) * R.P.biteKnock);
+      e.state = 'recoil'; e.stateT = R.PO.recoilT;
+      emit(g, 'bite', { id: e.id, absorbed: a, chill: R.PO.bite - a, x: p.x, y: p.y });
+      hint(g, a > 0 ? 'bite' : 'biteBare');
+    } else {
+      g.stats.whiffs++; e.state = 'recover'; e.stateT = R.PO.whiffT;
+      emit(g, 'whiff', { id: e.id, x: e.x, y: e.y, visible: e.windVisible });
+    }
+  }
+  function hurtPo(g, e, amt, o) {
+    if (!tangible(e)) return false;
+    if (e.state === 'dormant') wake(g, e, g.p, 'hit');
+    e.hp -= amt;
+    if (e.state === 'windup') { g.stats.interrupts++; emit(g, 'interrupt', { id: e.id, by: o.src }); }
+    if (o.stagger) { e.stag = e.state === 'stagger' ? Math.max(e.stag, o.stagger) : o.stagger; e.state = 'stagger'; }
+    if (o.knock) {
+      const dx = e.x - o.fx, dy = e.y - o.fy, d = hyp(dx, dy) || 1, KT = 0.1;   // 擊退在 0.1 秒內走完（比最短的停頓 0.12 秒短）
+      e.kvx = (dx / d) * o.knock / KT; e.kvy = (dy / d) * o.knock / KT; e.kt = KT;
+    }
+    if (e.hp <= 0) disperse(g, e, o.src);
+    return true;
+  }
+  function disperse(g, e, why) {
+    e.state = 'gone'; e.goneT = R.PO.reformT; e.formSpot = null; e.formWait = 0; e.burnT = 0; e.kt = 0; e.path = null; e.vis = null;
+    g.stats.disperse++;
+    emit(g, 'disperse', { id: e.id, why, x: e.x, y: e.y });
+  }
+  // 凝回：選離人遠的巡行點；最後 1.5 秒才顯形；人在旁邊就延後，等太久換地方
+  function pickReform(g, e) {
+    const p = g.p, all = e.way;
+    const far = all.filter(([x, y]) => hyp(x - p.x, y - p.y) >= R.PO.reformFar && !circleBlocked(g, e, x, y, e.r));
+    if (far.length) { const w = far[Math.floor(g.rand() * far.length)]; return { x: w[0], y: w[1] }; }
+    let best = all[0], bd = -1;
+    for (const w of all) { const d = hyp(w[0] - p.x, w[1] - p.y); if (d > bd) { bd = d; best = w; } }
+    return { x: best[0], y: best[1] };
+  }
+  function updateGone(g, e, dt) {
+    e.goneT -= dt;
+    if (e.goneT <= R.PO.formT && !e.formSpot) { e.formSpot = pickReform(g, e); emit(g, 'reformStart', { id: e.id, x: e.formSpot.x, y: e.formSpot.y }); }
+    if (e.goneT > 0) return;
+    const s = e.formSpot;
+    if (dist(g.p, s) < R.PO.formClear || circleBlocked(g, e, s.x, s.y, e.r)) {
+      e.goneT = 0; e.formWait += dt;
+      if (e.formWait >= R.PO.formRepick) { e.formSpot = pickReform(g, e); e.goneT = R.PO.formT; e.formWait = 0; emit(g, 'reformStart', { id: e.id, x: e.formSpot.x, y: e.formSpot.y, moved: true }); }
+      return;
+    }
+    e.x = s.x; e.y = s.y; e.hp = R.PO.hp; e.state = 'patrol'; e.goal = null; e.lastKnown = null; e.formSpot = null; e.path = null;
+    e.sample = { x: e.x, y: e.y, t: g.t };
+    emit(g, 'reform', { id: e.id, x: e.x, y: e.y });
+  }
+  function updatePo(g, e, dt) {
+    if (e.state === 'dormant') { e.vis = poVis(g, e); e.sample = { x: e.x, y: e.y, t: g.t }; return; }   // 睡著時不算卡住
+    if (e.state === 'gone') { updateGone(g, e, dt); return; }
+    if (e.burnT > 0) { e.burnT -= dt; e.hp -= R.FIRE.burn * dt; if (e.hp <= 0) { disperse(g, e, 'burn'); return; } }   // 灼燒只扣血
+    if (e.kt > 0) { const s = Math.min(dt, e.kt); moveEnt(g, e, e.kvx * s, e.kvy * s); e.kt -= s; }
+    const p = g.p, d = dist(p, e);
+    const sees = poSees(g, e);
+    e.sees = sees;
+    if (sees) { e.lastKnown = { x: p.x, y: p.y }; e.lostT = 0; } else e.lostT += dt;
+    e.vis = poVis(g, e);
+    if (e.vis) hint(g, 'seePo');
+    switch (e.state) {
+      case 'stagger': e.stag -= dt; if (e.stag <= 0) resume(g, e); break;
+      case 'windup': e.windT -= dt; if (e.windT <= 0) resolveBite(g, e); break;   // 蓄撲時停步
+      case 'recover': case 'recoil': e.stateT -= dt; if (e.stateT <= 0) resume(g, e); break;
+      default: think(g, e, dt, sees, d);
+    }
+    // 久留身邊：寒意（不經護心衣；隔牆、隔紙屏、隔封戶都傳不過來）
+    if (awake(e) && d <= R.PO.auraR && hitClear(g, e.x, e.y, p.x, p.y)) addChill(g, R.PO.aura * dt);
+    // 卡住偵測：該走卻一直沒動，就重新尋路（測試也看這個數）
+    if (g.t - e.sample.t >= 0.5) {
+      const moved = hyp(e.x - e.sample.x, e.y - e.sample.y);
+      const shouldMove = ['chase', 'investigate', 'search', 'lure', 'patrol'].includes(e.state) && !e.waiting && !(e.state === 'patrol' && e.lingering) && !(e.state === 'lure' && e.lingering);
+      if (shouldMove && moved < 0.05) e.stuck += g.t - e.sample.t; else e.stuck = 0;
+      if (e.stuck >= R.PO.stuckT) { g.stats.stuck++; emit(g, 'stuck', { id: e.id, state: e.state, x: e.x, y: e.y }); e.path = null; e.repathT = 0; e.goal = null; e.stuck = 0; }
+      e.sample = { x: e.x, y: e.y, t: g.t };
+    }
+  }
+  function think(g, e, dt, sees, d) {
+    const P = R.PO;
+    if (sees && e.state !== 'chase') { e.state = 'chase'; emit(g, 'spotted', { id: e.id }); }
+    if (e.state !== 'chase' && e.state !== 'investigate' && e.state !== 'lure') { const l = lureFor(g, e); if (l) { e.state = 'lure'; e.lureId = l.id; e.goal = null; } }
+    e.lingering = false;
+    switch (e.state) {
+      case 'chase': {
+        if (!sees && e.lostT > P.loseT) { e.state = 'investigate'; break; }
+        if (d <= P.windStart && hitClear(g, e.x, e.y, g.p.x, g.p.y)) { startWindup(g, e); break; }
+        moveToward(g, e, e.lastKnown, P.chase, dt);
+        break;
+      }
+      case 'investigate': {
+        const k = e.lastKnown;
+        if (!k) { e.state = 'patrol'; break; }
+        if (hyp(k.x - e.x, k.y - e.y) < 0.45) { e.state = 'search'; e.stateT = P.searchT; e.goal = null; break; }
+        moveToward(g, e, k, P.investigate, dt);
+        if (e.waiting) { e.stateT += dt; if (e.stateT > 2) { e.state = 'search'; e.stateT = P.searchT; e.goal = null; } } else e.stateT = 0;
+        break;
+      }
+      case 'search': {
+        e.stateT -= dt;
+        if (e.stateT <= 0) { e.state = 'patrol'; e.goal = null; e.lastKnown = null; break; }
+        if (!e.goal || hyp(e.goal.x - e.x, e.goal.y - e.y) < 0.3 || e.waiting) e.goal = searchGoal(g, e);
+        moveToward(g, e, e.goal, P.patrol, dt);
+        break;
+      }
+      case 'lure': {
+        const l = g.lures.find((q) => q.id === e.lureId);
+        if (!l) { e.state = 'patrol'; e.goal = null; break; }
+        if (hyp(l.x - e.x, l.y - e.y) < 1.4) {   // 到了火邊：繞著火打轉
+          e.lingering = true;
+          if (!e.goal || hyp(e.goal.x - e.x, e.goal.y - e.y) < 0.3) { const a = g.rand() * 2 * PI; e.goal = { x: l.x + Math.cos(a) * 1.0, y: l.y + Math.sin(a) * 1.0 }; if (circleBlocked(g, e, e.goal.x, e.goal.y, e.r)) e.goal = { x: l.x, y: l.y }; }
+          moveToward(g, e, e.goal, P.patrol * 0.6, dt);
+        } else moveToward(g, e, l, P.investigate, dt);
+        break;
+      }
+      default: {   // patrol
+        e.state = 'patrol';
+        if (!e.goal) nextWay(g, e);
+        if (hyp(e.goal.x - e.x, e.goal.y - e.y) < 0.35) { e.lingering = true; e.linger -= dt; if (e.linger <= 0) nextWay(g, e); break; }
+        moveToward(g, e, e.goal, P.patrol, dt);
+        if (e.waiting) nextWay(g, e);
+      }
+    }
+  }
+
+  // ---------- 人的動作 ----------
+  function nearPo(g) {   // 貼近一隻沒被震退的魄（距離用撲擊範圍，不留空隙）
+    const p = g.p;
+    return g.pos.some((e) => awake(e) && e.state !== 'stagger' && dist(p, e) <= R.PO.biteR && hitClear(g, e.x, e.y, p.x, p.y));
+  }
+  function cancelRead(g, why) {
+    const r = g.p.reading; if (!r) return;
+    g.p.reading = null; g.stats.readCancel++;
+    emit(g, 'readCancel', { why, spell: r.spell, ink: g.p.ink });
+  }
+  function cancelTake(g, why) { if (!g.p.taking) return; g.p.taking = null; emit(g, 'takeCancel', { why }); }
+  function findDoor(g) {
+    const p = g.p; let best = null, bd = 1e9;
+    for (const dr of g.m.doors) {
+      const d = hyp(dr.x + 0.5 - p.x, dr.y + 0.5 - p.y);
+      if (d <= R.BOOK.seal.reach && d < bd) { bd = d; best = dr; }
+    }
+    if (!best) return { ok: false, why: 'far' };
+    if (g.sealed.has(best.i)) return { ok: false, why: 'already', door: best };
+    const cx = clamp(p.x, best.x, best.x + 1), cy = clamp(p.y, best.y, best.y + 1);
+    if (hyp(p.x - cx, p.y - cy) < p.r) return { ok: false, why: 'standing', door: best };
+    return { ok: true, door: best };
+  }
+  function borrowSpot(g, target) {
+    const p = g.p;
+    let a = p.aim, want = 3;
+    if (target) { a = Math.atan2(target.y - p.y, target.x - p.x); want = Math.min(R.BOOK.borrow.range, hyp(target.x - p.x, target.y - p.y)); }
+    want = Math.max(0.6, Math.min(R.BOOK.borrow.range, want));
+    let x = p.x, y = p.y;
+    for (let s = 0.1; s <= want + 1e-9; s += 0.1) {
+      const nx = p.x + Math.cos(a) * s, ny = p.y + Math.sin(a) * s;
+      if (blocksHit(g, Math.floor(nx), Math.floor(ny)) || g.m.at(Math.floor(nx), Math.floor(ny)) === T.LOW) break;
+      x = nx; y = ny;
+    }
+    return { x, y };
+  }
+  function tryRead(g, spell, target) {
+    const p = g.p, B = R.BOOK[spell];
+    if (p.reading || p.act || p.taking) { emit(g, 'busy', { what: spell }); return; }
+    if (p.ink < B.cost) { emit(g, 'noInk', { spell }); return; }
+    if (nearPo(g)) { emit(g, 'readBlocked', { spell }); return; }
+    let spot = null;
+    if (spell === 'seal') { const f = findDoor(g); if (!f.ok) { emit(g, 'sealNoDoor', { why: f.why }); return; } spot = f.door; }
+    else spot = borrowSpot(g, target);
+    p.reading = { spell, t: 0, dur: B.read, spot };
+    emit(g, 'readStart', { spell });
+  }
+  function completeRead(g) {
+    const p = g.p, r = p.reading, B = R.BOOK[r.spell];
+    p.reading = null;
+    if (r.spell === 'seal') {
+      const f = findDoor(g);
+      if (!f.ok || f.door.i !== r.spot.i) { emit(g, 'sealNoDoor', { why: f.why || 'moved' }); return; }
+      const dr = r.spot, ex = new Set();
+      for (const e of g.pos) if (tangible(e)) { const cx = clamp(e.x, dr.x, dr.x + 1), cy = clamp(e.y, dr.y, dr.y + 1); if (hyp(e.x - cx, e.y - cy) < e.r) ex.add(e.id); }
+      g.sealed.set(dr.i, { id: g.nid++, x: dr.x, y: dr.y, t: B.life, exempt: ex });
+      for (const e of g.pos) { e.path = null; e.repathT = 0; }
+      g.stats.sealsPlaced++;
+      emit(g, 'sealDone', { x: dr.x, y: dr.y, exempt: [...ex] });
+    } else {
+      g.lures.push({ id: g.nid++, x: r.spot.x, y: r.spot.y, t: B.life });
+      g.stats.lures++;
+      emit(g, 'borrowDone', { x: r.spot.x, y: r.spot.y });
+    }
+    p.ink -= B.cost; g.stats.reads++;
+  }
+  function tryBell(g) {
+    const p = g.p;
+    if (p.bellCD > 1e-6) { emit(g, 'cooldown', { what: 'bell', left: p.bellCD }); return; }
+    if (p.reading) cancelRead(g, 'bell');   // 先合書（不耗墨）再搖鈴
+    if (p.taking) cancelTake(g, 'bell');
+    p.bellCD = R.BELL.cd; g.stats.bells++;
+    emit(g, 'bell', { x: p.x, y: p.y });
+    for (const e of g.pos) {
+      if (!tangible(e)) continue;
+      const d = dist(p, e);
+      if (awake(e) && d <= R.BELL.r + e.r && hitClear(g, p.x, p.y, e.x, e.y)) hurtPo(g, e, R.BELL.dmg, { stagger: R.BELL.stun, knock: R.BELL.knock, fx: p.x, fy: p.y, src: 'bell' });
+      if (!tangible(e)) continue;
+      if (d <= R.BELL.hear) {   // 紙宅擋不住聲音：鈴聲把魄引來
+        if (e.state === 'dormant') wake(g, e, p, 'bell');
+        else { e.lastKnown = { x: p.x, y: p.y }; if (['patrol', 'search', 'lure'].includes(e.state)) { e.state = 'investigate'; e.stateT = 0; } }
+      }
+    }
+    hint(g, 'bell');
+  }
+  function trySword(g) {
+    const p = g.p;
+    if (p.reading || p.taking) { emit(g, 'busy', { what: 'sword' }); return; }
+    if (p.act) return;
+    if (p.swordCD > 1e-6) { emit(g, 'cooldown', { what: 'sword', left: p.swordCD }); return; }
+    p.swordCD = R.SWORD.cd;
+    p.act = { kind: 'sword', t: R.SWORD.windup, dir: p.aim };   // 方向在起手時定，位置用出手那一刻的
+  }
+  function tryFire(g) {
+    const p = g.p;
+    if (p.reading || p.taking) { emit(g, 'busy', { what: 'fire' }); return; }
+    if (p.act) return;
+    if (p.talismans <= 0) { emit(g, 'noTalisman'); return; }
+    p.talismans--;
+    p.act = { kind: 'fire', t: R.FIRE.windup, dir: p.aim };
+  }
+  function swordRelease(g, dir) {
+    const p = g.p, arc = (R.SWORD.arc * PI) / 180;
+    let best = null, bd = 1e9, why = 'none';
+    for (const e of g.pos) {
+      if (!tangible(e)) continue;
+      const dx = e.x - p.x, dy = e.y - p.y, d = hyp(dx, dy);
+      const close = d <= p.r + e.r + 0.05;   // 貼身時不管方向
+      if (d > R.SWORD.reach) { if (d <= R.SWORD.reach + 0.8 && why === 'none') why = 'far'; continue; }
+      if (!close && angDiff(Math.atan2(dy, dx), dir) > arc) { why = 'dir'; continue; }
+      if (!hitClear(g, p.x, p.y, e.x, e.y)) { why = 'wall'; continue; }
+      if (d < bd) { bd = d; best = e; }
+    }
+    emit(g, 'swing', { x: p.x, y: p.y, dir });
+    if (best) {
+      hurtPo(g, best, R.SWORD.dmg, { stagger: R.SWORD.stagger, knock: R.SWORD.knock, fx: p.x, fy: p.y, src: 'sword' });
+      g.stats.swordHits++;
+      emit(g, 'swordHit', { id: best.id, x: best.x, y: best.y });
+    } else {
+      g.stats.swordMiss++;
+      emit(g, 'swordMiss', { why, x: p.x + Math.cos(dir) * 0.9, y: p.y + Math.sin(dir) * 0.9 });
+      hint(g, 'whiff');
+    }
+  }
+  function boom(g, x, y) {
+    g.stats.booms++;
+    g.flashes.push({ x, y, t: R.FIRE.flashT });
+    const hit = [];
+    for (const e of g.pos) {
+      if (!tangible(e)) continue;
+      if (hyp(e.x - x, e.y - y) <= R.FIRE.boom + e.r && hitClear(g, x, y, e.x, e.y)) {
+        hurtPo(g, e, R.FIRE.dmg, { stagger: R.FIRE.stagger, knock: R.FIRE.knock, fx: x, fy: y, src: 'fire' });
+        if (tangible(e)) e.burnT = R.FIRE.burnT;
+        hit.push(e.id);
+      }
+    }
+    emit(g, 'fireBoom', { x, y, hit });
+  }
+  function updateShots(g, dt) {
+    const F = R.FIRE;
+    for (const s of g.shots) {
+      let left = F.speed * dt;
+      while (left > 0 && !s.done) {
+        const st = Math.min(0.1, left); left -= st;
+        const nx = s.x + Math.cos(s.dir) * st, ny = s.y + Math.sin(s.dir) * st;
+        const hitPo = g.pos.find((e) => tangible(e) && hyp(e.x - nx, e.y - ny) <= e.r + 0.08);   // 射線先碰到的那隻魄
+        if (hitPo) { s.done = true; boom(g, nx, ny); break; }
+        if (blocksHit(g, Math.floor(nx), Math.floor(ny))) {   // 碰牆：在牆前引燃，火心不會在牆裡
+          s.done = true; boom(g, s.x - Math.cos(s.dir) * 0.05, s.y - Math.sin(s.dir) * 0.05); break;
+        }
+        s.x = nx; s.y = ny; s.dist += st;
+        if (s.dist >= F.range) { s.done = true; boom(g, s.x, s.y); }
+      }
+    }
+    g.shots = g.shots.filter((s) => !s.done);
+  }
+  function tryTake(g) {
+    const p = g.p;
+    if (p.reading || p.act || p.taking) return;
+    if (g.exitReady && !g.exitOpen && g.gate && dist(p, g.gate) <= R.TAKE.gateReach) { p.taking = { gate: true, t: 0, dur: R.TAKE.gate }; emit(g, 'takeStart', { key: 'gate' }); return; }
+    const a = g.altars.find((q) => !q.taken && dist(p, q) <= R.TAKE.reach);
+    if (!a) return;
+    p.taking = { a, t: 0, dur: R.TAKE.t };
+    emit(g, 'takeStart', { key: a.key });
+  }
+  function completeTake(g) {
+    const p = g.p, a = p.taking.a, K = R.TAKE;
+    if (p.taking.gate) { p.taking = null; g.exitOpen = true; emit(g, 'gateOpen'); return; }
+    p.taking = null; a.taken = true; g.seals[a.key] = true; g.stats.takes++;
+    p.armor = Math.min(R.P.armorMax, p.armor + K.armor);
+    p.talismans = Math.min(R.P.talismanMax, p.talismans + K.talisman);
+    p.ink = Math.min(R.P.inkMax, p.ink + K.ink);
+    p.chill = Math.max(0, p.chill + K.chill);
+    emit(g, 'seal', { key: a.key, glyph: a.glyph });
+    const both = g.seals.name && g.seals.breath;
+    if (!both) {
+      for (const e of g.pos) wake(g, e, a, 'seal');
+      hint(g, 'seal1');
+    } else {
+      g.exitReady = true;
+      const hall = R.WAY.hall.map(([x, y]) => [x + 0.5, y + 0.5]);
+      for (const e of g.pos) {
+        if (e.state === 'dormant') wake(g, e, { x: R.HALL[0], y: R.HALL[1] }, 'seal');
+        e.way = hall;   // 兩印到手後，兩隻魄都守在玄關一帶
+        if (awake(e) && ['patrol', 'search', 'lure', 'investigate'].includes(e.state)) { e.state = 'investigate'; e.stateT = 0; e.goal = null; e.path = null; e.lastKnown = { x: R.HALL[0], y: R.HALL[1] }; }
+      }
+      emit(g, 'exitReady');
+      hint(g, 'seal2');
+    }
+  }
+
+  // ---------- 一步 ----------
+  function step(g, dt, inp) {
+    if (g.state !== 'play') return;
+    inp = inp || {};
+    const press = g.press; g.press = {};
+    const hold = inp.hold || {};
+    const p = g.p;
+    g.t += dt;
+    p.bitten = false;
+    // 封戶、借火、火光的時間
+    for (const [i, s] of g.sealed) {
+      s.t -= dt;
+      for (const id of [...s.exempt]) { const e = g.pos.find((q) => q.id === id); const cx = clamp(e.x, s.x, s.x + 1), cy = clamp(e.y, s.y, s.y + 1); if (!tangible(e) || hyp(e.x - cx, e.y - cy) >= e.r) s.exempt.delete(id); }
+      if (s.t <= 0) { g.sealed.delete(i); emit(g, 'sealEnd', { x: s.x, y: s.y }); }
+    }
+    for (const l of g.lures) l.t -= dt;
+    g.lures = g.lures.filter((l) => l.t > 0);
+    for (const f of g.flashes) f.t -= dt;
+    g.flashes = g.flashes.filter((f) => f.t > 0);
+    // 人
+    p.swordCD = Math.max(0, p.swordCD - dt); p.bellCD = Math.max(0, p.bellCD - dt);
+    if (inp.aim != null) p.aim = inp.aim;
+    if (press.lamp) { p.lampOn = !p.lampOn; if (p.lampOn) p.adapt = 0; emit(g, 'lamp', { on: p.lampOn }); if (!p.lampOn) hint(g, 'dark'); }
+    let mx = inp.mx || 0, my = inp.my || 0;
+    const ml = hyp(mx, my), moving = ml > 0.05;
+    if (ml > 1) { mx /= ml; my /= ml; }
+    if (p.reading && moving) cancelRead(g, 'move');
+    if (p.taking && (moving || !hold.take)) cancelTake(g, moving ? 'move' : 'release');
+    p.moving = false;
+    if (!p.reading && !p.taking && moving) { moveEnt(g, p, mx * R.P.speed * dt, my * R.P.speed * dt); p.moving = true; }
+    if (press.bell) tryBell(g);
+    if (press.sword) trySword(g);
+    if (press.fire) tryFire(g);
+    if (press.read1) tryRead(g, 'borrow', inp.target || null);
+    if (press.read2) tryRead(g, 'seal');
+    if (hold.take && !p.taking) tryTake(g);
+    for (const k of g.pickups) if (!k.taken && dist(p, k) < 0.6) { k.taken = true; p.talismans = Math.min(R.P.talismanMax, p.talismans + 1); emit(g, 'pickup', { kind: k.kind }); }
+    if (!g.hints.has('altar') && g.altars.some((a) => !a.taken && dist(p, a) < 2)) hint(g, 'altar');
+    if (g.exitReady && !g.exitOpen && g.gate && dist(p, g.gate) < 2.5) hint(g, 'gate');
+    // 暴露與眼睛
+    const ambient = lightAt(g, p.x, p.y, true);
+    g.exposedNow = p.lampOn || ambient > R.EXPOSE.light;
+    if (p.lampOn) p.adapt = 0;
+    else if (ambient >= R.LAMP.glare) p.adapt = Math.max(0, p.adapt - dt / R.LAMP.adaptLoss);
+    else { p.adapt = Math.min(1, p.adapt + dt / R.LAMP.adaptT); if (p.adapt >= 1) hint(g, 'adapted'); }
+    // 魄
+    for (const e of g.pos) updatePo(g, e, dt);
+    // 人與魄不重疊：先推魄，推不動再推人
+    for (const e of g.pos) {
+      if (!tangible(e)) continue;
+      const d = dist(p, e), min = p.r + e.r;
+      if (d >= min) continue;
+      if (e.state === 'dormant') wake(g, e, p, 'touch');   // 撞到睡著的魄，它就醒了
+      const nx = d > 1e-6 ? (e.x - p.x) / d : 1, ny = d > 1e-6 ? (e.y - p.y) / d : 0;
+      moveEnt(g, e, nx * (min - d), ny * (min - d));
+      const d2 = dist(p, e);
+      if (d2 < min - 1e-3) moveEnt(g, p, -nx * (min - d2), -ny * (min - d2));
+    }
+    // 人出手
+    if (p.act) { p.act.t -= dt; if (p.act.t <= 0) { const a = p.act; p.act = null; if (a.kind === 'sword') swordRelease(g, a.dir); else { g.shots.push({ x: p.x, y: p.y, dir: a.dir, dist: 0 }); g.stats.fires++; emit(g, 'fireThrow', { x: p.x, y: p.y, dir: a.dir }); } } }
+    updateShots(g, dt);
+    // 讀咒：先查中斷，最後才完成
+    if (p.reading) {
+      p.reading.t += dt;
+      if (p.bitten) cancelRead(g, 'bite');
+      else if (nearPo(g)) cancelRead(g, 'near');
+      else if (p.reading.t >= p.reading.dur) completeRead(g);
+    }
+    // 取印
+    if (p.taking) {
+      if (p.bitten) cancelTake(g, 'bite');
+      else { p.taking.t += dt; if (p.taking.t >= p.taking.dur) completeTake(g); }
+    }
+    // 取暖：燭與借火旁（站在火光裡，同時也是暴露）
+    for (const s of sources(g, true)) if (s.fire && hyp(s.x - p.x, s.y - p.y) <= R.WARM.r && hitClear(g, s.x, s.y, p.x, p.y)) { p.chill = Math.max(0, p.chill - R.WARM.rate * dt); break; }
+    if (p.chill >= 60) hint(g, 'chill');
+    // 勝負
+    if (p.chill >= R.P.chillMax) { g.state = 'lose'; emit(g, 'lose'); }
+    else if (g.exitOpen && g.m.at(Math.floor(p.x), Math.floor(p.y)) === T.EXIT) { g.state = 'win'; emit(g, 'win', { t: g.t }); }
+  }
+
+  // ---------- 畫面要的：每格的光與看見程度、走過的地圖 ----------
+  function view(g, rad) {
+    const m = g.m, W = m.W, H = m.H, p = g.p;
+    const light = g._light || (g._light = new Float32Array(W * H));
+    const vis = g._vis || (g._vis = new Float32Array(W * H));
+    const paper = g._paper || (g._paper = new Uint8Array(W * H));
+    light.fill(0); vis.fill(0); paper.fill(0);
+    for (const s of sources(g, false)) {
+      for (let ty = Math.max(0, Math.floor(s.y - s.r)); ty <= Math.min(H - 1, Math.floor(s.y + s.r)); ty++)
+        for (let tx = Math.max(0, Math.floor(s.x - s.r)); tx <= Math.min(W - 1, Math.floor(s.x + s.r)); tx++) {
+          const l = lightFrom(g, s, tx + 0.5, ty + 0.5);
+          if (l > 0) { const i = ty * W + tx; light[i] = 1 - (1 - light[i]) * (1 - Math.min(1, l)); }
+        }
+    }
+    rad = rad || 13;
+    const dark = !p.lampOn && p.adapt > 0 ? p.adapt : 0, dr = dark * R.LAMP.adaptR;
+    const x0 = Math.max(0, Math.floor(p.x - rad)), x1 = Math.min(W - 1, Math.floor(p.x + rad));
+    const y0 = Math.max(0, Math.floor(p.y - rad)), y1 = Math.min(H - 1, Math.floor(p.y + rad));
+    for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) {
+      const i = ty * W + tx, k = m.t[i];
+      if (k === T.WALL) continue;
+      const cx = tx + 0.5, cy = ty + 0.5, d = hyp(cx - p.x, cy - p.y);
+      if (d > rad) continue;
+      const line = sightLine(g, p.x, p.y, cx, cy);
+      if (line === 'blocked') continue;
+      if (line === 'paper') { vis[i] = light[i] * R.LIGHT.paperGlow; paper[i] = 1; continue; }
+      let b = light[i];
+      if (dark && d < dr + 0.5) b = Math.max(b, 0.26 * dark * Math.pow(clamp(1 - d / (dr + 0.5), 0, 1), 0.6));
+      vis[i] = b;
+    }
+    // 牆：只在看得見、被照到的那一面亮
+    for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) {
+      const i = ty * W + tx;
+      if (m.t[i] !== T.WALL && !(m.t[i] === T.EXIT && !g.exitOpen)) continue;
+      let b = 0;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, 1], [1, -1], [-1, -1]]) {
+        const nx = tx + dx, ny = ty + dy;
+        if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+        const j = ny * W + nx;
+        if (m.t[j] === T.WALL || paper[j]) continue;
+        b = Math.max(b, vis[j] * (dx && dy ? 0.7 : 0.95));
+      }
+      vis[i] = b;
+    }
+    // 小地圖：只記看清楚過的格子，不記魄的位置
+    for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) { const i = ty * W + tx; if (vis[i] > 0.06 && !paper[i]) g.explored[i] = 1; }
+    return { light, vis, paper, W, H };
+  }
+
+  // ---------- 對外 ----------
+  function api(g) {
+    return {
+      step: (dt, inp) => { if (inp && inp.press) for (const k in inp.press) if (inp.press[k]) g.press[k] = true; step(g, dt, inp); },
+      // 畫面的一幀：補上固定步長；按鍵留到真的跑了一步才算用掉
+      advance(frameDt, inp) {
+        if (inp && inp.press) for (const k in inp.press) if (inp.press[k]) g.press[k] = true;
+        g.acc += clamp(frameDt, 0, R.MAX_FRAME);
+        let n = 0;
+        while (g.acc >= R.STEP - 1e-9) { g.acc -= R.STEP; step(g, R.STEP, inp); n++; if (g.state !== 'play') { g.acc = 0; break; } }
+        return n;
+      },
+      view: (rad) => view(g, rad),
+      lightAt: (x, y, ex) => lightAt(g, x, y, ex),
+      sightLine: (a, b, c, d) => sightLine(g, a, b, c, d),
+      hitClear: (a, b, c, d) => hitClear(g, a, b, c, d),
+      poVis: (e) => poVis(g, e),
+      spotVisible: (s) => spotVisible(g, s),
+      exposed: () => exposed(g),
+      sources: (ex) => sources(g, ex),
+      findDoor: () => findDoor(g),
+      blocksMove: (x, y, e) => blocksMove(g, x, y, e),
+      drain() { const ev = g.events; g.events = []; return ev; },
+      // 測試與除錯用
+      tp(x, y) { g.p.x = x; g.p.y = y; },
+      place(e, x, y, state) { e.x = x; e.y = y; if (state) e.state = state; e.path = null; e.goal = null; e.sample = { x, y, t: g.t }; }
+    };
+  }
+
+  root.ENGINE = { create, rng, angDiff };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+</script>
+<script>
+// 燈下無明 —— 畫面：宣紙是光，墨是黑暗。看得見的地方露出紙，其餘是墨。
+(function (root) {
+  const R = root.R, MAP = root.MAP, T = MAP.T;
+  const FONT = '"LXGW WenKai TC", "Kaiti TC", "BiauKai", "DFKai-SB", "Noto Serif TC", serif';
+  const C = { ink: '#0d0c0b', wall: '#211d19', paper: '#ebe0c6', court: '#ddd6c4', screen: '#f2e8d0', red: '#b4392a', gold: '#d9a441', po: '#3c4247', poDark: '#cfeee6' };
+  const TS = 48;   // 底圖每格幾像素
+  const RM = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;   // 減少動態：不抖、不晃
+  const hyp = Math.hypot;
+
+  let cv, ctx, g, art, mask, mctx, warm, wctx, cam = { x: 0, y: 0, s: 40 }, fx = [], floats = [], t = 0;
+
+  function rnd(seed) { let a = seed; return () => { a = (a * 1103515245 + 12345) & 0x7fffffff; return a / 0x7fffffff; }; }
+
+  // ---------- 靜態底圖：地板、牆、紙屏、井、廊口、房名 ----------
+  function buildArt(m) {
+    const c = document.createElement('canvas');
+    c.width = m.W * TS; c.height = m.H * TS;
+    const x = c.getContext('2d'), r = rnd(1016);
+    x.fillStyle = C.paper; x.fillRect(0, 0, c.width, c.height);
+    // 天井鋪石，其他房間鋪木板
+    for (let ty = 0; ty < m.H; ty++) for (let tx = 0; tx < m.W; tx++) {
+      const k = m.at(tx, ty), court = m.room(tx, ty) === '天井';
+      if (k === T.WALL) continue;
+      const px = tx * TS, py = ty * TS;
+      if (court) {
+        x.fillStyle = C.court; x.fillRect(px, py, TS, TS);
+        x.strokeStyle = 'rgba(40,34,28,.10)'; x.lineWidth = 1; x.strokeRect(px + 1.5, py + 1.5, TS - 3, TS - 3);
+      } else {
+        x.strokeStyle = 'rgba(60,45,30,.07)'; x.lineWidth = 1;
+        for (let k2 = 1; k2 < 3; k2++) { x.beginPath(); x.moveTo(px, py + (k2 * TS) / 3 + 0.5); x.lineTo(px + TS, py + (k2 * TS) / 3 + 0.5); x.stroke(); }
+      }
+      // 紙的纖維
+      x.fillStyle = 'rgba(90,70,40,.05)';
+      for (let k2 = 0; k2 < 6; k2++) x.fillRect(px + r() * TS, py + r() * TS, 1 + r() * 5, 1);
+    }
+    // 房名：淡淡寫在地上
+    x.textAlign = 'center'; x.textBaseline = 'middle';
+    for (const [name, x0, y0, x1, y1] of MAP.ROOMS) {
+      x.font = `${Math.round(TS * 1.6)}px ${FONT}`; x.fillStyle = 'rgba(40,30,20,.075)';
+      x.fillText(name, ((x0 + x1 + 1) / 2) * TS, ((y0 + y1 + 1) / 2) * TS);
+    }
+    // 牆：墨塊加毛邊
+    for (let ty = 0; ty < m.H; ty++) for (let tx = 0; tx < m.W; tx++) {
+      if (m.at(tx, ty) !== T.WALL) continue;
+      const px = tx * TS, py = ty * TS;
+      x.fillStyle = C.wall; x.fillRect(px - 0.5, py - 0.5, TS + 1, TS + 1);
+      x.fillStyle = 'rgba(0,0,0,.35)';
+      for (let k2 = 0; k2 < 5; k2++) x.fillRect(px + r() * TS, py + r() * TS, 2 + r() * 10, 1 + r() * 2);
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {   // 牆與地板的交界：一道不太直的墨線
+        const k = m.at(tx + dx, ty + dy);
+        if (k === T.WALL || k === T.EXIT) continue;
+        x.strokeStyle = 'rgba(10,8,6,.9)'; x.lineWidth = 3 + r() * 2.5; x.lineCap = 'round';
+        x.beginPath();
+        if (dx) { const ex = px + (dx > 0 ? TS : 0); x.moveTo(ex + (r() - 0.5) * 2, py + r() * 4); x.quadraticCurveTo(ex + (r() - 0.5) * 4, py + TS / 2, ex + (r() - 0.5) * 2, py + TS - r() * 4); }
+        else { const ey = py + (dy > 0 ? TS : 0); x.moveTo(px + r() * 4, ey + (r() - 0.5) * 2); x.quadraticCurveTo(px + TS / 2, ey + (r() - 0.5) * 4, px + TS - r() * 4, ey + (r() - 0.5) * 2); }
+        x.stroke();
+      }
+    }
+    // 紙屏：格子窗
+    for (let ty = 0; ty < m.H; ty++) for (let tx = 0; tx < m.W; tx++) {
+      if (m.at(tx, ty) !== T.SCREEN) continue;
+      const px = tx * TS, py = ty * TS, horiz = m.at(tx - 1, ty) === T.SCREEN || m.at(tx + 1, ty) === T.SCREEN;
+      const M = TS * 0.12, bx = horiz ? px : px + M, by = horiz ? py + M : py, bw = horiz ? TS : TS - 2 * M, bh = horiz ? TS - 2 * M : TS;
+      x.fillStyle = C.screen; x.fillRect(bx, by, bw, bh);
+      x.strokeStyle = 'rgba(60,45,30,.45)'; x.lineWidth = 1;
+      for (let k2 = 1; k2 < 4; k2++) { x.beginPath(); x.moveTo(bx + (bw * k2) / 4, by); x.lineTo(bx + (bw * k2) / 4, by + bh); x.stroke(); x.beginPath(); x.moveTo(bx, by + (bh * k2) / 4); x.lineTo(bx + bw, by + (bh * k2) / 4); x.stroke(); }
+      x.strokeStyle = 'rgba(40,28,18,.85)'; x.lineWidth = 2.5; x.strokeRect(bx + 1, by + 1, bw - 2, bh - 2);
+    }
+    // 井
+    const wells = [];
+    for (let ty = 0; ty < m.H; ty++) for (let tx = 0; tx < m.W; tx++) if (m.at(tx, ty) === T.LOW) wells.push([tx, ty]);
+    if (wells.length) {
+      const cx = (wells.reduce((a, w) => a + w[0], 0) / wells.length + 0.5) * TS, cy = (wells.reduce((a, w) => a + w[1], 0) / wells.length + 0.5) * TS;
+      x.fillStyle = 'rgba(30,26,22,.85)'; x.beginPath(); x.arc(cx, cy, TS * 0.95, 0, Math.PI * 2); x.fill();
+      x.fillStyle = 'rgba(12,10,9,1)'; x.beginPath(); x.arc(cx, cy, TS * 0.62, 0, Math.PI * 2); x.fill();
+      x.font = `${Math.round(TS * 1.2)}px ${FONT}`; x.fillStyle = 'rgba(235,224,198,.55)'; x.fillText('井', cx, cy + 2);
+    }
+    // 廊口：兩側門框
+    for (const d of m.doors) {
+      const px = d.x * TS, py = d.y * TS, vert = m.at(d.x, d.y - 1) === T.WALL || m.at(d.x, d.y - 1) === T.SCREEN;
+      x.fillStyle = 'rgba(70,45,25,.55)';
+      if (vert) { x.fillRect(px, py + 2, TS, 3); x.fillRect(px, py + TS - 5, TS, 3); }
+      else { x.fillRect(px + 2, py, 3, TS); x.fillRect(px + TS - 5, py, 3, TS); }
+    }
+    return c;
+  }
+
+  // ---------- 座標 ----------
+  const sx = (x) => (x - cam.x) * cam.s + cv.width / 2;
+  const sy = (y) => (y - cam.y) * cam.s + cv.height / 2;
+
+  function glyph(ch, x, y, size, color, o) {
+    o = o || {};
+    ctx.save();
+    ctx.translate(sx(x), sy(y));
+    if (o.rot) ctx.rotate(o.rot);
+    if (o.scale) ctx.scale(o.scale, o.scale);
+    ctx.globalAlpha = o.a == null ? 1 : o.a;
+    if (o.glow) { ctx.shadowColor = o.glow; ctx.shadowBlur = o.blur || 12; }
+    if (o.filter) ctx.filter = o.filter;
+    ctx.font = `${Math.round(size * cam.s)}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    if (o.stroke) { ctx.lineWidth = o.stroke; ctx.strokeStyle = o.strokeColor || C.paper; ctx.lineJoin = 'round'; ctx.strokeText(ch, 0, 0); }
+    ctx.fillStyle = color; ctx.fillText(ch, 0, 0);
+    ctx.restore();
+  }
+  function glow(x, y, r, color, a) {
+    const X = sx(x), Y = sy(y), rr = r * cam.s;
+    const gr = ctx.createRadialGradient(X, Y, 0, X, Y, rr);
+    gr.addColorStop(0, color.replace('A', a)); gr.addColorStop(1, color.replace('A', 0));
+    ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(X, Y, rr, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // ---------- 事件變成畫面上的效果 ----------
+  function float(text, x, y, color, o) { floats.push(Object.assign({ text, x, y, color: color || C.ink, t: 0, life: 1.1, size: 0.55 }, o || {})); }
+  function event(e) {
+    const p = g.p;
+    switch (e.type) {
+      case 'swing': fx.push({ k: 'swing', x: e.x, y: e.y, dir: e.dir, t: 0, life: 0.2 }); break;
+      case 'swordHit': fx.push({ k: 'splash', x: e.x, y: e.y, t: 0, life: 0.35, c: '20,18,16' }); break;
+      case 'swordMiss': float(e.why === 'dir' ? '空 · 偏了' : e.why === 'far' ? '空 · 差一步' : e.why === 'wall' ? '空 · 隔著' : '空', e.x, e.y, '#6b5a48', { size: 0.42 }); break;
+      case 'bell': fx.push({ k: 'ring', x: e.x, y: e.y, t: 0, life: 0.45, r: R.BELL.r }); fx.push({ k: 'hear', x: e.x, y: e.y, t: 0, life: 1.4, r: R.BELL.hear }); float('鈴', e.x, e.y - 0.9, '#8a6a1c'); break;
+      case 'fireBoom': fx.push({ k: 'boom', x: e.x, y: e.y, t: 0, life: 0.5 }); break;
+      case 'bite': fx.push({ k: 'bite', t: 0, life: 0.45 }); float('噬', p.x, p.y - 0.8, C.red, { size: 0.7 }); float(e.absorbed ? (e.chill ? `護 −${e.absorbed}　寒 +${e.chill}` : `護 −${e.absorbed}`) : `寒 +${e.chill}`, p.x, p.y + 0.8, e.absorbed ? '#5b4a8a' : '#3f6f8a', { size: 0.36 }); break;
+      case 'whiff': { const po = g.pos.find((q) => q.id === e.id); if (po && po.vis) float('撲空', e.x, e.y - 0.8, '#6b5a48', { size: 0.4 }); break; }
+      case 'interrupt': { const po = g.pos.find((q) => q.id === e.id); if (po) float('斷', po.x, po.y - 0.9, C.red, { size: 0.5 }); break; }
+      case 'disperse': fx.push({ k: 'disperse', x: e.x, y: e.y, t: 0, life: 1.0, seed: Math.random() * 1e6 }); if (g.poVis({ state: 'patrol', x: e.x, y: e.y }) || hyp(e.x - p.x, e.y - p.y) < 4.5) float('散', e.x, e.y - 0.6, '#4a4540', { size: 0.6 }); break;
+      case 'wake': { const po = g.pos.find((q) => q.id === e.id); if (po && po.vis) float('醒', e.x, e.y - 0.9, C.red, { size: 0.5 }); break; }
+      case 'seal': fx.push({ k: 'stamp', x: p.x, y: p.y, t: 0, life: 0.8, glyph: e.glyph }); break;
+      case 'sealDone': fx.push({ k: 'sealIn', x: e.x + 0.5, y: e.y + 0.5, t: 0, life: 0.4 }); break;
+      case 'borrowDone': fx.push({ k: 'ignite', x: e.x, y: e.y, t: 0, life: 0.5 }); break;
+      case 'pickup': float('+符', p.x, p.y - 0.8, C.red, { size: 0.42 }); break;
+    }
+  }
+
+  // ---------- 一幀 ----------
+  function frame(dt, w) {
+    t += dt;
+    const W = cv.width, H = cv.height, m = g.m, p = g.p;
+    // 鏡頭：每格大小跟著螢幕；跟著人走，稍微平滑
+    const s = Math.max(26, Math.min(76, Math.min(W / 21, H / 12.5)));
+    cam.s = s;
+    const k = 1 - Math.pow(0.0005, dt);
+    cam.x += (p.x - cam.x) * k; cam.y += (p.y - cam.y) * k;
+    if (w && w.snap) { cam.x = p.x; cam.y = p.y; }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = C.ink; ctx.fillRect(0, 0, W, H);
+    const v = g.view(13);
+    // 底圖
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(art, sx(0), sy(0), m.W * s, m.H * s);
+    drawFloorThings(v);
+    // 墨：看不見的地方蓋起來；走過的地方留一點點牆影
+    const md = mask.data;
+    for (let i = 0; i < m.W * m.H; i++) {
+      const b = Math.min(1, v.vis[i] * 1.3);
+      let a = 1 - b;
+      if (g.explored[i] && a > 0.9) a = 0.9;
+      md[i * 4] = 13; md[i * 4 + 1] = 12; md[i * 4 + 2] = 11; md[i * 4 + 3] = Math.round(a * 255);
+      const L = v.light[i] * (v.paper[i] ? 0.4 : 1) * (v.vis[i] > 0 ? 1 : 0);
+      const wd = warm.data; wd[i * 4] = 255; wd[i * 4 + 1] = 150; wd[i * 4 + 2] = 60; wd[i * 4 + 3] = Math.round(Math.min(1, L) * 60);
+    }
+    mctx.putImageData(mask, 0, 0); wctx.putImageData(warm, 0, 0);
+    ctx.drawImage(mctx.canvas, sx(0), sy(0), m.W * s, m.H * s);
+    ctx.globalCompositeOperation = 'soft-light';
+    ctx.drawImage(wctx.canvas, sx(0), sy(0), m.W * s, m.H * s);
+    ctx.globalCompositeOperation = 'source-over';
+    drawLights(v);
+    drawPos(v);
+    drawPlayer();
+    drawShots();
+    drawFx(dt);
+    drawFloats(dt);
+    drawScreenFx(dt);
+  }
+
+  function visAt(v, x, y) { const i = Math.floor(y) * g.m.W + Math.floor(x); return v.vis[i] || 0; }
+
+  // 地上的東西：先畫，讓墨蓋過去
+  function drawFloorThings(v) {
+    const p = g.p;
+    for (const a of g.altars) {
+      ctx.fillStyle = '#3b2a1e'; ctx.fillRect(sx(a.x - 0.42), sy(a.y - 0.3), 0.84 * cam.s, 0.6 * cam.s);
+      if (!a.taken) {
+        ctx.fillStyle = C.red; ctx.fillRect(sx(a.x - 0.24), sy(a.y - 0.24), 0.48 * cam.s, 0.48 * cam.s);
+        glyph(a.glyph, a.x, a.y + 0.02, 0.36, '#f6ecd8');
+      }
+    }
+    for (const k of g.pickups) if (!k.taken) {
+      ctx.save(); ctx.translate(sx(k.x), sy(k.y)); ctx.rotate(-0.25);
+      ctx.fillStyle = '#e8c860'; ctx.fillRect(-0.13 * cam.s, -0.32 * cam.s, 0.26 * cam.s, 0.64 * cam.s);
+      ctx.restore(); glyph('火', k.x, k.y, 0.24, C.red, { rot: -0.25 });
+    }
+    // 大門
+    for (const e of g.m.exits) {
+      ctx.fillStyle = g.exitOpen ? 'rgba(235,224,198,.0)' : '#4a2618';
+      if (!g.exitOpen) ctx.fillRect(sx(e.x), sy(e.y), cam.s, cam.s * 0.9);
+    }
+    const ex = g.m.exits;
+    if (ex.length) { const cx = (ex[0].x + ex[ex.length - 1].x + 1) / 2, cy = ex[0].y + 0.45; glyph('門', cx, cy, 0.8, g.exitOpen ? '#7a5a2a' : '#e8d9b8', { a: g.exitOpen ? 0.55 : 0.9 }); if (g.exitReady && !g.exitOpen) glyph('閂', cx, cy - 0.85, 0.36, '#e8c860', { a: 0.6 + 0.4 * Math.abs(Math.sin(t * 3)), stroke: 3, strokeColor: 'rgba(40,20,10,.8)' }); }
+    // 封戶：紙條橫過廊口
+    for (const [, s] of g.sealed) {
+      const blink = s.t < 2 ? 0.45 + 0.55 * Math.abs(Math.sin(t * 9)) : 1;
+      const vert = g.m.at(s.x, s.y - 1) === T.WALL || g.m.at(s.x, s.y - 1) === T.SCREEN;
+      ctx.save(); ctx.globalAlpha = blink; ctx.translate(sx(s.x + 0.5), sy(s.y + 0.5)); if (vert) ctx.rotate(Math.PI / 2);
+      ctx.fillStyle = '#f0deb0'; ctx.fillRect(-0.18 * cam.s, -0.5 * cam.s, 0.36 * cam.s, cam.s);
+      ctx.strokeStyle = C.red; ctx.lineWidth = 2; ctx.strokeRect(-0.18 * cam.s, -0.5 * cam.s, 0.36 * cam.s, cam.s);
+      ctx.restore();
+      glyph('封', s.x + 0.5, s.y + 0.5, 0.3, C.red, { a: blink });
+    }
+  }
+
+  // 光源本身：火苗看得見就畫（隔著紙屏只看到一團暈）
+  function drawLights(v) {
+    for (const c of g.m.candles) {
+      const b = visAt(v, c.x, c.y), line = g.sightLine(g.p.x, g.p.y, c.x, c.y);
+      if (line === 'blocked' || hyp(c.x - g.p.x, c.y - g.p.y) > 14) continue;
+      const fl = 0.85 + 0.15 * Math.sin(t * 11 + c.x * 3) * Math.sin(t * 7 + c.y);
+      glow(c.x, c.y - 0.1, line === 'paper' ? 0.9 : 0.6, 'rgba(255,170,70,A)', line === 'paper' ? 0.25 : 0.55 * fl);
+      if (line === 'clear') {
+        ctx.fillStyle = '#efe6d2'; ctx.fillRect(sx(c.x - 0.06), sy(c.y - 0.05), 0.12 * cam.s, 0.32 * cam.s);
+        ctx.fillStyle = `rgba(255,${190 + 30 * fl | 0},90,.95)`; ctx.beginPath(); ctx.ellipse(sx(c.x), sy(c.y - 0.16), 0.07 * cam.s, 0.13 * cam.s * fl, 0, 0, Math.PI * 2); ctx.fill();
+      }
+      void b;
+    }
+    for (const l of g.lures) {
+      const line = g.sightLine(g.p.x, g.p.y, l.x, l.y);
+      if (line === 'blocked') continue;
+      const fade = Math.min(1, l.t / 2), fl = 0.85 + 0.15 * Math.sin(t * 13 + l.id);
+      glow(l.x, l.y, 1.1, 'rgba(255,150,60,A)', (line === 'paper' ? 0.25 : 0.6) * fade);
+      if (line === 'clear') glyph('火', l.x, l.y - 0.05 * Math.sin(t * 5), 0.55, '#c8461f', { a: fade * fl, glow: 'rgba(255,150,60,.9)', blur: 16 });
+    }
+    // 黑暗中，印還有一點紅光（眼睛習慣後看得到）
+    if (!g.p.lampOn && g.p.adapt > 0.3) for (const a of g.altars) if (!a.taken && hyp(a.x - g.p.x, a.y - g.p.y) <= g.p.adapt * R.LAMP.adaptR + 1 && g.sightLine(g.p.x, g.p.y, a.x, a.y) === 'clear') glow(a.x, a.y, 0.5, 'rgba(200,60,40,A)', 0.35 * g.p.adapt);
+  }
+
+  // 魄：照見是灰墨；黑暗裡是微光；隔紙屏是剪影
+  function drawPos(v) {
+    const P = R.PO;
+    for (const e of g.pos) {
+      if (e.state === 'gone') {
+        if (e.formSpot && e.goneT <= P.formT && g.spotVisible(e.formSpot)) {
+          const f = 1 - Math.max(0, e.goneT) / P.formT, s = e.formSpot;
+          for (let k = 0; k < 14; k++) { const a = k * 2.4 + t * 2, r = (1 - f) * 1.4 + 0.15; ctx.fillStyle = `rgba(40,44,48,${0.25 + 0.5 * f})`; ctx.beginPath(); ctx.arc(sx(s.x + Math.cos(a) * r), sy(s.y + Math.sin(a) * r), 0.05 * cam.s, 0, Math.PI * 2); ctx.fill(); }
+          glyph('魄', s.x, s.y, 0.8, C.po, { a: 0.15 + 0.35 * f });
+          glyph('凝', s.x, s.y - 0.9, 0.4, C.red, { a: 0.55 + 0.45 * f, stroke: 3, strokeColor: 'rgba(236,226,200,.8)' });
+        }
+        continue;
+      }
+      const vis = e.vis;
+      if (!vis) continue;
+      const hpF = Math.max(0.25, e.hp / P.hp);
+      let ox = 0, oy = 0;
+      if (!RM && e.state === 'stagger') { ox = (Math.random() - 0.5) * 0.08; oy = (Math.random() - 0.5) * 0.08; }
+      if (!RM && e.state === 'windup') { ox = (Math.random() - 0.5) * 0.05; }
+      const wob = RM ? 1 : 1 + 0.05 * Math.sin(t * 3 + e.id), x = e.x + ox, y = e.y + oy;
+      const dorm = e.state === 'dormant';
+      if (vis.mode === 'silhouette') {   // 剪影：影子落在視線穿過的那片紙屏上，像皮影戲
+        let hit = null;
+        MAP.walk(g.p.x, g.p.y, x, y, (tx, ty) => { if (g.m.at(tx, ty) === T.SCREEN) { hit = [tx + 0.5, ty + 0.5]; return true; } return false; });
+        if (hit) {
+          const dx = x - g.p.x, dy = y - g.p.y, L2 = dx * dx + dy * dy || 1, u = ((hit[0] - g.p.x) * dx + (hit[1] - g.p.y) * dy) / L2;
+          glyph('魄', g.p.x + dx * u, g.p.y + dy * u, 1.05, 'rgba(22,18,14,1)', { a: Math.min(0.85, 0.45 + 0.5 * vis.a), filter: 'blur(1.2px)', scale: wob });
+        }
+        continue;
+      }
+      if (vis.mode === 'dark') {
+        glyph('魄', x, y, dorm ? 0.7 : 0.9, C.poDark, { a: Math.min(1, vis.a * 1.4) * (0.5 + 0.5 * hpF), glow: 'rgba(170,240,225,.9)', blur: 14, scale: wob, rot: dorm ? -0.4 : 0 });
+      } else {
+        glow(x, y, 0.75, 'rgba(225,240,245,A)', 0.35 * vis.a);
+        glyph('魄', x, y, dorm ? 0.7 : 0.9, C.po, { a: vis.a * (0.45 + 0.55 * hpF), scale: wob, rot: dorm ? -0.4 : 0, stroke: 3, strokeColor: 'rgba(235,240,240,.5)' });
+      }
+      if (dorm) glyph('眠', x + 0.45, y - 0.55, 0.26, '#6e7378', { a: 0.6 * vis.a });
+      if (e.burnT > 0) for (let k = 0; k < 3; k++) glyph('火', x + Math.sin(t * 6 + k * 2) * 0.35, y + 0.35 - ((t * 1.5 + k / 3) % 1) * 0.8, 0.22, '#d2552a', { a: 0.8 });
+      // 蓄撲：「噬」字與撲擊範圍圈（看得見才有；黑暗裡只有聲音）
+      if (e.state === 'windup' && e.windVisible) {
+        const f = 1 - e.windT / P.windT;
+        ctx.save(); ctx.setLineDash([6, 5]); ctx.strokeStyle = `rgba(180,57,42,${0.5 + 0.4 * f})`; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.arc(sx(e.x), sy(e.y), P.biteR * cam.s, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+        ctx.fillStyle = `rgba(180,57,42,${0.08 + 0.12 * f})`; ctx.beginPath(); ctx.arc(sx(e.x), sy(e.y), P.biteR * cam.s, -Math.PI / 2, -Math.PI / 2 + f * Math.PI * 2); ctx.lineTo(sx(e.x), sy(e.y)); ctx.fill();
+        glyph('噬', e.x, e.y - 0.95, 0.55 + 0.15 * f, C.red, { stroke: 4, strokeColor: 'rgba(240,230,210,.85)' });
+      }
+      if (e.state === 'recover' && vis) glyph('…', e.x, e.y - 0.8, 0.4, '#6b5a48', { a: 0.7 });
+    }
+  }
+
+  function drawPlayer() {
+    const p = g.p, x = p.x, y = p.y;
+    // 讀咒與取印的進度圈
+    const prog = p.reading ? p.reading.t / p.reading.dur : p.taking ? p.taking.t / p.taking.dur : 0;
+    if (prog > 0) {
+      ctx.strokeStyle = p.reading ? 'rgba(150,40,30,.85)' : 'rgba(180,57,42,.9)'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(sx(x), sy(y), 0.55 * cam.s, -Math.PI / 2, -Math.PI / 2 + prog * Math.PI * 2); ctx.stroke();
+      glyph(p.reading ? (p.reading.spell === 'seal' ? '封戶' : '借火') : p.taking.gate ? '推門' : '取印', x, y - 0.85, 0.3, '#7a2a1e', { stroke: 3 });
+    }
+    ctx.fillStyle = C.paper; ctx.strokeStyle = '#1c1a17'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(sx(x), sy(y), p.r * cam.s, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    glyph('人', x, y + 0.02, 0.42, '#1c1a17');
+    // 對準方向：一小撇
+    const ax = x + Math.cos(p.aim) * 0.5, ay = y + Math.sin(p.aim) * 0.5;
+    ctx.strokeStyle = 'rgba(180,57,42,.9)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(sx(x + Math.cos(p.aim) * 0.36), sy(y + Math.sin(p.aim) * 0.36)); ctx.lineTo(sx(ax), sy(ay)); ctx.stroke();
+    // 手燈：掛在身側
+    const lx = x + Math.cos(p.aim + 1.9) * 0.36, ly = y + Math.sin(p.aim + 1.9) * 0.36;
+    if (p.lampOn) { glow(lx, ly, 0.5, 'rgba(255,190,90,A)', 0.8); ctx.fillStyle = '#ffdc96'; }
+    else ctx.fillStyle = '#2a2420';
+    ctx.strokeStyle = '#5a3a1e'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(sx(lx), sy(ly), 0.11 * cam.s, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  }
+
+  function drawShots() {
+    for (const s of g.shots) {
+      glow(s.x, s.y, 0.5, 'rgba(255,140,50,A)', 0.7);
+      glyph('火', s.x, s.y, 0.32, '#b8361c');
+    }
+  }
+
+  function drawFx(dt) {
+    for (const f of fx) {
+      f.t += dt;
+      const q = f.t / f.life;
+      if (f.k === 'swing') {
+        ctx.save(); ctx.strokeStyle = `rgba(30,24,18,${0.85 * (1 - q)})`; ctx.lineCap = 'round'; ctx.lineWidth = 0.16 * cam.s * (1 - q * 0.6);
+        const a0 = f.dir - 1.0 + q * 0.5, a1 = f.dir + 1.0;
+        ctx.beginPath(); ctx.arc(sx(f.x), sy(f.y), R.SWORD.reach * 0.85 * cam.s, a0, a1); ctx.stroke(); ctx.restore();
+      } else if (f.k === 'splash') {
+        for (let k = 0; k < 7; k++) { const a = k * 0.9, r = 0.2 + q * 0.6; ctx.fillStyle = `rgba(${f.c},${0.7 * (1 - q)})`; ctx.beginPath(); ctx.arc(sx(f.x + Math.cos(a) * r), sy(f.y + Math.sin(a) * r), (0.09 - 0.05 * q) * cam.s, 0, Math.PI * 2); ctx.fill(); }
+      } else if (f.k === 'ring') {
+        ctx.strokeStyle = `rgba(217,164,65,${0.9 * (1 - q)})`; ctx.lineWidth = 3;
+        for (const k of [1, 0.7]) { ctx.beginPath(); ctx.arc(sx(f.x), sy(f.y), f.r * Math.min(1, q * 1.3) * k * cam.s, 0, Math.PI * 2); ctx.stroke(); }
+      } else if (f.k === 'hear') {   // 鈴聲傳得很遠：一道淡淡的圈
+        ctx.strokeStyle = `rgba(217,164,65,${0.28 * (1 - q)})`; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(sx(f.x), sy(f.y), f.r * q * cam.s, 0, Math.PI * 2); ctx.stroke();
+      } else if (f.k === 'boom') {
+        glow(f.x, f.y, R.FIRE.boom * (0.6 + q * 0.6), 'rgba(230,100,40,A)', 0.75 * (1 - q));
+        for (let k = 0; k < 10; k++) { const a = k * 0.63, r = q * R.FIRE.boom; ctx.fillStyle = `rgba(160,40,20,${0.8 * (1 - q)})`; ctx.beginPath(); ctx.arc(sx(f.x + Math.cos(a) * r), sy(f.y + Math.sin(a) * r), 0.07 * cam.s, 0, Math.PI * 2); ctx.fill(); }
+        if (q < 0.5) glyph('焚', f.x, f.y, 0.6, '#a8301a', { a: 1 - q * 2 });
+      } else if (f.k === 'disperse') {
+        const r2 = rnd(f.seed | 0);
+        for (let k = 0; k < 18; k++) { const a = r2() * 6.28, d = q * (0.6 + r2() * 1.2); ctx.fillStyle = `rgba(45,48,52,${0.6 * (1 - q)})`; ctx.beginPath(); ctx.arc(sx(f.x + Math.cos(a) * d), sy(f.y + Math.sin(a) * d), 0.05 * cam.s, 0, Math.PI * 2); ctx.fill(); }
+      } else if (f.k === 'stamp') {
+        const sc = 1.6 - Math.min(1, q * 3) * 0.6;
+        ctx.save(); ctx.globalAlpha = 1 - Math.max(0, q - 0.6) / 0.4; ctx.translate(sx(f.x), sy(f.y - 1)); ctx.scale(sc, sc);
+        ctx.fillStyle = C.red; ctx.fillRect(-0.3 * cam.s, -0.3 * cam.s, 0.6 * cam.s, 0.6 * cam.s); ctx.restore();
+        glyph(f.glyph, f.x, f.y - 1, 0.42 * sc, '#f6ecd8', { a: 1 - Math.max(0, q - 0.6) / 0.4 });
+      } else if (f.k === 'sealIn' || f.k === 'ignite') {
+        glow(f.x, f.y, 0.9, f.k === 'ignite' ? 'rgba(255,150,60,A)' : 'rgba(200,60,40,A)', 0.6 * (1 - q));
+      }
+    }
+    fx = fx.filter((f) => f.t < f.life);
+  }
+
+  function drawFloats(dt) {
+    for (const f of floats) {
+      f.t += dt;
+      const q = f.t / f.life;
+      glyph(f.text, f.x, f.y - q * 0.5, f.size, f.color, { a: q < 0.7 ? 1 : 1 - (q - 0.7) / 0.3, stroke: 3, strokeColor: 'rgba(236,226,200,.8)' });
+    }
+    floats = floats.filter((f) => f.t < f.life);
+  }
+
+  // 寒意：畫面邊緣結霜（魄在身邊、寒意高時都會出現）；被咬時一閃
+  function drawScreenFx() {
+    const W = cv.width, H = cv.height, p = g.p;
+    let near = 0;
+    for (const e of g.pos) {
+      if (e.state === 'gone' || e.state === 'dormant') continue;
+      const d = hyp(e.x - p.x, e.y - p.y);
+      if (d < 3 && g.hitClear(e.x, e.y, p.x, p.y)) near = Math.max(near, 1 - d / 3);
+    }
+    const frost = Math.min(1, near * 0.75 + (p.chill / 100) * 0.35);
+    if (frost > 0.02) {
+      const gr = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * (0.55 - 0.25 * frost), W / 2, H / 2, Math.max(W, H) * 0.72);
+      gr.addColorStop(0, 'rgba(210,235,250,0)'); gr.addColorStop(1, `rgba(215,238,252,${0.75 * frost})`);
+      ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+    }
+    if (!p.lampOn && p.adapt > 0) { ctx.fillStyle = `rgba(30,50,70,${0.12 * p.adapt})`; ctx.fillRect(0, 0, W, H); }
+    for (const f of fx) if (f.k === 'bite') { const q = f.t / f.life; ctx.fillStyle = `rgba(160,30,20,${0.28 * (1 - q)})`; ctx.fillRect(0, 0, W, H); }
+    void frost;
+  }
+
+  // ---------- 小地圖：只有看清楚過的牆、屏、門與印；沒有魄 ----------
+  function minimap(mc) {
+    const m = g.m, x = mc.getContext('2d'), k = mc.width / m.W;
+    x.clearRect(0, 0, mc.width, mc.height);
+    for (let ty = 0; ty < m.H; ty++) for (let tx = 0; tx < m.W; tx++) {
+      const i = ty * m.W + tx;
+      if (!g.explored[i]) continue;
+      const t2 = m.t[i];
+      x.fillStyle = t2 === T.WALL ? '#2a241e' : t2 === T.SCREEN ? '#a89c84' : t2 === T.LOW ? '#5a5248' : t2 === T.EXIT ? (g.exitOpen ? '#e8c860' : '#6a3420') : '#e6dcc2';
+      x.fillRect(tx * k, ty * k, k + 0.3, k + 0.3);
+    }
+    for (const a of g.altars) if (g.explored[Math.floor(a.y) * m.W + Math.floor(a.x)]) { x.fillStyle = a.taken ? '#8a7f6c' : C.red; x.fillRect(a.x * k - 2.5, a.y * k - 2.5, 5, 5); }
+    for (const [, s] of g.sealed) { x.fillStyle = C.red; x.fillRect(s.x * k, s.y * k, k, k); }
+    x.fillStyle = '#b4392a'; x.strokeStyle = '#fff'; x.lineWidth = 1;
+    x.beginPath(); x.arc(g.p.x * k, g.p.y * k, 2.6, 0, Math.PI * 2); x.fill(); x.stroke();
+  }
+
+  function init(canvas) {
+    cv = canvas; ctx = cv.getContext('2d');
+  }
+  function setGame(game) {
+    g = game; fx = []; floats = [];
+    art = art || buildArt(g.m);
+    const mc = document.createElement('canvas'); mc.width = g.m.W; mc.height = g.m.H; mctx = mc.getContext('2d'); mask = mctx.createImageData(g.m.W, g.m.H);
+    const wc = document.createElement('canvas'); wc.width = g.m.W; wc.height = g.m.H; wctx = wc.getContext('2d'); warm = wctx.createImageData(g.m.W, g.m.H);
+    cam.x = g.p.x; cam.y = g.p.y;
+  }
+  function toWorld(px, py) { return { x: (px - cv.width / 2) / cam.s + cam.x, y: (py - cv.height / 2) / cam.s + cam.y }; }
+  root.RENDER = { init, setGame, frame, event, minimap, toWorld, FONT, cam, rebuild() { art = null; if (g) art = buildArt(g.m); } };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+</script>
+<script>
+// 燈下無明 —— 聲音：全部用 WebAudio 現場合成，沒有音檔。
+// 黑暗裡的蓄撲只有聲音提示，所以這裡的「嘶」聲是規則的一部分，不只是裝飾。
+(function (root) {
+  let ac = null, master = null, muted = false, noiseBuf = null;
+  try { muted = localStorage.getItem('xieyi.deng.mute') === '1'; } catch (e) { /* 沒有就算了 */ }
+
+  function ensure() {
+    if (ac) { if (ac.state === 'suspended') ac.resume(); return true; }
+    const AC = root.AudioContext || root.webkitAudioContext;
+    if (!AC) return false;
+    ac = new AC();
+    master = ac.createGain(); master.gain.value = muted ? 0 : 0.7; master.connect(ac.destination);
+    noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
+    const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    return true;
+  }
+  function out(pan) {
+    if (pan == null || !ac.createStereoPanner) return master;
+    const p = ac.createStereoPanner(); p.pan.value = Math.max(-1, Math.min(1, pan)); p.connect(master); return p;
+  }
+  function tone(f, dur, vol, type, dest, f2) {
+    const o = ac.createOscillator(), gn = ac.createGain(), t = ac.currentTime;
+    o.type = type || 'sine'; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    gn.gain.setValueAtTime(vol, t); gn.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(gn); gn.connect(dest || master); o.start(t); o.stop(t + dur + 0.05);
+  }
+  function noise(dur, vol, filt, f0, f1, dest, q) {
+    const s = ac.createBufferSource(), bf = ac.createBiquadFilter(), gn = ac.createGain(), t = ac.currentTime;
+    s.buffer = noiseBuf; bf.type = filt || 'bandpass'; bf.Q.value = q || 1.2;
+    bf.frequency.setValueAtTime(f0, t); if (f1) bf.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    gn.gain.setValueAtTime(0.0001, t); gn.gain.exponentialRampToValueAtTime(vol, t + Math.min(0.03, dur / 3)); gn.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(bf); bf.connect(gn); gn.connect(dest || master); s.start(t); s.stop(t + dur + 0.05);
+  }
+  const S = {
+    bell() { const d = out(); tone(880, 1.8, 0.22, 'sine', d); tone(1318, 1.4, 0.12, 'sine', d); tone(2210, 0.9, 0.06, 'sine', d); tone(587, 2.2, 0.08, 'triangle', d); },
+    // 蓄撲：由低升高的嘶聲，0.45 秒；音量看距離、左右看方位
+    hiss(dist, dx) { const v = Math.max(0.05, 0.5 * (1 - dist / 9)); noise(0.45, v, 'bandpass', 380, 1900, out(dx / 4), 3); tone(90, 0.45, v * 0.35, 'sawtooth', out(dx / 4), 140); },
+    bite() { noise(0.25, 0.5, 'lowpass', 900, 200); tone(70, 0.3, 0.4, 'sine', null, 40); },
+    whiff() { noise(0.18, 0.12, 'bandpass', 1200, 400); },
+    swish() { noise(0.16, 0.22, 'highpass', 2500, 900, null, 0.7); },
+    hit() { noise(0.12, 0.35, 'lowpass', 1400, 300); tone(160, 0.15, 0.2, 'triangle', null, 90); },
+    boom() { noise(0.6, 0.55, 'lowpass', 1600, 120); tone(110, 0.5, 0.35, 'sine', null, 45); },
+    throwIt() { noise(0.2, 0.15, 'bandpass', 600, 2400, null, 2); },
+    page() { noise(0.07, 0.18, 'highpass', 3000); setTimeout(() => ac && noise(0.06, 0.12, 'highpass', 3500), 80); },
+    seal() { tone(320, 0.12, 0.35, 'square'); setTimeout(() => ac && tone(260, 0.16, 0.3, 'square'), 110); },
+    fail() { tone(160, 0.25, 0.15, 'triangle', null, 120); },
+    disperse() { noise(1.0, 0.25, 'bandpass', 900, 3000, null, 0.8); },
+    wake() { tone(55, 1.2, 0.25, 'sawtooth', null, 48); noise(1.0, 0.1, 'lowpass', 300, 120); },
+    lamp(on) { noise(0.08, 0.12, 'bandpass', on ? 1800 : 600); },
+    door() { tone(70, 1.2, 0.3, 'triangle', null, 50); noise(0.8, 0.2, 'lowpass', 500, 100); },
+    win() { [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => ac && tone(f, 0.9, 0.12, 'sine'), i * 160)); },
+    lose() { tone(196, 1.6, 0.2, 'sine', null, 98); noise(1.5, 0.15, 'lowpass', 600, 80); }
+  };
+  root.SFX = {
+    unlock: ensure,
+    play(name, ...a) { if (!ac || muted || !S[name]) return; try { S[name](...a); } catch (e) { /* 聲音出錯不影響遊戲 */ } },
+    get muted() { return muted; },
+    toggle() { muted = !muted; try { localStorage.setItem('xieyi.deng.mute', muted ? '1' : '0'); } catch (e) { /* 沒有就算了 */ } if (master) master.gain.value = muted ? 0 : 0.7; return muted; }
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+</script>
+<script>
+// 燈下無明 —— 介面：按鍵、滑鼠、HUD、提示、旁側文字、暫停與結束畫面、主迴圈。
+// 失去焦點（切分頁、切視窗）就自動暫停，並放開所有按著的鍵，免得回來時人自己一直走。
+(function () {
+  const R = window.R, E = window.ENGINE, RD = window.RENDER, SFX = window.SFX;
+  const $ = (id) => document.getElementById(id);
+  const cv = $('world');
+  RD.init(cv);
+
+  let g = null, paused = false, running = false, last = 0, snap = false, frameN = 0;
+  let press = {}, holdTake = false;
+  const keys = new Set();
+  const mouse = { x: 0, y: 0, t: -1e9, in: false };
+  let moveDir = null;
+
+  // 教學提示：每一局第一次遇到時出現
+  const HINT = {
+    start: '先往裡走。名印在西北的書房，息印在東北的祠堂。取到兩印，再從這道大門出去。',
+    dark: '掩燈了。站著別動一會兒，眼睛會慢慢習慣黑暗，看得比點燈時更遠（左上的「目」）。',
+    adapted: '眼睛習慣了。黑暗裡微微發亮的，就是魄。這時它要很近才察覺得到你。',
+    seePo: '那是魄。你點著燈，它從遠處就看得見你；你掩了燈，它要靠得很近才察覺。',
+    windup: '「噬」：魄要撲了。退出紅圈，讓它撲空；它撲空後會愣一下，那時再回身揮劍。',
+    whiff: '劍揮空了。看飄出的字：「偏了」是方向不對，「差一步」是不夠近，「隔著」是中間有牆或屏。',
+    bite: '被咬了。護心衣先擋下寒傷（「護」少一格）。護持用完，咬中就直接加寒意。',
+    biteBare: '護持沒了，咬中就直接加寒意。寒意滿了就失魂。',
+    bell: '鈴聲把身邊的魄震開。可是紙宅擋不住聲音：附近的魄都會往這裡來，睡著的也會醒。',
+    altar: '按住 E 取印。取印時不能動，被咬就要重來。',
+    seal1: '取到一印，寒意退了一些，也補了護持、火符與書墨。宅裡有東西醒了。',
+    seal2: '兩印到手。回大門，按住 E 推開門閂（要一秒半）。魄也往玄關去了。',
+    gate: '按住 E 推開門閂。推的時候不能動，被咬就要重來。魄在附近時，可以先借火把它引開，或封住它過來的廊口。',
+    chill: '寒意很高。到燭火或借火旁邊可以取暖，但站在火光裡，魄看得見你。'
+  };
+  const SPELL = { borrow: '借火', seal: '封戶' };
+
+  // ---------- 畫面大小 ----------
+  function resize() {
+    const d = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = Math.round(innerWidth * d); cv.height = Math.round(innerHeight * d);
+    cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px';
+  }
+  addEventListener('resize', resize); resize();
+
+  // ---------- 旁側文字與提示 ----------
+  const recent = new Map();
+  function log(text, cls) {
+    const now = performance.now();
+    if (recent.has(text) && now - recent.get(text) < 1500) return;
+    recent.set(text, now);
+    const box = $('log'), d = document.createElement('div');
+    d.textContent = text; if (cls) d.className = cls;
+    box.appendChild(d);
+    while (box.children.length > 5) box.removeChild(box.firstChild);
+    setTimeout(() => d.remove(), 5200);
+  }
+  let hintTimer = 0;
+  function showHint(key) {
+    const t = HINT[key]; if (!t) return;
+    const h = $('hint'); h.textContent = t; h.classList.remove('hidden');
+    clearTimeout(hintTimer); hintTimer = setTimeout(() => h.classList.add('hidden'), 9000);
+  }
+  $('hint').addEventListener('click', () => $('hint').classList.add('hidden'));
+
+  // ---------- 開局、暫停、結束 ----------
+  function seedFromUrl() { const m = /[?&]seed=(\d+)/.exec(location.search); return m ? +m[1] : (Date.now() % 100000) | 0; }
+  function newGame(seed) {
+    g = E.create({ seed: seed == null ? seedFromUrl() : seed });
+    window.DENG.g = g;
+    RD.setGame(g);
+    $('log').innerHTML = ''; $('hint').classList.add('hidden');
+    ['start', 'pause', 'end'].forEach((id) => $(id).classList.add('hidden'));
+    $('hud').classList.remove('hidden');
+    paused = false; running = true; snap = true; keys.clear(); holdTake = false; press = {};
+    handle(g.drain());
+  }
+  function setPause(on, why) {
+    if (!running) return;
+    paused = on;
+    $('pause').classList.toggle('hidden', !on);
+    $('pause-why').textContent = why === 'blur' ? '視窗失去焦點，先停下來。冷卻、讀咒、取印都停在原處。' : '冷卻、讀咒、取印都停在原處。';
+    keys.clear(); holdTake = false; press = {};
+  }
+  function fmt(s) { const m = Math.floor(s / 60), r = Math.floor(s % 60); return m + ':' + String(r).padStart(2, '0'); }
+  function best() { try { return +localStorage.getItem('xieyi.deng.best') || 0; } catch (e) { return 0; } }
+  function showBest() { const b = best(); $('best').textContent = b ? ' · 最快出宅 ' + fmt(b) : ''; }
+  function endGame(win) {
+    running = false;
+    const s = g.stats;
+    let rec = '';
+    if (win) { const b = best(); if (!b || g.t < b) { try { localStorage.setItem('xieyi.deng.best', String(g.t)); } catch (e) { /* 沒有就算了 */ } rec = '（新紀錄）'; } }
+    $('end-seal').textContent = win ? '出' : '失';
+    $('end-seal').className = 'endseal' + (win ? '' : ' lose');
+    $('end-title').textContent = win ? '出宅' : '失魂';
+    $('end-text').textContent = win ? '天還沒亮，你帶著名印與息印出了大門。' : '寒意滿了。紙宅的夜，還沒過完。';
+    const rows = [['用時', fmt(g.t) + rec], ['兩印', (g.seals.name ? '名' : '　') + ' ' + (g.seals.breath ? '息' : '　')], ['最高寒意', Math.round(s.maxChill)], ['被咬', s.bites + ' 次（護持擋下 ' + s.armorLost + '）'], ['魄撲空', s.whiffs + ' 次'], ['打散魄', s.disperse + ' 次'], ['用了', `劍 ${s.swordHits + s.swordMiss}・鈴 ${s.bells}・火符 ${s.fires}・咒 ${s.reads}`]];
+    $('end-stats').innerHTML = rows.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('');
+    $('end').classList.remove('hidden');
+    SFX.play(win ? 'win' : 'lose');
+  }
+
+  // ---------- 事件 → 聲音、旁側文字、提示 ----------
+  function handle(evs) {
+    for (const e of evs) {
+      RD.event(e);
+      switch (e.type) {
+        case 'hint': showHint(e.key); break;
+        case 'windup': SFX.play('hiss', e.dist, e.dx); if (e.visible) log('魄在蓄撲，退出紅圈', 'warn'); break;
+        case 'bite': SFX.play('bite'); log(e.absorbed ? (e.chill ? `被咬：護持 −${e.absorbed}，寒意 +${e.chill}` : `被咬：護心衣擋下，護持 −${e.absorbed}`) : `被咬：寒意 +${e.chill}`, 'warn'); break;
+        case 'whiff': SFX.play('whiff'); if (e.visible) log('魄撲空了', 'good'); break;
+        case 'interrupt': log('打斷了魄的蓄撲', 'good'); break;
+        case 'swing': SFX.play('swish'); break;
+        case 'swordHit': SFX.play('hit'); break;
+        case 'bell': SFX.play('bell'); break;
+        case 'fireThrow': SFX.play('throwIt'); break;
+        case 'fireBoom': SFX.play('boom'); break;
+        case 'readStart': SFX.play('page'); log('讀咒：' + SPELL[e.spell]); break;
+        case 'readCancel': log({ bell: '讀咒中斷，書墨未耗', move: '合上書，書墨未耗', bite: '被咬，讀咒中斷，書墨未耗', near: '魄貼近，讀咒中斷，書墨未耗' }[e.why] || '讀咒中斷，書墨未耗', e.why === 'move' ? '' : 'warn'); break;
+        case 'readBlocked': SFX.play('fail'); log('魄太近，讀不了咒。先搖鈴把它震開', 'warn'); break;
+        case 'sealNoDoor': SFX.play('fail'); log({ far: '要站在廊口旁邊才能封戶', standing: '站在廊口上封不了，先退開一步', already: '這個廊口已經封著', moved: '廊口不見了' }[e.why] || '這裡封不了'); break;
+        case 'noInk': SFX.play('fail'); log('書墨用完了。取印時會補一點'); break;
+        case 'noTalisman': SFX.play('fail'); log('火符用完了'); break;
+        case 'cooldown': if (e.what === 'bell') log(`銅鈴還在響，${Math.ceil(e.left)} 秒後再搖`); break;
+        case 'busy': log(e.what === 'sword' || e.what === 'fire' ? (g.p.reading ? '讀咒中只能搖鈴（K）' : '取印中，先放開 E') : '手上正忙'); break;
+        case 'sealDone': log('封戶：這個廊口十秒內誰也過不去', 'good'); break;
+        case 'sealEnd': log('封戶散了'); break;
+        case 'borrowDone': log('借火：火會燒十五秒，魄會被火吸引過去', 'good'); break;
+        case 'takeStart': log(e.key === 'gate' ? '推門閂……' : '取印中……'); break;
+        case 'takeCancel': if (e.why === 'bite') log('被咬，要重來', 'warn'); break;
+        case 'seal': SFX.play('seal'); log('取得' + e.glyph + '印', 'good'); break;
+        case 'wake': SFX.play('wake'); log(e.why === 'bell' ? '鈴聲吵醒了什麼' : e.why === 'touch' ? '你撞醒了一隻魄' : '宅裡有東西醒了', 'warn'); break;
+        case 'disperse': SFX.play('disperse'); log('魄散了，過一陣子會在別處凝回來', 'good'); break;
+        case 'reformStart': if (g.spotVisible(e)) log('那裡有東西在凝形', 'warn'); break;
+        case 'exitReady': log('兩印到手：回大門推開門閂', 'good'); break;
+        case 'gateOpen': SFX.play('door'); log('門閂推開了，快出去', 'good'); break;
+        case 'pickup': log('撿到一張火符', 'good'); break;
+        case 'lamp': SFX.play('lamp', e.on); break;
+        case 'win': endGame(true); break;
+        case 'lose': endGame(false); break;
+      }
+    }
+  }
+
+  // ---------- 輸入 ----------
+  const MOVE = { KeyW: [0, -1], ArrowUp: [0, -1], KeyS: [0, 1], ArrowDown: [0, 1], KeyA: [-1, 0], ArrowLeft: [-1, 0], KeyD: [1, 0], ArrowRight: [1, 0] };
+  const ACT = { KeyJ: 'sword', KeyK: 'bell', KeyL: 'fire', KeyF: 'lamp', Space: 'lamp', Digit1: 'read1', Digit2: 'read2', Numpad1: 'read1', Numpad2: 'read2' };
+  addEventListener('keydown', (ev) => {
+    if (ev.code === 'Space' || ev.code.startsWith('Arrow')) ev.preventDefault();
+    if (!$('start').classList.contains('hidden')) { if (ev.code === 'Enter' || ev.code === 'NumpadEnter') { ev.preventDefault(); begin(); } return; }
+    if (!$('end').classList.contains('hidden')) { if (ev.code === 'Enter' || ev.code === 'NumpadEnter') { ev.preventDefault(); newGame(); } return; }
+    if (ev.code === 'Escape') { setPause(!paused); return; }
+    if (paused || !running) return;
+    if (MOVE[ev.code]) keys.add(ev.code);
+    if (ev.repeat) return;
+    if (ACT[ev.code]) press[ACT[ev.code]] = true;
+    if (ev.code === 'KeyE') holdTake = true;
+  });
+  addEventListener('keyup', (ev) => { keys.delete(ev.code); if (ev.code === 'KeyE') holdTake = false; });
+  addEventListener('blur', () => { keys.clear(); holdTake = false; if (running && !paused) setPause(true, 'blur'); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) { keys.clear(); holdTake = false; if (running && !paused) setPause(true, 'blur'); } });
+  addEventListener('mousemove', (ev) => { mouse.x = ev.clientX; mouse.y = ev.clientY; mouse.t = performance.now(); mouse.in = true; });
+  document.addEventListener('mouseleave', () => { mouse.in = false; });
+  cv.addEventListener('mousedown', (ev) => {
+    if (!running || paused) return;
+    mouse.x = ev.clientX; mouse.y = ev.clientY; mouse.t = performance.now(); mouse.in = true;
+    if (ev.button === 0) press.sword = true;
+    if (ev.button === 2) press.fire = true;
+  });
+  cv.addEventListener('contextmenu', (ev) => ev.preventDefault());
+  document.querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', (ev) => { ev.preventDefault(); if (running && !paused) press[b.dataset.act] = true; b.blur(); }));
+
+  function input() {
+    let mx = 0, my = 0;
+    for (const k of keys) { const v = MOVE[k]; if (v) { mx += v[0]; my += v[1]; } }
+    if (mx || my) moveDir = Math.atan2(my, mx);
+    const now = performance.now(), useMouse = mouse.in && now - mouse.t < 2500;
+    let aim = null, target = null;
+    if (useMouse) {
+      const d = Math.min(2, window.devicePixelRatio || 1), w = RD.toWorld(mouse.x * d, mouse.y * d);
+      aim = Math.atan2(w.y - g.p.y, w.x - g.p.x); target = w;
+    } else if (mx || my) aim = moveDir;
+    return { mx, my, aim, target, press, hold: { take: holdTake } };
+  }
+
+  // ---------- HUD ----------
+  function hud() {
+    const p = g.p;
+    const set = (id, v) => $(id).style.setProperty('--p', v);
+    set('chill-fill', p.chill / R.P.chillMax); $('chill-num').textContent = Math.round(p.chill) + '/100';
+    $('chill-fill').parentNode.parentNode.classList.toggle('high', p.chill >= 60);
+    set('armor-fill', p.armor / R.P.armorMax); $('armor-num').textContent = p.armor + '/' + R.P.armorMax;
+    set('eye-fill', p.lampOn ? 0 : p.adapt); $('eye-num').textContent = p.lampOn ? '點著燈' : Math.round(p.adapt * 100) + '%';
+    const ex = g.exposedNow, xe = $('expose');
+    xe.className = ex ? 'on' : 'off';
+    xe.innerHTML = ex ? '<b>顯</b>' + (p.lampOn ? '燈亮著，魄從遠處看得見你' : '你站在光裡，魄看得見你') : '<b>隱</b>魄要靠很近才察覺';
+    $('goal').innerHTML = `<span class="s${g.seals.name ? ' got' : ''}"><i>名</i>印</span><span class="s${g.seals.breath ? ' got' : ''}"><i>息</i>印</span><span class="door${g.exitOpen ? ' open' : ''}">大門${g.exitOpen ? '開了' : g.exitReady ? '可以推開' : '關著'}</span>`;
+    $('t-sword').style.setProperty('--cd', p.swordCD / R.SWORD.cd);
+    $('t-bell').style.setProperty('--cd', p.bellCD / R.BELL.cd);
+    $('fire-n').textContent = '×' + p.talismans;
+    $('t-fire').classList.toggle('off', p.talismans <= 0);
+    $('ink-n').textContent = '墨 ' + '●'.repeat(p.ink) + '○'.repeat(Math.max(0, R.P.inkMax - p.ink));
+    const door = g.findDoor();
+    $('pg-seal').classList.toggle('off', !door.ok || p.ink <= 0);
+    $('pg-borrow').classList.toggle('off', p.ink <= 0);
+    $('pg-borrow').classList.toggle('reading', !!(p.reading && p.reading.spell === 'borrow'));
+    $('pg-seal').classList.toggle('reading', !!(p.reading && p.reading.spell === 'seal'));
+    const reading = !!p.reading;
+    $('t-sword').classList.toggle('off', reading); $('t-fire').classList.toggle('off', reading || p.talismans <= 0);
+    $('t-bell').classList.toggle('busy', reading);
+    $('t-lamp').classList.toggle('covered', !p.lampOn); $('lamp-s').textContent = p.lampOn ? '點著' : '掩著';
+    if (frameN % 6 === 0) RD.minimap($('minimap'));
+  }
+
+  // ---------- 主迴圈 ----------
+  function loop(ts) {
+    const dt = last ? Math.min(0.25, (ts - last) / 1000) : 0;
+    last = ts; frameN++;
+    if (g) {
+      if (running && !paused) {
+        const n = g.advance(dt, input());
+        if (n > 0 || Object.keys(press).length) press = {};
+        handle(g.drain());
+      }
+      RD.frame(running && !paused ? dt : 0, { snap });
+      snap = false;
+      hud();
+    }
+    requestAnimationFrame(loop);
+  }
+
+  function begin() { SFX.unlock(); newGame(); }
+  $('btn-start').addEventListener('click', begin);
+  $('btn-again').addEventListener('click', () => { SFX.unlock(); newGame(); });
+  $('btn-resume').addEventListener('click', () => setPause(false));
+  $('btn-restart').addEventListener('click', () => newGame());
+  $('btn-pause').addEventListener('click', (ev) => { setPause(true); ev.currentTarget.blur(); });
+  const muteBtns = () => ['btn-mute', 'btn-mute2'].forEach((id) => { $(id).classList.toggle('off', SFX.muted); $(id).textContent = SFX.muted ? '音效關' : '音效'; });
+  ['btn-mute', 'btn-mute2'].forEach((id) => $(id).addEventListener('click', (ev) => { SFX.unlock(); SFX.toggle(); muteBtns(); ev.currentTarget.blur(); }));
+  muteBtns(); showBest();
+  if (window.matchMedia && matchMedia('(pointer: coarse)').matches && !matchMedia('(pointer: fine)').matches) $('touchnote').textContent = '這一版是試做，只做了鍵盤與滑鼠；手機上還不能玩。';
+
+  // 先在背景擺好宅子（開始畫面後面看得到一點點）
+  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, setPause, snap() { snap = true; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
+  g = E.create({ seed: seedFromUrl() }); window.DENG.g = g; RD.setGame(g); g.drain();
+  const fontReady = document.fonts && document.fonts.load ? document.fonts.load('32px "LXGW WenKai TC"', '燈下無明魄噬人火封') : Promise.resolve();
+  fontReady.catch(() => {}).then(() => { RD.rebuild(); window.DENG.ready = true; });
+  requestAnimationFrame(loop);
+})();
+
+</script>

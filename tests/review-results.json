@@ -1,0 +1,9279 @@
+{
+ "duel": {
+  "table": [
+   {
+    "armor": 54,
+    "name": "sword-stand",
+    "won": 16,
+    "lost": 0,
+    "held": 0,
+    "bites": 2,
+    "armorLost": 36,
+    "chill": 16,
+    "time": 2.6
+   },
+   {
+    "armor": 54,
+    "name": "fire-stand",
+    "won": 16,
+    "lost": 0,
+    "held": 0,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 2.7,
+    "time": 0.9
+   },
+   {
+    "armor": 54,
+    "name": "mixed-stand",
+    "won": 16,
+    "lost": 0,
+    "held": 0,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0.2,
+    "time": 1.6
+   },
+   {
+    "armor": 54,
+    "name": "bell-only",
+    "won": 0,
+    "lost": 16,
+    "held": 0,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "time": 10.6
+   },
+   {
+    "armor": 54,
+    "name": "sword-hitrun",
+    "won": 16,
+    "lost": 0,
+    "held": 0,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 20.8,
+    "time": 3.3
+   },
+   {
+    "armor": 54,
+    "name": "mixed-hitrun",
+    "won": 16,
+    "lost": 0,
+    "held": 0,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 13.9,
+    "time": 2.3
+   },
+   {
+    "armor": 54,
+    "name": "dodge-only",
+    "won": 0,
+    "lost": 16,
+    "held": 0,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "time": 9.5
+   },
+   {
+    "armor": 0,
+    "name": "sword-stand",
+    "won": 16,
+    "lost": 0,
+    "held": 0,
+    "bites": 2,
+    "armorLost": 0,
+    "chill": 52,
+    "time": 2.6
+   },
+   {
+    "armor": 0,
+    "name": "fire-stand",
+    "won": 16,
+    "lost": 0,
+    "held": 0,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 2.7,
+    "time": 0.9
+   },
+   {
+    "armor": 0,
+    "name": "mixed-stand",
+    "won": 16,
+    "lost": 0,
+    "held": 0,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0.2,
+    "time": 1.6
+   },
+   {
+    "armor": 0,
+    "name": "bell-only",
+    "won": 0,
+    "lost": 16,
+    "held": 0,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "time": 6.3
+   },
+   {
+    "armor": 0,
+    "name": "sword-hitrun",
+    "won": 16,
+    "lost": 0,
+    "held": 0,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 20.8,
+    "time": 3.3
+   },
+   {
+    "armor": 0,
+    "name": "mixed-hitrun",
+    "won": 16,
+    "lost": 0,
+    "held": 0,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 16.5,
+    "time": 2.8
+   },
+   {
+    "armor": 0,
+    "name": "dodge-only",
+    "won": 0,
+    "lost": 16,
+    "held": 0,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "time": 7.1
+   }
+  ],
+  "rows": [
+   {
+    "armor": 54,
+    "name": "sword-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 2.24,
+    "bites": 2,
+    "armorLost": 36,
+    "chill": 15.7,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "sword-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 2.24,
+    "bites": 2,
+    "armorLost": 36,
+    "chill": 15.7,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "sword-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 2.62,
+    "bites": 2,
+    "armorLost": 36,
+    "chill": 16.2,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "sword-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 3.21,
+    "bites": 2,
+    "armorLost": 36,
+    "chill": 16.2,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "sword-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 2.24,
+    "bites": 2,
+    "armorLost": 36,
+    "chill": 15.7,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "sword-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 2.25,
+    "bites": 2,
+    "armorLost": 36,
+    "chill": 15.8,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "sword-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 2.62,
+    "bites": 2,
+    "armorLost": 36,
+    "chill": 16.2,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "sword-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 3.21,
+    "bites": 2,
+    "armorLost": 36,
+    "chill": 16.2,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "sword-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 2.24,
+    "bites": 2,
+    "armorLost": 36,
+    "chill": 15.7,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "sword-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 2.24,
+    "bites": 2,
+    "armorLost": 36,
+    "chill": 15.7,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "sword-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 2.62,
+    "bites": 2,
+    "armorLost": 36,
+    "chill": 16.2,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "sword-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 3.21,
+    "bites": 2,
+    "armorLost": 36,
+    "chill": 16.2,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "sword-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 2.24,
+    "bites": 2,
+    "armorLost": 36,
+    "chill": 15.7,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "sword-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 2.25,
+    "bites": 2,
+    "armorLost": 36,
+    "chill": 15.8,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "sword-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 2.62,
+    "bites": 2,
+    "armorLost": 36,
+    "chill": 16.2,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "sword-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 3.21,
+    "bites": 2,
+    "armorLost": 36,
+    "chill": 16.2,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "fire-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 0.77,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 5.4,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "fire-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 0.79,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 5.5,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "fire-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 0.88,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "fire-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 1.05,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "fire-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 0.77,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 5.4,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "fire-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 0.79,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 5.5,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "fire-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 0.88,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "fire-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 1.05,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "fire-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 0.77,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 5.4,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "fire-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 0.79,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 5.5,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "fire-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 0.88,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "fire-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 1.05,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "fire-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 0.77,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 5.4,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "fire-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 0.79,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 5.5,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "fire-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 0.88,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "fire-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 1.05,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "mixed-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 1.76,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0.6,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "mixed-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 1.79,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0.1,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "mixed-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 1.88,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "mixed-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 1.13,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "mixed-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 1.76,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0.6,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "mixed-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 1.79,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0.1,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "mixed-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 1.88,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "mixed-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 1.13,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "mixed-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 1.76,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0.6,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "mixed-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 1.79,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0.1,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "mixed-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 1.88,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "mixed-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 1.13,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "mixed-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 1.76,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0.6,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "mixed-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 1.79,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0.1,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "mixed-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 1.88,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "mixed-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 1.13,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "bell-only",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "lost",
+    "t": 10.43,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "bell-only",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "lost",
+    "t": 10.43,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "bell-only",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "lost",
+    "t": 10.5,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "bell-only",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "lost",
+    "t": 11.03,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "bell-only",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "lost",
+    "t": 10.43,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "bell-only",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "lost",
+    "t": 10.43,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "bell-only",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "lost",
+    "t": 10.5,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "bell-only",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "lost",
+    "t": 11.03,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "bell-only",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 0.5,
+    "res": "lost",
+    "t": 10.43,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "bell-only",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 1.2,
+    "res": "lost",
+    "t": 10.43,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "bell-only",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 2.2,
+    "res": "lost",
+    "t": 10.5,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "bell-only",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 3.8,
+    "res": "lost",
+    "t": 11.03,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "bell-only",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 0.5,
+    "res": "lost",
+    "t": 10.43,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "bell-only",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 1.2,
+    "res": "lost",
+    "t": 10.43,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "bell-only",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 2.2,
+    "res": "lost",
+    "t": 10.5,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "bell-only",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 3.8,
+    "res": "lost",
+    "t": 11.03,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "sword-hitrun",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 2.72,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 19.1,
+    "whiffs": 3
+   },
+   {
+    "armor": 54,
+    "name": "sword-hitrun",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 3.02,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.1,
+    "whiffs": 3
+   },
+   {
+    "armor": 54,
+    "name": "sword-hitrun",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 3.38,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.6,
+    "whiffs": 3
+   },
+   {
+    "armor": 54,
+    "name": "sword-hitrun",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 3.97,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.6,
+    "whiffs": 3
+   },
+   {
+    "armor": 54,
+    "name": "sword-hitrun",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 2.72,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 19.1,
+    "whiffs": 3
+   },
+   {
+    "armor": 54,
+    "name": "sword-hitrun",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 3.02,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.1,
+    "whiffs": 3
+   },
+   {
+    "armor": 54,
+    "name": "sword-hitrun",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 3.38,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.6,
+    "whiffs": 3
+   },
+   {
+    "armor": 54,
+    "name": "sword-hitrun",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 3.97,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.6,
+    "whiffs": 3
+   },
+   {
+    "armor": 54,
+    "name": "sword-hitrun",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 2.72,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 19.1,
+    "whiffs": 3
+   },
+   {
+    "armor": 54,
+    "name": "sword-hitrun",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 3.02,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.1,
+    "whiffs": 3
+   },
+   {
+    "armor": 54,
+    "name": "sword-hitrun",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 3.38,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.6,
+    "whiffs": 3
+   },
+   {
+    "armor": 54,
+    "name": "sword-hitrun",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 3.97,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.6,
+    "whiffs": 3
+   },
+   {
+    "armor": 54,
+    "name": "sword-hitrun",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 2.72,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 19.1,
+    "whiffs": 3
+   },
+   {
+    "armor": 54,
+    "name": "sword-hitrun",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 3.02,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.1,
+    "whiffs": 3
+   },
+   {
+    "armor": 54,
+    "name": "sword-hitrun",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 3.38,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.6,
+    "whiffs": 3
+   },
+   {
+    "armor": 54,
+    "name": "sword-hitrun",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 3.97,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.6,
+    "whiffs": 3
+   },
+   {
+    "armor": 54,
+    "name": "mixed-hitrun",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 1.75,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 12.3,
+    "whiffs": 2
+   },
+   {
+    "armor": 54,
+    "name": "mixed-hitrun",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 2.01,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 14.1,
+    "whiffs": 2
+   },
+   {
+    "armor": 54,
+    "name": "mixed-hitrun",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 2.38,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 14.6,
+    "whiffs": 2
+   },
+   {
+    "armor": 54,
+    "name": "mixed-hitrun",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 2.97,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 14.6,
+    "whiffs": 2
+   },
+   {
+    "armor": 54,
+    "name": "mixed-hitrun",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 1.75,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 12.3,
+    "whiffs": 2
+   },
+   {
+    "armor": 54,
+    "name": "mixed-hitrun",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 2.01,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 14.1,
+    "whiffs": 2
+   },
+   {
+    "armor": 54,
+    "name": "mixed-hitrun",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 2.38,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 14.6,
+    "whiffs": 2
+   },
+   {
+    "armor": 54,
+    "name": "mixed-hitrun",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 2.98,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 14.6,
+    "whiffs": 2
+   },
+   {
+    "armor": 54,
+    "name": "mixed-hitrun",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 1.75,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 12.3,
+    "whiffs": 2
+   },
+   {
+    "armor": 54,
+    "name": "mixed-hitrun",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 2.01,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 14.1,
+    "whiffs": 2
+   },
+   {
+    "armor": 54,
+    "name": "mixed-hitrun",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 2.38,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 14.6,
+    "whiffs": 2
+   },
+   {
+    "armor": 54,
+    "name": "mixed-hitrun",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 2.97,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 14.6,
+    "whiffs": 2
+   },
+   {
+    "armor": 54,
+    "name": "mixed-hitrun",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 1.75,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 12.3,
+    "whiffs": 2
+   },
+   {
+    "armor": 54,
+    "name": "mixed-hitrun",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 2.01,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 14.1,
+    "whiffs": 2
+   },
+   {
+    "armor": 54,
+    "name": "mixed-hitrun",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 2.38,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 14.6,
+    "whiffs": 2
+   },
+   {
+    "armor": 54,
+    "name": "mixed-hitrun",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 2.98,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 14.6,
+    "whiffs": 2
+   },
+   {
+    "armor": 54,
+    "name": "dodge-only",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "lost",
+    "t": 9.88,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 1
+   },
+   {
+    "armor": 54,
+    "name": "dodge-only",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "lost",
+    "t": 9.08,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "dodge-only",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "lost",
+    "t": 9.54,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "dodge-only",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "lost",
+    "t": 10.13,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "dodge-only",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "lost",
+    "t": 9.51,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 1
+   },
+   {
+    "armor": 54,
+    "name": "dodge-only",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "lost",
+    "t": 8.72,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "dodge-only",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "lost",
+    "t": 9.18,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "dodge-only",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "lost",
+    "t": 9.77,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "dodge-only",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 0.5,
+    "res": "lost",
+    "t": 9.88,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 1
+   },
+   {
+    "armor": 54,
+    "name": "dodge-only",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 1.2,
+    "res": "lost",
+    "t": 9.08,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "dodge-only",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 2.2,
+    "res": "lost",
+    "t": 9.54,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "dodge-only",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 3.8,
+    "res": "lost",
+    "t": 10.13,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "dodge-only",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 0.5,
+    "res": "lost",
+    "t": 9.51,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 1
+   },
+   {
+    "armor": 54,
+    "name": "dodge-only",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 1.2,
+    "res": "lost",
+    "t": 8.72,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "dodge-only",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 2.2,
+    "res": "lost",
+    "t": 9.18,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 54,
+    "name": "dodge-only",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 3.8,
+    "res": "lost",
+    "t": 9.77,
+    "bites": 6,
+    "armorLost": 54,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "sword-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 2.24,
+    "bites": 2,
+    "armorLost": 0,
+    "chill": 51.7,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "sword-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 2.24,
+    "bites": 2,
+    "armorLost": 0,
+    "chill": 51.7,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "sword-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 2.62,
+    "bites": 2,
+    "armorLost": 0,
+    "chill": 52.2,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "sword-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 3.21,
+    "bites": 2,
+    "armorLost": 0,
+    "chill": 52.2,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "sword-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 2.24,
+    "bites": 2,
+    "armorLost": 0,
+    "chill": 51.7,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "sword-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 2.25,
+    "bites": 2,
+    "armorLost": 0,
+    "chill": 51.7,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "sword-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 2.62,
+    "bites": 2,
+    "armorLost": 0,
+    "chill": 52.2,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "sword-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 3.21,
+    "bites": 2,
+    "armorLost": 0,
+    "chill": 52.2,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "sword-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 2.24,
+    "bites": 2,
+    "armorLost": 0,
+    "chill": 51.7,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "sword-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 2.24,
+    "bites": 2,
+    "armorLost": 0,
+    "chill": 51.7,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "sword-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 2.62,
+    "bites": 2,
+    "armorLost": 0,
+    "chill": 52.2,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "sword-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 3.21,
+    "bites": 2,
+    "armorLost": 0,
+    "chill": 52.2,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "sword-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 2.24,
+    "bites": 2,
+    "armorLost": 0,
+    "chill": 51.7,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "sword-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 2.25,
+    "bites": 2,
+    "armorLost": 0,
+    "chill": 51.7,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "sword-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 2.62,
+    "bites": 2,
+    "armorLost": 0,
+    "chill": 52.2,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "sword-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 3.21,
+    "bites": 2,
+    "armorLost": 0,
+    "chill": 52.2,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "fire-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 0.77,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 5.4,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "fire-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 0.79,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 5.5,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "fire-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 0.88,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "fire-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 1.05,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "fire-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 0.77,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 5.4,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "fire-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 0.79,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 5.5,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "fire-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 0.88,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "fire-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 1.05,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "fire-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 0.77,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 5.4,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "fire-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 0.79,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 5.5,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "fire-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 0.88,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "fire-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 1.05,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "fire-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 0.77,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 5.4,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "fire-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 0.79,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 5.5,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "fire-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 0.88,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "fire-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 1.05,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "mixed-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 1.76,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0.6,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "mixed-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 1.79,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0.1,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "mixed-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 1.88,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "mixed-stand",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 1.13,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "mixed-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 1.76,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0.6,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "mixed-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 1.79,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0.1,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "mixed-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 1.88,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "mixed-stand",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 1.13,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "mixed-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 1.76,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0.6,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "mixed-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 1.79,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0.1,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "mixed-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 1.88,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "mixed-stand",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 1.13,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "mixed-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 1.76,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0.6,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "mixed-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 1.79,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0.1,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "mixed-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 1.88,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "mixed-stand",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 1.13,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 0,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "bell-only",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "lost",
+    "t": 5.81,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "bell-only",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "lost",
+    "t": 6.05,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "bell-only",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "lost",
+    "t": 6.43,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "bell-only",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "lost",
+    "t": 7.02,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "bell-only",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "lost",
+    "t": 5.81,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "bell-only",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "lost",
+    "t": 6.05,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "bell-only",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "lost",
+    "t": 6.43,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "bell-only",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "lost",
+    "t": 7.02,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "bell-only",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 0.5,
+    "res": "lost",
+    "t": 5.81,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "bell-only",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 1.2,
+    "res": "lost",
+    "t": 6.05,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "bell-only",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 2.2,
+    "res": "lost",
+    "t": 6.43,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "bell-only",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 3.8,
+    "res": "lost",
+    "t": 7.02,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "bell-only",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 0.5,
+    "res": "lost",
+    "t": 5.81,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "bell-only",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 1.2,
+    "res": "lost",
+    "t": 6.05,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "bell-only",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 2.2,
+    "res": "lost",
+    "t": 6.43,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "bell-only",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 3.8,
+    "res": "lost",
+    "t": 7.02,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "sword-hitrun",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 2.72,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 19.1,
+    "whiffs": 3
+   },
+   {
+    "armor": 0,
+    "name": "sword-hitrun",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 3.02,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.1,
+    "whiffs": 3
+   },
+   {
+    "armor": 0,
+    "name": "sword-hitrun",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 3.38,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.6,
+    "whiffs": 3
+   },
+   {
+    "armor": 0,
+    "name": "sword-hitrun",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 3.97,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.6,
+    "whiffs": 3
+   },
+   {
+    "armor": 0,
+    "name": "sword-hitrun",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 2.72,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 19.1,
+    "whiffs": 3
+   },
+   {
+    "armor": 0,
+    "name": "sword-hitrun",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 3.02,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.1,
+    "whiffs": 3
+   },
+   {
+    "armor": 0,
+    "name": "sword-hitrun",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 3.38,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.6,
+    "whiffs": 3
+   },
+   {
+    "armor": 0,
+    "name": "sword-hitrun",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 3.97,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.6,
+    "whiffs": 3
+   },
+   {
+    "armor": 0,
+    "name": "sword-hitrun",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 2.72,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 19.1,
+    "whiffs": 3
+   },
+   {
+    "armor": 0,
+    "name": "sword-hitrun",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 3.02,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.1,
+    "whiffs": 3
+   },
+   {
+    "armor": 0,
+    "name": "sword-hitrun",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 3.38,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.6,
+    "whiffs": 3
+   },
+   {
+    "armor": 0,
+    "name": "sword-hitrun",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 3.97,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.6,
+    "whiffs": 3
+   },
+   {
+    "armor": 0,
+    "name": "sword-hitrun",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 2.72,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 19.1,
+    "whiffs": 3
+   },
+   {
+    "armor": 0,
+    "name": "sword-hitrun",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 3.02,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.1,
+    "whiffs": 3
+   },
+   {
+    "armor": 0,
+    "name": "sword-hitrun",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 3.38,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.6,
+    "whiffs": 3
+   },
+   {
+    "armor": 0,
+    "name": "sword-hitrun",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 3.97,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 21.6,
+    "whiffs": 3
+   },
+   {
+    "armor": 0,
+    "name": "mixed-hitrun",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 2.32,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 15,
+    "whiffs": 1
+   },
+   {
+    "armor": 0,
+    "name": "mixed-hitrun",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 2.57,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 16.6,
+    "whiffs": 1
+   },
+   {
+    "armor": 0,
+    "name": "mixed-hitrun",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 2.95,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 17.2,
+    "whiffs": 1
+   },
+   {
+    "armor": 0,
+    "name": "mixed-hitrun",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 3.55,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 17.2,
+    "whiffs": 1
+   },
+   {
+    "armor": 0,
+    "name": "mixed-hitrun",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 2.32,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 15,
+    "whiffs": 1
+   },
+   {
+    "armor": 0,
+    "name": "mixed-hitrun",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 2.57,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 16.6,
+    "whiffs": 1
+   },
+   {
+    "armor": 0,
+    "name": "mixed-hitrun",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 2.95,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 17.2,
+    "whiffs": 1
+   },
+   {
+    "armor": 0,
+    "name": "mixed-hitrun",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 3.55,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 17.2,
+    "whiffs": 1
+   },
+   {
+    "armor": 0,
+    "name": "mixed-hitrun",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 2.32,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 15,
+    "whiffs": 1
+   },
+   {
+    "armor": 0,
+    "name": "mixed-hitrun",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 2.57,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 16.6,
+    "whiffs": 1
+   },
+   {
+    "armor": 0,
+    "name": "mixed-hitrun",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 2.95,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 17.2,
+    "whiffs": 1
+   },
+   {
+    "armor": 0,
+    "name": "mixed-hitrun",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 3.55,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 17.2,
+    "whiffs": 1
+   },
+   {
+    "armor": 0,
+    "name": "mixed-hitrun",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 0.5,
+    "res": "won",
+    "t": 2.32,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 15,
+    "whiffs": 1
+   },
+   {
+    "armor": 0,
+    "name": "mixed-hitrun",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 1.2,
+    "res": "won",
+    "t": 2.57,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 16.6,
+    "whiffs": 1
+   },
+   {
+    "armor": 0,
+    "name": "mixed-hitrun",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 2.2,
+    "res": "won",
+    "t": 2.95,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 17.2,
+    "whiffs": 1
+   },
+   {
+    "armor": 0,
+    "name": "mixed-hitrun",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 3.8,
+    "res": "won",
+    "t": 3.55,
+    "bites": 0,
+    "armorLost": 0,
+    "chill": 17.2,
+    "whiffs": 1
+   },
+   {
+    "armor": 0,
+    "name": "dodge-only",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "lost",
+    "t": 7.57,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 1
+   },
+   {
+    "armor": 0,
+    "name": "dodge-only",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "lost",
+    "t": 6.77,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "dodge-only",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "lost",
+    "t": 7.14,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "dodge-only",
+    "dir": [
+     1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "lost",
+    "t": 7.73,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "dodge-only",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 0.5,
+    "res": "lost",
+    "t": 7.19,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 1
+   },
+   {
+    "armor": 0,
+    "name": "dodge-only",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 1.2,
+    "res": "lost",
+    "t": 6.4,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "dodge-only",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 2.2,
+    "res": "lost",
+    "t": 6.77,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "dodge-only",
+    "dir": [
+     -1,
+     0
+    ],
+    "d0": 3.8,
+    "res": "lost",
+    "t": 7.37,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "dodge-only",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 0.5,
+    "res": "lost",
+    "t": 7.57,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 1
+   },
+   {
+    "armor": 0,
+    "name": "dodge-only",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 1.2,
+    "res": "lost",
+    "t": 6.77,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "dodge-only",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 2.2,
+    "res": "lost",
+    "t": 7.14,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "dodge-only",
+    "dir": [
+     0,
+     1
+    ],
+    "d0": 3.8,
+    "res": "lost",
+    "t": 7.73,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "dodge-only",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 0.5,
+    "res": "lost",
+    "t": 7.19,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 1
+   },
+   {
+    "armor": 0,
+    "name": "dodge-only",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 1.2,
+    "res": "lost",
+    "t": 6.4,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "dodge-only",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 2.2,
+    "res": "lost",
+    "t": 6.77,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   },
+   {
+    "armor": 0,
+    "name": "dodge-only",
+    "dir": [
+     0,
+     -1
+    ],
+    "d0": 3.8,
+    "res": "lost",
+    "t": 7.37,
+    "bites": 4,
+    "armorLost": 0,
+    "chill": 100,
+    "whiffs": 0
+   }
+  ]
+ },
+ "version": "0.1",
+ "at": "2026-10-28",
+ "escape": {
+  "sum": {
+   "反應0.25・全部": {
+    "n": 128,
+    "ok": 128,
+    "lost": 0,
+    "timeout": 0,
+    "tMin": 35.82,
+    "tMax": 59.05,
+    "maxChill": 83.5,
+    "bites": 0.16,
+    "stuck": 0
+   },
+   "反應0.25・正常・點燈": {
+    "n": 32,
+    "ok": 32,
+    "lost": 0,
+    "timeout": 0,
+    "tMin": 36.69,
+    "tMax": 56.62,
+    "maxChill": 56.5,
+    "bites": 0.06,
+    "stuck": 0
+   },
+   "反應0.25・正常・掩燈": {
+    "n": 32,
+    "ok": 32,
+    "lost": 0,
+    "timeout": 0,
+    "tMin": 35.82,
+    "tMax": 45.69,
+    "maxChill": 8.1,
+    "bites": 0,
+    "stuck": 0
+   },
+   "反應0.25・沒補給・點燈": {
+    "n": 32,
+    "ok": 32,
+    "lost": 0,
+    "timeout": 0,
+    "tMin": 36.49,
+    "tMax": 59.05,
+    "maxChill": 83.5,
+    "bites": 0.56,
+    "stuck": 0
+   },
+   "反應0.25・沒補給・掩燈": {
+    "n": 32,
+    "ok": 32,
+    "lost": 0,
+    "timeout": 0,
+    "tMin": 35.82,
+    "tMax": 46.53,
+    "maxChill": 19.2,
+    "bites": 0,
+    "stuck": 0
+   },
+   "反應0.4・全部": {
+    "n": 128,
+    "ok": 126,
+    "lost": 2,
+    "timeout": 0,
+    "tMin": 35.82,
+    "tMax": 58.63,
+    "maxChill": 100,
+    "bites": 0.83,
+    "stuck": 0
+   },
+   "反應0.4・正常・點燈": {
+    "n": 32,
+    "ok": 32,
+    "lost": 0,
+    "timeout": 0,
+    "tMin": 35.98,
+    "tMax": 58.63,
+    "maxChill": 84.7,
+    "bites": 1.75,
+    "stuck": 0
+   },
+   "反應0.4・正常・掩燈": {
+    "n": 32,
+    "ok": 32,
+    "lost": 0,
+    "timeout": 0,
+    "tMin": 35.82,
+    "tMax": 45.99,
+    "maxChill": 5,
+    "bites": 0,
+    "stuck": 0
+   },
+   "反應0.4・沒補給・點燈": {
+    "n": 32,
+    "ok": 30,
+    "lost": 2,
+    "timeout": 0,
+    "tMin": 36.96,
+    "tMax": 53.83,
+    "maxChill": 100,
+    "bites": 1.47,
+    "stuck": 0
+   },
+   "反應0.4・沒補給・掩燈": {
+    "n": 32,
+    "ok": 32,
+    "lost": 0,
+    "timeout": 0,
+    "tMin": 35.82,
+    "tMax": 48.73,
+    "maxChill": 20.9,
+    "bites": 0.09,
+    "stuck": 0
+   }
+  },
+  "rows": [
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 0,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 38.59,
+    "maxChill": 14.9,
+    "bites": 0,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 0,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 0,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 39.31,
+    "maxChill": 14.7,
+    "bites": 0,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 0,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.21,
+    "maxChill": 17.6,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 2,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 3,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 41.93,
+    "maxChill": 14.8,
+    "bites": 0,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 3,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 3,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 48.47,
+    "maxChill": 19.8,
+    "bites": 1,
+    "disperse": 2,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 3,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 6,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 47.14,
+    "maxChill": 22,
+    "bites": 0,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 3,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 6,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 6,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 48.03,
+    "maxChill": 29.1,
+    "bites": 1,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 6,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.77,
+    "maxChill": 19.2,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 2,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 9,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 49.52,
+    "maxChill": 27.4,
+    "bites": 0,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 9,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 9,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 48.38,
+    "maxChill": 9.9,
+    "bites": 0,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 9,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 0,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 39.94,
+    "maxChill": 13,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 0,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36.33,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 0,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 49.02,
+    "maxChill": 30.5,
+    "bites": 2,
+    "disperse": 2,
+    "bells": 3,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 0,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36.33,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 3,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 44.51,
+    "maxChill": 17.3,
+    "bites": 0,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 4,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 3,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.35,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 3,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 50.14,
+    "maxChill": 33.4,
+    "bites": 2,
+    "disperse": 2,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 3,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.35,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 6,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 45.74,
+    "maxChill": 15.9,
+    "bites": 0,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 6,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42.35,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 6,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 51.77,
+    "maxChill": 20.1,
+    "bites": 1,
+    "disperse": 2,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 2,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 6,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42.35,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 9,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 51.72,
+    "maxChill": 7.9,
+    "bites": 0,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 4,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 9,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.33,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 9,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 48.92,
+    "maxChill": 10.3,
+    "bites": 0,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 9,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 46.53,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 1,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 0,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 38.18,
+    "maxChill": 16.3,
+    "bites": 0,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 0,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 35.82,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 0,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 36.73,
+    "maxChill": 3.7,
+    "bites": 0,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 0,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 35.82,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 3,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 45.32,
+    "maxChill": 8.6,
+    "bites": 0,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 4,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 3,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 38.82,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 3,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 42.52,
+    "maxChill": 15.8,
+    "bites": 0,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 3,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 38.82,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 6,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 43.25,
+    "maxChill": 4.5,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 6,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 41.82,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 6,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 52.32,
+    "maxChill": 23.9,
+    "bites": 1,
+    "disperse": 2,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 2,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 6,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 41.82,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 9,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 50.65,
+    "maxChill": 16.5,
+    "bites": 0,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 4,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 9,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.14,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 9,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 59.05,
+    "maxChill": 83.5,
+    "bites": 4,
+    "disperse": 2,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 2,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 9,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.14,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 0,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 56.62,
+    "maxChill": 56.5,
+    "bites": 2,
+    "disperse": 3,
+    "bells": 1,
+    "fires": 5,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 0,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 35.98,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 0,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 45.27,
+    "maxChill": 31.7,
+    "bites": 2,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 0,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 35.98,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 3,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 44.55,
+    "maxChill": 8.5,
+    "bites": 0,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 4,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 3,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.03,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 3,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 51.11,
+    "maxChill": 33.9,
+    "bites": 2,
+    "disperse": 2,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 3,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.03,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 6,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 44.87,
+    "maxChill": 7.6,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 6,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42.03,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 6,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 47.86,
+    "maxChill": 29.6,
+    "bites": 1,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 2,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 6,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42.03,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 9,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 52,
+    "maxChill": 8.3,
+    "bites": 0,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 4,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 9,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.03,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 9,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 55.74,
+    "maxChill": 32,
+    "bites": 1,
+    "disperse": 2,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 2,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 9,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.03,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 0,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 52.77,
+    "maxChill": 46,
+    "bites": 0,
+    "disperse": 3,
+    "bells": 1,
+    "fires": 5,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 0,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36.34,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 0,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 39.17,
+    "maxChill": 8.4,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 0,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36.34,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 3,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 42.64,
+    "maxChill": 17.4,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 3,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.34,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 3,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 41.98,
+    "maxChill": 5,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 3,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 43.26,
+    "maxChill": 10.1,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 2,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 6,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 45.03,
+    "maxChill": 7.1,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 6,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 43.37,
+    "maxChill": 8.1,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 6,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 42.6,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 6,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.61,
+    "maxChill": 12.3,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 2,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 9,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 45.34,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 9,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.34,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 9,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 52.36,
+    "maxChill": 11.7,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 9,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.34,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 0,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 36.69,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 0,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36.69,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 0,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 39.32,
+    "maxChill": 8.3,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 0,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36.69,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 3,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 40.13,
+    "maxChill": 3.8,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 3,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.71,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 3,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 43.19,
+    "maxChill": 13.9,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 3,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.71,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 6,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 46.29,
+    "maxChill": 8.4,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 6,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42.71,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 6,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 46.32,
+    "maxChill": 9.5,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 6,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42.71,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 9,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 45.69,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 9,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.69,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 9,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 47.92,
+    "maxChill": 19.1,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 9,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.69,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 0,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 38.7,
+    "maxChill": 8.6,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 5,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 0,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36.49,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 0,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 36.49,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 0,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36.49,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 3,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 43.34,
+    "maxChill": 9,
+    "bites": 0,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 4,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 3,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 40.27,
+    "maxChill": 4.1,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 3,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 43.18,
+    "maxChill": 5.3,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 1,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 3,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.49,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 6,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 45.17,
+    "maxChill": 7.9,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 6,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42.49,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 6,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 42.9,
+    "maxChill": 3.7,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 6,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42.49,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 9,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 49.54,
+    "maxChill": 9,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 9,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.67,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 9,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 52.46,
+    "maxChill": 20.9,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 9,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.67,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 0,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 39.07,
+    "maxChill": 8.6,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 0,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 37.16,
+    "maxChill": 4.5,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 0,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 39.57,
+    "maxChill": 8.5,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 0,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36.35,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 3,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 42.73,
+    "maxChill": 15.6,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 3,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.4,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 3,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 44.83,
+    "maxChill": 5.2,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 3,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 40.6,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 1,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 6,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 45.48,
+    "maxChill": 20.9,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 6,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42.4,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 6,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 49.37,
+    "maxChill": 15.5,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 6,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42.4,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 9,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 47.67,
+    "maxChill": 16.9,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 9,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.4,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 9,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 52.07,
+    "maxChill": 9.2,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.25,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 9,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.4,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 0,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 40.81,
+    "maxChill": 22.2,
+    "bites": 2,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 3,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 0,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 0,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 37.43,
+    "maxChill": 12.4,
+    "bites": 1,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 0,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 3,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 53.19,
+    "maxChill": 84.7,
+    "bites": 7,
+    "disperse": 3,
+    "bells": 2,
+    "fires": 5,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 3,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 3,
+    "empty": true,
+    "lamp": "lit",
+    "ok": false,
+    "state": "lose",
+    "t": 46.25,
+    "maxChill": 100,
+    "bites": 5,
+    "disperse": 0,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 3,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 6,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 45.16,
+    "maxChill": 32.6,
+    "bites": 2,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 3,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 6,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 6,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 45.42,
+    "maxChill": 8,
+    "bites": 1,
+    "disperse": 1,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 6,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 9,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 58.63,
+    "maxChill": 76.7,
+    "bites": 6,
+    "disperse": 3,
+    "bells": 2,
+    "fires": 5,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 9,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 9,
+    "empty": true,
+    "lamp": "lit",
+    "ok": false,
+    "state": "lose",
+    "t": 55.36,
+    "maxChill": 100,
+    "bites": 6,
+    "disperse": 1,
+    "bells": 3,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0069,
+    "wait": 9,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 48.73,
+    "maxChill": 17.2,
+    "bites": 1,
+    "disperse": 1,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 0,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 40.47,
+    "maxChill": 14.2,
+    "bites": 2,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 0,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36.33,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 0,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 38.51,
+    "maxChill": 6.2,
+    "bites": 1,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 0,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36.33,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 3,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 47.52,
+    "maxChill": 11.4,
+    "bites": 3,
+    "disperse": 2,
+    "bells": 2,
+    "fires": 5,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 3,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.35,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 3,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 43.51,
+    "maxChill": 12.5,
+    "bites": 1,
+    "disperse": 1,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 3,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.35,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 6,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 45.84,
+    "maxChill": 19.1,
+    "bites": 1,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 6,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42.35,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 6,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 49.85,
+    "maxChill": 58.9,
+    "bites": 4,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 6,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42.35,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 9,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 49.51,
+    "maxChill": 16.2,
+    "bites": 2,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 3,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 9,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.99,
+    "maxChill": 5,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 9,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 46.97,
+    "maxChill": 6.2,
+    "bites": 1,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.0167,
+    "wait": 9,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.33,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 0,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 44.4,
+    "maxChill": 16.4,
+    "bites": 2,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 5,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 0,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 35.82,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 0,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 38.32,
+    "maxChill": 14.4,
+    "bites": 1,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 0,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 35.82,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 3,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 41.88,
+    "maxChill": 14.3,
+    "bites": 2,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 3,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 3,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 38.82,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 3,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 41.6,
+    "maxChill": 12.6,
+    "bites": 1,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 3,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 38.82,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 6,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 45.51,
+    "maxChill": 25.8,
+    "bites": 2,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 6,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 41.82,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 6,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 45.12,
+    "maxChill": 16.5,
+    "bites": 1,
+    "disperse": 0,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 6,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 41.82,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 9,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 45.97,
+    "maxChill": 4,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 9,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.14,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 9,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 53.83,
+    "maxChill": 56.9,
+    "bites": 4,
+    "disperse": 2,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.04,
+    "wait": 9,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.14,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 0,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 35.98,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 0,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 35.98,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 0,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 42.82,
+    "maxChill": 66.1,
+    "bites": 4,
+    "disperse": 3,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 0,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 35.98,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 3,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 42.62,
+    "maxChill": 17.1,
+    "bites": 2,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 3,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 3,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.03,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 3,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 42.87,
+    "maxChill": 7.7,
+    "bites": 1,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 3,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.03,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 6,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 45.67,
+    "maxChill": 13.2,
+    "bites": 2,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 3,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 6,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42.03,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 6,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 46.12,
+    "maxChill": 18.7,
+    "bites": 1,
+    "disperse": 1,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 6,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 43.23,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 1,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 9,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 49.12,
+    "maxChill": 16.1,
+    "bites": 1,
+    "disperse": 2,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 9,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.03,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 9,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 47.77,
+    "maxChill": 7,
+    "bites": 1,
+    "disperse": 2,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "name",
+    "dt": 0.05,
+    "wait": 9,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.03,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 0,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 42.89,
+    "maxChill": 23.5,
+    "bites": 2,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 5,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 0,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36.98,
+    "maxChill": 4.5,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 0,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 38.43,
+    "maxChill": 5.6,
+    "bites": 1,
+    "disperse": 1,
+    "bells": 1,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 0,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36.34,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 3,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 46.32,
+    "maxChill": 11.3,
+    "bites": 2,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 5,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 3,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.34,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 3,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 42.43,
+    "maxChill": 5.8,
+    "bites": 1,
+    "disperse": 1,
+    "bells": 1,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 3,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.34,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 6,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 48.9,
+    "maxChill": 17.2,
+    "bites": 2,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 5,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 6,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42.34,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 6,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 48.12,
+    "maxChill": 5.6,
+    "bites": 1,
+    "disperse": 1,
+    "bells": 3,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 6,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42.34,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 9,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 46.1,
+    "maxChill": 3.7,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 9,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.34,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 9,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 49.93,
+    "maxChill": 5.6,
+    "bites": 1,
+    "disperse": 1,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0069,
+    "wait": 9,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.34,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 0,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 36.69,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 0,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36.69,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 0,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 36.96,
+    "maxChill": 4,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 0,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36.69,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 3,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 39.71,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 3,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.71,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 3,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 42.27,
+    "maxChill": 5.7,
+    "bites": 1,
+    "disperse": 1,
+    "bells": 1,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 3,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.71,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 6,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 48.52,
+    "maxChill": 11.3,
+    "bites": 2,
+    "disperse": 1,
+    "bells": 1,
+    "fires": 3,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 6,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42.71,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 6,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 45.34,
+    "maxChill": 5.7,
+    "bites": 1,
+    "disperse": 1,
+    "bells": 1,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 6,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42.71,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 9,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 46.22,
+    "maxChill": 3.7,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 9,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.69,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 9,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 45.69,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.0167,
+    "wait": 9,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.69,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 0,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 39.89,
+    "maxChill": 20.7,
+    "bites": 2,
+    "disperse": 1,
+    "bells": 1,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 0,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36.49,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 0,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 39.22,
+    "maxChill": 6.7,
+    "bites": 1,
+    "disperse": 1,
+    "bells": 1,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 0,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36.49,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 3,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 46.22,
+    "maxChill": 12.6,
+    "bites": 2,
+    "disperse": 2,
+    "bells": 1,
+    "fires": 5,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 3,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.49,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 3,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 42.69,
+    "maxChill": 5.7,
+    "bites": 1,
+    "disperse": 1,
+    "bells": 1,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 3,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.49,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 6,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 45.26,
+    "maxChill": 12.1,
+    "bites": 2,
+    "disperse": 1,
+    "bells": 1,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 6,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42.49,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 6,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 48.06,
+    "maxChill": 5.7,
+    "bites": 1,
+    "disperse": 1,
+    "bells": 2,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 6,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 46.29,
+    "maxChill": 20.9,
+    "bites": 1,
+    "disperse": 1,
+    "bells": 2,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 9,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 49.17,
+    "maxChill": 12.7,
+    "bites": 2,
+    "disperse": 1,
+    "bells": 1,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 9,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.67,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 9,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 50.62,
+    "maxChill": 5.8,
+    "bites": 1,
+    "disperse": 1,
+    "bells": 2,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.04,
+    "wait": 9,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.67,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 0,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 39.31,
+    "maxChill": 19.5,
+    "bites": 2,
+    "disperse": 1,
+    "bells": 1,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 0,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36.35,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 0,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 38.74,
+    "maxChill": 6.8,
+    "bites": 1,
+    "disperse": 1,
+    "bells": 1,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 0,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 36.35,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 3,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 39.4,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 3,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 39.4,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 3,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 45.04,
+    "maxChill": 11.7,
+    "bites": 1,
+    "disperse": 1,
+    "bells": 2,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 3,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42.45,
+    "maxChill": 16.2,
+    "bites": 1,
+    "disperse": 1,
+    "bells": 1,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 0,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 6,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 45.86,
+    "maxChill": 21.8,
+    "bites": 2,
+    "disperse": 1,
+    "bells": 1,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 6,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 43.1,
+    "maxChill": 4.4,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 6,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 42.65,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 6,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 42.4,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 9,
+    "empty": false,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 46.15,
+    "maxChill": 3.7,
+    "bites": 0,
+    "disperse": 1,
+    "bells": 0,
+    "fires": 2,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 9,
+    "empty": false,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.4,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 9,
+    "empty": true,
+    "lamp": "lit",
+    "ok": true,
+    "state": "win",
+    "t": 48.55,
+    "maxChill": 5.7,
+    "bites": 1,
+    "disperse": 1,
+    "bells": 1,
+    "fires": 1,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   },
+   {
+    "react": 0.4,
+    "order": "breath",
+    "dt": 0.05,
+    "wait": 9,
+    "empty": true,
+    "lamp": "dark",
+    "ok": true,
+    "state": "win",
+    "t": 45.4,
+    "maxChill": 0,
+    "bites": 0,
+    "disperse": 0,
+    "bells": 0,
+    "fires": 0,
+    "stuck": 0,
+    "stalls": 1,
+    "seals": {
+     "name": true,
+     "breath": true
+    }
+   }
+  ]
+ },
+ "stress": {
+  "seeds": 24,
+  "steps": 96000,
+  "segments": 43,
+  "violations": [],
+  "stuck": 0
+ }
+}
