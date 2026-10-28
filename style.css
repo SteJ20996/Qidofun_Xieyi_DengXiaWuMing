@@ -112,6 +112,31 @@ h2 { font: 32px/1.2 var(--font); margin: 4px 0 10px; letter-spacing: 4px; }
 button.big { font: 22px var(--font); padding: 6px 34px; margin: 10px 6px 6px; background: var(--ink); color: var(--paper); border: 2px solid var(--ink); border-radius: 4px; cursor: pointer; letter-spacing: 4px; }
 button.big:hover { background: var(--red); border-color: var(--red); }
 .panel .row button:not(.big) { font: 17px var(--font); padding: 6px 18px; margin: 10px 4px 6px; background: transparent; border: 1.5px solid var(--ink); border-radius: 4px; cursor: pointer; color: var(--ink); }
+/* 三格存檔 */
+.slots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 14px 0 6px; }
+.slot { border: 1.5px solid rgba(28,26,23,.45); border-radius: 5px; padding: 8px 10px; background: rgba(255,255,255,.28); text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.slot.sel { border-color: var(--red); box-shadow: 0 0 0 2px rgba(180,57,42,.35); background: rgba(255,255,255,.5); }
+.slot-h { font-size: 17px; display: flex; align-items: center; gap: 6px; }
+.slot-b { font-size: 14px; line-height: 1.55; min-height: 3.1em; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.slot-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
+.slot-btns button { font: 16px var(--font); padding: 4px 14px; border-radius: 4px; cursor: pointer; border: 1.5px solid var(--ink); }
+.slot-btns .go { background: var(--ink); color: var(--paper); }
+.slot-btns .go:hover { background: var(--red); border-color: var(--red); }
+.slot-btns .fresh { background: transparent; color: var(--ink); }
+.mini { display: inline-grid; place-items: center; width: 20px; height: 20px; border: 1.5px solid var(--red); color: var(--red); border-radius: 3px; font-size: 12px; margin-right: 2px; }
+.mini.got { background: var(--red); color: #f7efe0; }
+.warn { color: var(--red-2); }
+.savebox { margin: 10px 0 2px; padding-top: 10px; border-top: 1px solid rgba(28,26,23,.2); }
+.saverow { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 6px 0 4px; }
+.savebtn { font: 16px var(--font); padding: 6px 14px; border: 1.5px solid var(--ink); background: transparent; color: var(--ink); border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 104px; }
+.savebtn:hover:not(:disabled) { background: rgba(28,26,23,.08); }
+.savebtn small { font-size: 12px; color: var(--ink-2); }
+.savebtn.mine { border-color: var(--red); }
+.savebtn:disabled { opacity: .5; cursor: default; }
+#save-msg { min-height: 1.4em; color: var(--red-2); }
+#goal .slotlab { font-size: 13px; color: var(--dim); }
+.panel .row button.plain { font: 17px var(--font); padding: 6px 18px; margin: 10px 4px 6px; background: transparent; border: 1.5px solid var(--ink); border-radius: 4px; cursor: pointer; color: var(--ink); }
+@media (max-width: 640px) { .slots { grid-template-columns: 1fr; } .slot-b { min-height: 0; } }
 ul.rules { text-align: left; font-size: 15px; line-height: 1.6; margin: 12px 0 0; padding-left: 1.2em; }
 ul.rules b { color: var(--red-2); font-weight: normal; }
 .endseal { width: 70px; height: 70px; margin: 0 auto; background: var(--red); color: #f7efe0; display: grid; place-items: center; font: 34px var(--font); border-radius: 5px; transform: rotate(-4deg); }

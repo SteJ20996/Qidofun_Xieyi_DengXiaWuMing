@@ -7,9 +7,12 @@
   const hyp = Math.hypot, PI = Math.PI;
   const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
   const angDiff = (a, b) => { let d = (a - b) % (2 * PI); if (d > PI) d -= 2 * PI; if (d < -PI) d += 2 * PI; return Math.abs(d); };
+  // 亂數：狀態放在 f.s.a，存檔才存得下、讀回來接著跑結果一樣
   function rng(seed) {
-    let a = seed >>> 0;
-    return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const s = { a: seed >>> 0 };
+    const f = () => { s.a = (s.a + 0x6D2B79F5) | 0; let t = Math.imul(s.a ^ (s.a >>> 15), 1 | s.a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    f.s = s;
+    return f;
   }
 
   // ---------- 格子判定 ----------
@@ -724,6 +727,101 @@
     return { light, vis, paper, W, H };
   }
 
+  // ---------- 存檔 ----------
+  // 一局的完整狀態（魄的計時、尋路、亂數都存），讀回來接著跑，結果和沒存過一樣。
+  const SAVE_V = 1;
+  const PO_KEYS = ['id', 'x', 'y', 'hp', 'state', 'way', 'goal', 'linger', 'lastKnown', 'lostT', 'path', 'pathGoal', 'repathT', 'reach', 'waiting', 'windT', 'windVisible',
+    'stateT', 'stag', 'kvx', 'kvy', 'kt', 'burnT', 'goneT', 'formSpot', 'formWait', 'stuck', 'sample', 'sees', 'lureId', 'lingering'];
+  const PO_STATES = ['dormant', 'patrol', 'lure', 'investigate', 'search', 'chase', 'windup', 'recover', 'recoil', 'stagger', 'gone'];
+  const P_NUMS = ['x', 'y', 'aim', 'adapt', 'chill', 'armor', 'talismans', 'ink', 'swordCD', 'bellCD'];
+  const copy = (v) => (v == null ? v : JSON.parse(JSON.stringify(v)));
+  function serialize(g) {
+    const p = g.p;
+    let ex = '';
+    for (let i = 0; i < g.explored.length; i++) ex += g.explored[i] ? '1' : '0';
+    return {
+      v: SAVE_V, game: 'xieyi.deng', ver: R.VERSION, map: [g.m.W, g.m.H],
+      seed: g.seed, rng: g.rand.s.a, t: g.t, acc: g.acc, nid: g.nid, exposedNow: g.exposedNow,
+      exitReady: g.exitReady, exitOpen: g.exitOpen, seals: { name: g.seals.name, breath: g.seals.breath },
+      sealed: [...g.sealed].map(([i, q]) => ({ i, id: q.id, x: q.x, y: q.y, t: q.t, ex: [...q.exempt] })),
+      lures: copy(g.lures), flashes: copy(g.flashes), shots: copy(g.shots),
+      explored: ex, hints: [...g.hints], stats: Object.assign({}, g.stats),
+      p: Object.assign(Object.fromEntries(P_NUMS.map((k) => [k, p[k]])), {
+        lampOn: p.lampOn,
+        act: copy(p.act),
+        reading: p.reading && { spell: p.reading.spell, t: p.reading.t, dur: p.reading.dur, spot: { x: p.reading.spot.x, y: p.reading.spot.y, i: p.reading.spot.i } },
+        taking: p.taking && { key: p.taking.gate ? 'gate' : p.taking.a.key, t: p.taking.t, dur: p.taking.dur }
+      }),
+      pos: g.pos.map((e) => Object.fromEntries(PO_KEYS.map((k) => [k, copy(e[k])]))),
+      altars: g.altars.map((a) => a.taken), pickups: g.pickups.map((k) => k.taken)
+    };
+  }
+  // 讀檔：格式、版本、地圖、每個數字都要對；不對就整份不讀（回傳 null），不會讀一半
+  function restore(d, opt) {
+    try {
+      const fin = (v) => typeof v === 'number' && Number.isFinite(v);
+      const pt = (q) => q && fin(q.x) && fin(q.y);
+      const bool = (v) => typeof v === 'boolean';
+      if (!d || typeof d !== 'object' || d.v !== SAVE_V || d.game !== 'xieyi.deng') return null;
+      if (!fin(d.seed) || !fin(d.rng) || !fin(d.t) || d.t < 0 || !fin(d.acc) || !fin(d.nid)) return null;
+      const g = create({ seed: d.seed, rows: opt && opt.rows, way: opt && opt.way });
+      const m = g.m, W = m.W, H = m.H, inMap = (q) => pt(q) && q.x >= 0 && q.y >= 0 && q.x <= W && q.y <= H;
+      if (!Array.isArray(d.map) || d.map[0] !== W || d.map[1] !== H) return null;
+      if (!d.p || !P_NUMS.every((k) => fin(d.p[k])) || !bool(d.p.lampOn) || !inMap(d.p)) return null;
+      if (!Array.isArray(d.pos) || d.pos.length !== g.pos.length) return null;
+      if (!Array.isArray(d.altars) || d.altars.length !== g.altars.length || !Array.isArray(d.pickups) || d.pickups.length !== g.pickups.length) return null;
+      if (typeof d.explored !== 'string' || d.explored.length !== W * H) return null;
+      if (!d.seals || !bool(d.seals.name) || !bool(d.seals.breath) || !bool(d.exitReady) || !bool(d.exitOpen)) return null;
+      for (const q of d.pos) {
+        if (!PO_STATES.includes(q.state) || !inMap(q) || !fin(q.hp) || !Array.isArray(q.way) || !q.way.length) return null;
+        for (const k of ['linger', 'lostT', 'windT', 'stateT', 'stag', 'kvx', 'kvy', 'kt', 'burnT', 'goneT', 'formWait', 'stuck', 'repathT']) if (!fin(q[k])) return null;
+        if (q.path != null && !Array.isArray(q.path)) return null;
+      }
+      for (const arr of [d.lures, d.flashes, d.sealed]) if (!Array.isArray(arr) || arr.length > 64 || !arr.every((q) => inMap(q) && fin(q.t))) return null;
+      if (!Array.isArray(d.shots) || d.shots.length > 16 || !d.shots.every((q) => inMap(q) && fin(q.dir) && fin(q.dist))) return null;   // 飛在半空的火符沒有計時，看飛了多遠
+      g.rand.s.a = d.rng | 0; g.t = d.t; g.acc = Math.max(0, Math.min(R.STEP, d.acc)); g.nid = d.nid; g.exposedNow = !!d.exposedNow;
+      g.exitReady = d.exitReady; g.exitOpen = d.exitOpen; g.seals = { name: d.seals.name, breath: d.seals.breath };
+      g.sealed = new Map();
+      for (const q of d.sealed) { if (!m.doors.some((dr) => dr.i === q.i)) return null; g.sealed.set(q.i, { id: q.id, x: q.x, y: q.y, t: q.t, exempt: new Set(Array.isArray(q.ex) ? q.ex : []) }); }
+      g.lures = copy(d.lures); g.flashes = copy(d.flashes); g.shots = copy(d.shots);
+      for (let i = 0; i < W * H; i++) g.explored[i] = d.explored.charCodeAt(i) === 49 ? 1 : 0;
+      g.hints = new Set(Array.isArray(d.hints) ? d.hints.filter((h) => typeof h === 'string') : []);
+      for (const k in g.stats) if (d.stats && fin(d.stats[k])) g.stats[k] = d.stats[k];
+      d.altars.forEach((v, i) => { g.altars[i].taken = !!v; });
+      d.pickups.forEach((v, i) => { g.pickups[i].taken = !!v; });
+      const p = g.p;
+      for (const k of P_NUMS) p[k] = d.p[k];
+      p.lampOn = d.p.lampOn;
+      p.chill = clamp(p.chill, 0, R.P.chillMax); p.armor = clamp(Math.round(p.armor), 0, R.P.armorMax);
+      p.talismans = clamp(Math.round(p.talismans), 0, R.P.talismanMax); p.ink = clamp(Math.round(p.ink), 0, R.P.inkMax);
+      p.adapt = clamp(p.adapt, 0, 1); p.swordCD = clamp(p.swordCD, 0, R.SWORD.cd); p.bellCD = clamp(p.bellCD, 0, R.BELL.cd);
+      p.act = d.p.act && ['sword', 'fire'].includes(d.p.act.kind) && fin(d.p.act.t) && fin(d.p.act.dir) ? copy(d.p.act) : null;
+      p.reading = null;
+      const r = d.p.reading;
+      if (r && R.BOOK[r.spell] && fin(r.t) && fin(r.dur) && pt(r.spot)) {
+        const spot = r.spell === 'seal' ? m.doors.find((dr) => dr.i === r.spot.i) : { x: r.spot.x, y: r.spot.y };
+        if (spot) p.reading = { spell: r.spell, t: r.t, dur: r.dur, spot };
+      }
+      p.taking = null;
+      const tk = d.p.taking;
+      if (tk && fin(tk.t) && fin(tk.dur)) {
+        if (tk.key === 'gate') p.taking = { gate: true, t: tk.t, dur: tk.dur };
+        else { const a = g.altars.find((q) => q.key === tk.key && !q.taken); if (a) p.taking = { a, t: tk.t, dur: tk.dur }; }
+      }
+      pushOut(g, p);   // 萬一存在牆邊的浮點誤差
+      d.pos.forEach((q, i) => {
+        const e = g.pos[i];
+        for (const k of PO_KEYS) e[k] = copy(q[k]);
+        e.id = i + 1; e.vis = null;
+        if (!Array.isArray(e.path)) e.path = null;
+        if (!fin(e.pathGoal)) e.pathGoal = -1;
+        if (!pt(e.sample) || !fin(e.sample.t)) e.sample = { x: e.x, y: e.y, t: g.t };
+      });
+      g.drain();
+      return g;
+    } catch (err) { return null; }
+  }
+
   // ---------- 對外 ----------
   function api(g) {
     return {
@@ -747,11 +845,12 @@
       findDoor: () => findDoor(g),
       blocksMove: (x, y, e) => blocksMove(g, x, y, e),
       drain() { const ev = g.events; g.events = []; return ev; },
+      serialize: () => serialize(g),
       // 測試與除錯用
       tp(x, y) { g.p.x = x; g.p.y = y; },
       place(e, x, y, state) { e.x = x; e.y = y; if (state) e.state = state; e.path = null; e.goal = null; e.sample = { x, y, t: g.t }; }
     };
   }
 
-  root.ENGINE = { create, rng, angDiff };
+  root.ENGINE = { create, restore, rng, angDiff, SAVE_V };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

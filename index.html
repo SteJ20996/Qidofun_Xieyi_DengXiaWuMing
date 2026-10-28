@@ -62,8 +62,9 @@
       <div><span><kbd>U</kbd>（按住）</span><b>取印、推門閂</b></div>
       <div><span><kbd>P</kbd>／<kbd>Esc</kbd></span><b>暫停</b></div>
     </div>
-    <button id="btn-start" class="big">入宅</button>
-    <div class="dim small">Enter 也可以開始<span id="best"></span></div>
+    <div id="slots" class="slots"></div>
+    <div class="dim small warn" id="slot-msg"></div>
+    <div class="dim small">三格存檔：U、I、O 選一格，Enter 開始或繼續；滑鼠點也可以<span id="best"></span></div>
     <div class="dim small">左手 WASD 走位，右手 U I O P J K L ：M《》操作；不必按 Shift。</div>
     <div class="dim small" id="touchnote">這一版是試做：一個關卡，只做了鍵盤與滑鼠。</div>
   </div>
@@ -74,6 +75,7 @@
     <h2>暫停</h2>
     <p class="dim small" id="pause-why"></p>
     <div class="row"><button id="btn-resume" class="big">繼續</button><button id="btn-restart">重來</button><button id="btn-mute2">音效</button></div>
+    <div class="savebox"><div class="dim small">存到（U、I、O）：這一局自動存在自己那格；也可以把這一刻抄進別格，當作存檔點。</div><div id="saverow" class="saverow"></div><div class="small" id="save-msg"></div></div>
     <ul class="rules">
       <li><b>燈</b>：點著看得清，但魄從九格外就看得見你；隔著紙屏也看得到你的燈光。掩燈時，魄要靠到兩格左右才察覺。</li>
       <li><b>噬</b>：魄撲之前會停下來蓄力（約半秒）。看得見時頭上有「噬」字與紅圈；黑暗裡只有一聲嘶。退出紅圈，它就撲空，會愣一下。</li>
@@ -91,8 +93,8 @@
     <h2 id="end-title"></h2>
     <p id="end-text"></p>
     <table id="end-stats" class="stats"></table>
-    <button id="btn-again" class="big">再一夜</button>
-    <div class="dim small">Enter 也可以</div>
+    <div class="row"><button id="btn-load" class="big hidden"></button><button id="btn-again" class="big">再一夜</button></div>
+    <div class="dim small">Enter 是左邊那個</div>
   </div>
 </div>
 

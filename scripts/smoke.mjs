@@ -189,6 +189,101 @@ try {
   await shot('99-error').catch(() => {});
 }
 
+// ---------- 三格存檔（另開一個乾淨的瀏覽器設定檔） ----------
+const Q = base.includes('?') ? '&' : '?';
+try {
+  const sctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const sp = await sctx.newPage(); watch(sp);
+  const sev = (f) => sp.evaluate(f);
+  const sw = (ms) => sp.waitForTimeout(ms);
+  const open = async () => { await sp.goto(base + Q + 'seed=7'); await sp.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 30000 }); await sw(150); };
+  const slotTexts = () => sev(() => [...document.querySelectorAll('#slots .slot-b')].map((e) => e.textContent));
+  const still = () => sev(() => { const g = DENG.g; g.pos.forEach((e, i) => { g.place(e, 2.5 + i, 25.5, 'recover'); e.stateT = 999; }); });
+  await open();
+  let tx = await slotTexts();
+  ok('存檔：三格一開始都是空的', tx.length === 3 && tx.every((t) => t.includes('空')), tx);
+  await sp.screenshot({ path: path.join(out, '17-slots-empty.png') });
+  // 第一格開一局，走一下，暫停（自動存）
+  await sp.keyboard.press('KeyU'); await sp.keyboard.press('Enter'); await sw(300);
+  ok('存檔：U 選第一格、Enter 入宅', await sev(() => DENG.running && DENG.slot === 1 && document.getElementById('goal').textContent.includes('第一格')));
+  await sp.keyboard.down('KeyW'); await sw(400); await sp.keyboard.up('KeyW');
+  await sp.keyboard.press('Escape'); await sw(100); await sp.keyboard.press('Escape'); await sw(100);
+  ok('存檔：暫停時自動存到這一格', await sev(() => DENG.readSlot(1).kind === 'run'));
+  // 重新整理，第二格開新局，取名印（自動存）
+  await open();
+  await sp.keyboard.press('KeyI'); await sp.keyboard.press('Enter'); await sw(300);
+  ok('存檔：I 選第二格開新局', await sev(() => DENG.slot === 2));
+  await still();
+  await sev(() => { const g = DENG.g; const a = g.altars.find((q) => q.key === 'name'); g.tp(a.x + 0.8, a.y); DENG.snap(); });
+  await sp.keyboard.down('KeyU'); await sw(1250); await sp.keyboard.up('KeyU'); await sw(100);
+  const auto = await sev(() => ({ log: document.getElementById('log').textContent, sum: DENG.readSlot(2).d && DENG.readSlot(2).d.sum }));
+  ok('存檔：取印時自動存（旁側文字說存到第二格）', auto.log.includes('已自動存到第二格') && auto.sum && auto.sum.name, auto);
+  // 暫停：O 存到空的第三格；U 存到另一局的第一格要按兩次
+  await sp.keyboard.press('Escape'); await sw(100);
+  await sp.keyboard.press('KeyO'); await sw(100);
+  const s3 = await sev(() => ({ kind: DENG.readSlot(3).kind, msg: document.getElementById('save-msg').textContent }));
+  ok('存檔：暫停時 O 把這一刻抄到空的第三格', s3.kind === 'run' && s3.msg.includes('抄到第三格'), s3);
+  const id1 = await sev(() => DENG.readSlot(1).d.id);
+  await sp.keyboard.press('KeyU'); await sw(100);
+  const first = await sev(() => ({ id: DENG.readSlot(1).d.id, msg: document.getElementById('save-msg').textContent }));
+  await sp.screenshot({ path: path.join(out, '18-pause-save.png') });
+  await sp.keyboard.press('KeyU'); await sw(100);
+  const second = await sev(() => ({ id: DENG.readSlot(1).d.id, name: DENG.readSlot(1).d.sum.name }));
+  ok('存檔：蓋掉另一局要按兩次', first.id === id1 && first.msg.includes('再按一次') && second.id !== id1 && second.name, { first, second });
+  const where = await sev(() => ({ x: DENG.g.p.x, y: DENG.g.p.y, explored: DENG.g.explored.reduce((a, b) => a + b, 0) }));
+  await sp.keyboard.press('Escape'); await sw(100);
+  // 重新整理：第二格看得到名印；繼續之後名印、位置、地圖記憶都在
+  await open();
+  tx = await slotTexts();
+  const got = await sev(() => document.querySelectorAll('#slots .slot')[1].querySelectorAll('.mini.got').length);
+  await sp.screenshot({ path: path.join(out, '19-slots-saved.png') });
+  ok('存檔：重新整理後，第二格顯示取到名印', got === 1 && tx[1].includes('存於'), tx);
+  await sp.keyboard.press('KeyI'); await sp.keyboard.press('Enter'); await sw(300);
+  const back = await sev(() => ({ slot: DENG.slot, name: DENG.g.seals.name, x: DENG.g.p.x, y: DENG.g.p.y, explored: DENG.g.explored.reduce((a, b) => a + b, 0), log: document.getElementById('log').textContent }));
+  ok('存檔：繼續第二格，名印、位置、地圖記憶都在', back.slot === 2 && back.name && Math.hypot(back.x - where.x, back.y - where.y) < 0.05 && back.explored === where.explored && back.log.includes('接著玩'), { back, where });
+  // 失魂：從存檔接著
+  await sev(() => { const g = DENG.g; g.p.chill = 99.5; g.p.armor = 0; const e = g.pos[0]; g.place(e, g.p.x + 0.7, g.p.y, 'chase'); e.lastKnown = { x: g.p.x, y: g.p.y }; });
+  await sp.waitForFunction(() => DENG.g.state === 'lose', null, { timeout: 5000 }); await sw(200);
+  const lose = await sev(() => ({ load: !document.getElementById('btn-load').classList.contains('hidden'), text: document.getElementById('end-text').textContent }));
+  await sp.screenshot({ path: path.join(out, '20-lose-load.png') });
+  await sp.keyboard.press('Enter'); await sw(300);
+  const again = await sev(() => ({ st: DENG.g.state, name: DENG.g.seals.name, chill: DENG.g.p.chill, slot: DENG.slot }));
+  ok('存檔：失魂後 Enter 從第二格的存檔接著', lose.load && lose.text.includes('第二格存著') && again.st === 'play' && again.name && again.chill < 99 && again.slot === 2, { lose, again });
+  // 出宅：這一格記下出宅
+  await still();
+  await sev(() => { const g = DENG.g; const a = g.altars.find((q) => q.key === 'breath'); g.tp(a.x - 0.8, a.y); });
+  await sp.keyboard.down('KeyU'); await sw(1250); await sp.keyboard.up('KeyU');
+  await still();
+  await sev(() => { DENG.g.tp(20.0, 26.4); });
+  await sp.keyboard.down('KeyU'); await sw(1750); await sp.keyboard.up('KeyU');
+  await sp.keyboard.down('KeyS'); await sw(600); await sp.keyboard.up('KeyS'); await sw(300);
+  ok('存檔：出宅後這一格記下出宅', await sev(() => DENG.g.state === 'win' && DENG.readSlot(2).kind === 'done'));
+  // 壞掉的存檔：顯示讀不出來，可以在那一格從頭
+  await sev(() => localStorage.setItem('xieyi.deng.save.3', '{壞掉的'));
+  await open();
+  tx = await slotTexts();
+  ok('存檔：出宅過的格顯示紀錄', tx[1].includes('出宅過'), tx[1]);
+  await sp.keyboard.press('KeyO'); await sp.keyboard.press('Enter'); await sw(300);
+  ok('存檔：壞掉的格顯示讀不出來，Enter 在那一格從頭', tx[2].includes('讀不出來') && await sev(() => DENG.slot === 3 && DENG.readSlot(3).kind === 'run'), tx[2]);
+  await sctx.close();
+} catch (e) { ok('三格存檔整套', false, String(e && e.message || e)); }
+
+// 存不了檔的瀏覽器（例如無痕視窗擋掉 localStorage）：照樣能玩
+try {
+  const nctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  await nctx.addInitScript(() => { Object.defineProperty(window, 'localStorage', { configurable: true, get() { throw new Error('blocked'); } }); });
+  const np = await nctx.newPage(); watch(np);
+  await np.goto(base + Q + 'seed=7');
+  await np.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 30000 });
+  const info = await np.evaluate(() => ({ can: DENG.canSave, msg: document.getElementById('slot-msg').textContent, slot: document.querySelector('#slots .slot-b').textContent }));
+  await np.keyboard.press('Enter'); await np.waitForTimeout(300);
+  await np.keyboard.down('KeyW'); await np.waitForTimeout(300); await np.keyboard.up('KeyW');
+  await np.keyboard.press('Escape'); await np.waitForTimeout(100);
+  const pz = await np.evaluate(() => ({ running: DENG.running, disabled: [...document.querySelectorAll('#saverow button')].every((b) => b.disabled) }));
+  ok('存不了檔時照樣能玩，存檔鈕關掉並說明', !info.can && info.msg.includes('存不了') && info.slot.includes('存不了') && pz.running && pz.disabled, { info, pz });
+  await nctx.close();
+} catch (e) { ok('存不了檔的情況', false, String(e && e.message || e)); }
+
 // 手機寬度：開始畫面放得下
 const mctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 const mp = await mctx.newPage(); watch(mp);

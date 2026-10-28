@@ -118,6 +118,31 @@ h2 { font: 32px/1.2 var(--font); margin: 4px 0 10px; letter-spacing: 4px; }
 button.big { font: 22px var(--font); padding: 6px 34px; margin: 10px 6px 6px; background: var(--ink); color: var(--paper); border: 2px solid var(--ink); border-radius: 4px; cursor: pointer; letter-spacing: 4px; }
 button.big:hover { background: var(--red); border-color: var(--red); }
 .panel .row button:not(.big) { font: 17px var(--font); padding: 6px 18px; margin: 10px 4px 6px; background: transparent; border: 1.5px solid var(--ink); border-radius: 4px; cursor: pointer; color: var(--ink); }
+/* 三格存檔 */
+.slots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 14px 0 6px; }
+.slot { border: 1.5px solid rgba(28,26,23,.45); border-radius: 5px; padding: 8px 10px; background: rgba(255,255,255,.28); text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.slot.sel { border-color: var(--red); box-shadow: 0 0 0 2px rgba(180,57,42,.35); background: rgba(255,255,255,.5); }
+.slot-h { font-size: 17px; display: flex; align-items: center; gap: 6px; }
+.slot-b { font-size: 14px; line-height: 1.55; min-height: 3.1em; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.slot-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
+.slot-btns button { font: 16px var(--font); padding: 4px 14px; border-radius: 4px; cursor: pointer; border: 1.5px solid var(--ink); }
+.slot-btns .go { background: var(--ink); color: var(--paper); }
+.slot-btns .go:hover { background: var(--red); border-color: var(--red); }
+.slot-btns .fresh { background: transparent; color: var(--ink); }
+.mini { display: inline-grid; place-items: center; width: 20px; height: 20px; border: 1.5px solid var(--red); color: var(--red); border-radius: 3px; font-size: 12px; margin-right: 2px; }
+.mini.got { background: var(--red); color: #f7efe0; }
+.warn { color: var(--red-2); }
+.savebox { margin: 10px 0 2px; padding-top: 10px; border-top: 1px solid rgba(28,26,23,.2); }
+.saverow { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 6px 0 4px; }
+.savebtn { font: 16px var(--font); padding: 6px 14px; border: 1.5px solid var(--ink); background: transparent; color: var(--ink); border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 104px; }
+.savebtn:hover:not(:disabled) { background: rgba(28,26,23,.08); }
+.savebtn small { font-size: 12px; color: var(--ink-2); }
+.savebtn.mine { border-color: var(--red); }
+.savebtn:disabled { opacity: .5; cursor: default; }
+#save-msg { min-height: 1.4em; color: var(--red-2); }
+#goal .slotlab { font-size: 13px; color: var(--dim); }
+.panel .row button.plain { font: 17px var(--font); padding: 6px 18px; margin: 10px 4px 6px; background: transparent; border: 1.5px solid var(--ink); border-radius: 4px; cursor: pointer; color: var(--ink); }
+@media (max-width: 640px) { .slots { grid-template-columns: 1fr; } .slot-b { min-height: 0; } }
 ul.rules { text-align: left; font-size: 15px; line-height: 1.6; margin: 12px 0 0; padding-left: 1.2em; }
 ul.rules b { color: var(--red-2); font-weight: normal; }
 .endseal { width: 70px; height: 70px; margin: 0 auto; background: var(--red); color: #f7efe0; display: grid; place-items: center; font: 34px var(--font); border-radius: 5px; transform: rotate(-4deg); }
@@ -188,8 +213,9 @@ table.stats td:first-child { text-align: right; color: var(--ink-2); }
       <div><span><kbd>U</kbd>（按住）</span><b>取印、推門閂</b></div>
       <div><span><kbd>P</kbd>／<kbd>Esc</kbd></span><b>暫停</b></div>
     </div>
-    <button id="btn-start" class="big">入宅</button>
-    <div class="dim small">Enter 也可以開始<span id="best"></span></div>
+    <div id="slots" class="slots"></div>
+    <div class="dim small warn" id="slot-msg"></div>
+    <div class="dim small">三格存檔：U、I、O 選一格，Enter 開始或繼續；滑鼠點也可以<span id="best"></span></div>
     <div class="dim small">左手 WASD 走位，右手 U I O P J K L ：M《》操作；不必按 Shift。</div>
     <div class="dim small" id="touchnote">這一版是試做：一個關卡，只做了鍵盤與滑鼠。</div>
   </div>
@@ -200,6 +226,7 @@ table.stats td:first-child { text-align: right; color: var(--ink-2); }
     <h2>暫停</h2>
     <p class="dim small" id="pause-why"></p>
     <div class="row"><button id="btn-resume" class="big">繼續</button><button id="btn-restart">重來</button><button id="btn-mute2">音效</button></div>
+    <div class="savebox"><div class="dim small">存到（U、I、O）：這一局自動存在自己那格；也可以把這一刻抄進別格，當作存檔點。</div><div id="saverow" class="saverow"></div><div class="small" id="save-msg"></div></div>
     <ul class="rules">
       <li><b>燈</b>：點著看得清，但魄從九格外就看得見你；隔著紙屏也看得到你的燈光。掩燈時，魄要靠到兩格左右才察覺。</li>
       <li><b>噬</b>：魄撲之前會停下來蓄力（約半秒）。看得見時頭上有「噬」字與紅圈；黑暗裡只有一聲嘶。退出紅圈，它就撲空，會愣一下。</li>
@@ -217,8 +244,8 @@ table.stats td:first-child { text-align: right; color: var(--ink-2); }
     <h2 id="end-title"></h2>
     <p id="end-text"></p>
     <table id="end-stats" class="stats"></table>
-    <button id="btn-again" class="big">再一夜</button>
-    <div class="dim small">Enter 也可以</div>
+    <div class="row"><button id="btn-load" class="big hidden"></button><button id="btn-again" class="big">再一夜</button></div>
+    <div class="dim small">Enter 是左邊那個</div>
   </div>
 </div>
 
@@ -400,9 +427,12 @@ table.stats td:first-child { text-align: right; color: var(--ink-2); }
   const hyp = Math.hypot, PI = Math.PI;
   const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
   const angDiff = (a, b) => { let d = (a - b) % (2 * PI); if (d > PI) d -= 2 * PI; if (d < -PI) d += 2 * PI; return Math.abs(d); };
+  // 亂數：狀態放在 f.s.a，存檔才存得下、讀回來接著跑結果一樣
   function rng(seed) {
-    let a = seed >>> 0;
-    return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const s = { a: seed >>> 0 };
+    const f = () => { s.a = (s.a + 0x6D2B79F5) | 0; let t = Math.imul(s.a ^ (s.a >>> 15), 1 | s.a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    f.s = s;
+    return f;
   }
 
   // ---------- 格子判定 ----------
@@ -1117,6 +1147,101 @@ table.stats td:first-child { text-align: right; color: var(--ink-2); }
     return { light, vis, paper, W, H };
   }
 
+  // ---------- 存檔 ----------
+  // 一局的完整狀態（魄的計時、尋路、亂數都存），讀回來接著跑，結果和沒存過一樣。
+  const SAVE_V = 1;
+  const PO_KEYS = ['id', 'x', 'y', 'hp', 'state', 'way', 'goal', 'linger', 'lastKnown', 'lostT', 'path', 'pathGoal', 'repathT', 'reach', 'waiting', 'windT', 'windVisible',
+    'stateT', 'stag', 'kvx', 'kvy', 'kt', 'burnT', 'goneT', 'formSpot', 'formWait', 'stuck', 'sample', 'sees', 'lureId', 'lingering'];
+  const PO_STATES = ['dormant', 'patrol', 'lure', 'investigate', 'search', 'chase', 'windup', 'recover', 'recoil', 'stagger', 'gone'];
+  const P_NUMS = ['x', 'y', 'aim', 'adapt', 'chill', 'armor', 'talismans', 'ink', 'swordCD', 'bellCD'];
+  const copy = (v) => (v == null ? v : JSON.parse(JSON.stringify(v)));
+  function serialize(g) {
+    const p = g.p;
+    let ex = '';
+    for (let i = 0; i < g.explored.length; i++) ex += g.explored[i] ? '1' : '0';
+    return {
+      v: SAVE_V, game: 'xieyi.deng', ver: R.VERSION, map: [g.m.W, g.m.H],
+      seed: g.seed, rng: g.rand.s.a, t: g.t, acc: g.acc, nid: g.nid, exposedNow: g.exposedNow,
+      exitReady: g.exitReady, exitOpen: g.exitOpen, seals: { name: g.seals.name, breath: g.seals.breath },
+      sealed: [...g.sealed].map(([i, q]) => ({ i, id: q.id, x: q.x, y: q.y, t: q.t, ex: [...q.exempt] })),
+      lures: copy(g.lures), flashes: copy(g.flashes), shots: copy(g.shots),
+      explored: ex, hints: [...g.hints], stats: Object.assign({}, g.stats),
+      p: Object.assign(Object.fromEntries(P_NUMS.map((k) => [k, p[k]])), {
+        lampOn: p.lampOn,
+        act: copy(p.act),
+        reading: p.reading && { spell: p.reading.spell, t: p.reading.t, dur: p.reading.dur, spot: { x: p.reading.spot.x, y: p.reading.spot.y, i: p.reading.spot.i } },
+        taking: p.taking && { key: p.taking.gate ? 'gate' : p.taking.a.key, t: p.taking.t, dur: p.taking.dur }
+      }),
+      pos: g.pos.map((e) => Object.fromEntries(PO_KEYS.map((k) => [k, copy(e[k])]))),
+      altars: g.altars.map((a) => a.taken), pickups: g.pickups.map((k) => k.taken)
+    };
+  }
+  // 讀檔：格式、版本、地圖、每個數字都要對；不對就整份不讀（回傳 null），不會讀一半
+  function restore(d, opt) {
+    try {
+      const fin = (v) => typeof v === 'number' && Number.isFinite(v);
+      const pt = (q) => q && fin(q.x) && fin(q.y);
+      const bool = (v) => typeof v === 'boolean';
+      if (!d || typeof d !== 'object' || d.v !== SAVE_V || d.game !== 'xieyi.deng') return null;
+      if (!fin(d.seed) || !fin(d.rng) || !fin(d.t) || d.t < 0 || !fin(d.acc) || !fin(d.nid)) return null;
+      const g = create({ seed: d.seed, rows: opt && opt.rows, way: opt && opt.way });
+      const m = g.m, W = m.W, H = m.H, inMap = (q) => pt(q) && q.x >= 0 && q.y >= 0 && q.x <= W && q.y <= H;
+      if (!Array.isArray(d.map) || d.map[0] !== W || d.map[1] !== H) return null;
+      if (!d.p || !P_NUMS.every((k) => fin(d.p[k])) || !bool(d.p.lampOn) || !inMap(d.p)) return null;
+      if (!Array.isArray(d.pos) || d.pos.length !== g.pos.length) return null;
+      if (!Array.isArray(d.altars) || d.altars.length !== g.altars.length || !Array.isArray(d.pickups) || d.pickups.length !== g.pickups.length) return null;
+      if (typeof d.explored !== 'string' || d.explored.length !== W * H) return null;
+      if (!d.seals || !bool(d.seals.name) || !bool(d.seals.breath) || !bool(d.exitReady) || !bool(d.exitOpen)) return null;
+      for (const q of d.pos) {
+        if (!PO_STATES.includes(q.state) || !inMap(q) || !fin(q.hp) || !Array.isArray(q.way) || !q.way.length) return null;
+        for (const k of ['linger', 'lostT', 'windT', 'stateT', 'stag', 'kvx', 'kvy', 'kt', 'burnT', 'goneT', 'formWait', 'stuck', 'repathT']) if (!fin(q[k])) return null;
+        if (q.path != null && !Array.isArray(q.path)) return null;
+      }
+      for (const arr of [d.lures, d.flashes, d.sealed]) if (!Array.isArray(arr) || arr.length > 64 || !arr.every((q) => inMap(q) && fin(q.t))) return null;
+      if (!Array.isArray(d.shots) || d.shots.length > 16 || !d.shots.every((q) => inMap(q) && fin(q.dir) && fin(q.dist))) return null;   // 飛在半空的火符沒有計時，看飛了多遠
+      g.rand.s.a = d.rng | 0; g.t = d.t; g.acc = Math.max(0, Math.min(R.STEP, d.acc)); g.nid = d.nid; g.exposedNow = !!d.exposedNow;
+      g.exitReady = d.exitReady; g.exitOpen = d.exitOpen; g.seals = { name: d.seals.name, breath: d.seals.breath };
+      g.sealed = new Map();
+      for (const q of d.sealed) { if (!m.doors.some((dr) => dr.i === q.i)) return null; g.sealed.set(q.i, { id: q.id, x: q.x, y: q.y, t: q.t, exempt: new Set(Array.isArray(q.ex) ? q.ex : []) }); }
+      g.lures = copy(d.lures); g.flashes = copy(d.flashes); g.shots = copy(d.shots);
+      for (let i = 0; i < W * H; i++) g.explored[i] = d.explored.charCodeAt(i) === 49 ? 1 : 0;
+      g.hints = new Set(Array.isArray(d.hints) ? d.hints.filter((h) => typeof h === 'string') : []);
+      for (const k in g.stats) if (d.stats && fin(d.stats[k])) g.stats[k] = d.stats[k];
+      d.altars.forEach((v, i) => { g.altars[i].taken = !!v; });
+      d.pickups.forEach((v, i) => { g.pickups[i].taken = !!v; });
+      const p = g.p;
+      for (const k of P_NUMS) p[k] = d.p[k];
+      p.lampOn = d.p.lampOn;
+      p.chill = clamp(p.chill, 0, R.P.chillMax); p.armor = clamp(Math.round(p.armor), 0, R.P.armorMax);
+      p.talismans = clamp(Math.round(p.talismans), 0, R.P.talismanMax); p.ink = clamp(Math.round(p.ink), 0, R.P.inkMax);
+      p.adapt = clamp(p.adapt, 0, 1); p.swordCD = clamp(p.swordCD, 0, R.SWORD.cd); p.bellCD = clamp(p.bellCD, 0, R.BELL.cd);
+      p.act = d.p.act && ['sword', 'fire'].includes(d.p.act.kind) && fin(d.p.act.t) && fin(d.p.act.dir) ? copy(d.p.act) : null;
+      p.reading = null;
+      const r = d.p.reading;
+      if (r && R.BOOK[r.spell] && fin(r.t) && fin(r.dur) && pt(r.spot)) {
+        const spot = r.spell === 'seal' ? m.doors.find((dr) => dr.i === r.spot.i) : { x: r.spot.x, y: r.spot.y };
+        if (spot) p.reading = { spell: r.spell, t: r.t, dur: r.dur, spot };
+      }
+      p.taking = null;
+      const tk = d.p.taking;
+      if (tk && fin(tk.t) && fin(tk.dur)) {
+        if (tk.key === 'gate') p.taking = { gate: true, t: tk.t, dur: tk.dur };
+        else { const a = g.altars.find((q) => q.key === tk.key && !q.taken); if (a) p.taking = { a, t: tk.t, dur: tk.dur }; }
+      }
+      pushOut(g, p);   // 萬一存在牆邊的浮點誤差
+      d.pos.forEach((q, i) => {
+        const e = g.pos[i];
+        for (const k of PO_KEYS) e[k] = copy(q[k]);
+        e.id = i + 1; e.vis = null;
+        if (!Array.isArray(e.path)) e.path = null;
+        if (!fin(e.pathGoal)) e.pathGoal = -1;
+        if (!pt(e.sample) || !fin(e.sample.t)) e.sample = { x: e.x, y: e.y, t: g.t };
+      });
+      g.drain();
+      return g;
+    } catch (err) { return null; }
+  }
+
   // ---------- 對外 ----------
   function api(g) {
     return {
@@ -1140,13 +1265,14 @@ table.stats td:first-child { text-align: right; color: var(--ink-2); }
       findDoor: () => findDoor(g),
       blocksMove: (x, y, e) => blocksMove(g, x, y, e),
       drain() { const ev = g.events; g.events = []; return ev; },
+      serialize: () => serialize(g),
       // 測試與除錯用
       tp(x, y) { g.p.x = x; g.p.y = y; },
       place(e, x, y, state) { e.x = x; e.y = y; if (state) e.state = state; e.path = null; e.goal = null; e.sample = { x, y, t: g.t }; }
     };
   }
 
-  root.ENGINE = { create, rng, angDiff };
+  root.ENGINE = { create, restore, rng, angDiff, SAVE_V };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
 </script>
@@ -1687,42 +1813,151 @@ table.stats td:first-child { text-align: right; color: var(--ink-2); }
   }
   $('hint').addEventListener('click', () => $('hint').classList.add('hidden'));
 
-  // ---------- 開局、暫停、結束 ----------
+  // ---------- 存檔：三格 ----------
+  // 每一格存一局。這一局自動存在自己那格（取印、推開門閂、暫停、關頁面時）；暫停面板「存到」可以把這一刻抄進別格。
+  // 別局的存檔要按兩次才蓋掉（頁面裡不能跳確認框）。瀏覽器存不了（無痕視窗等）時照樣能玩，只是存不下來。
+  const SLOTS = 3, CN = ['', '一', '二', '三'], SLOT_KEY = { KeyU: 1, KeyI: 2, KeyO: 3 }, KEY_OF = ['', 'U', 'I', 'O'];
+  const skey = (n) => 'xieyi.deng.save.' + n;
+  const lsGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  const lsSet = (k, v) => { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } };
+  const canSave = (() => { const ok = lsSet('xieyi.deng.probe', '1'); try { localStorage.removeItem('xieyi.deng.probe'); } catch (e) { /* 沒有就算了 */ } return ok; })();
+  let slot = Math.min(SLOTS, Math.max(1, +lsGet('xieyi.deng.slot') || 1)), sel = slot, runId = '';
+  let armed = { start: 0, pause: 0, restart: false }, armTimer = 0;
+  function readSlot(n) {
+    const raw = lsGet(skey(n));
+    if (!raw) return { kind: canSave ? 'empty' : 'off' };
+    try { const d = JSON.parse(raw); if (d && d.done) return { kind: 'done', d }; if (d && d.run) return { kind: 'run', d }; } catch (e) { /* 壞了 */ }
+    return { kind: 'bad' };
+  }
+  const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  function saveTo(n, id) {
+    if (!g || !running || g.state !== 'play') return false;
+    const sum = { name: g.seals.name, breath: g.seals.breath, gate: g.exitOpen, t: g.t, chill: Math.round(g.p.chill), armor: g.p.armor };
+    return lsSet(skey(n), JSON.stringify({ id: id || runId, at: Date.now(), ver: R.VERSION, sum, run: g.serialize() }));
+  }
+  function autosave(say) {
+    if (!saveTo(slot)) return false;
+    lsSet('xieyi.deng.slot', String(slot));
+    if (say) log(`已自動存到第${CN[slot]}格`, 'good');
+    return true;
+  }
+  function when(at) { const d = new Date(at); return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; }
+  function slotInfo(r) {   // 一格的摘要
+    if (r.kind === 'off') return '這個瀏覽器存不了檔';
+    if (r.kind === 'empty') return '空的';
+    if (r.kind === 'bad') return '存檔讀不出來，可以從頭開始';
+    if (r.kind === 'done') return `出宅過，用時 ${fmt(r.d.t || 0)}<br><span class="dim">${when(r.d.at)}</span>`;
+    const q = r.d.sum || {};
+    return `<span class="mini${q.name ? ' got' : ''}">名</span><span class="mini${q.breath ? ' got' : ''}">息</span> ${fmt(q.t || 0)}・寒 ${q.chill == null ? '?' : q.chill}・護 ${q.armor == null ? '?' : q.armor}<br><span class="dim">存於 ${when(r.d.at)}</span>`;
+  }
+  function arm(kind, v) {
+    armed[kind] = v; clearTimeout(armTimer);
+    armTimer = setTimeout(() => { disarm(); if (!$('start').classList.contains('hidden')) renderSlots(); if (!$('pause').classList.contains('hidden')) renderSaveRow(); }, 4000);
+  }
+  function disarm() { armed = { start: 0, pause: 0, restart: false }; clearTimeout(armTimer); $('btn-restart').textContent = '重來'; }
+  // 開始畫面：三格
+  function renderSlots() {
+    const box = $('slots'); box.innerHTML = '';
+    for (let n = 1; n <= SLOTS; n++) {
+      const r = readSlot(n), isRun = r.kind === 'run';
+      const d = document.createElement('div');
+      d.className = 'slot' + (n === sel ? ' sel' : ''); d.dataset.n = n;
+      d.innerHTML = `<div class="slot-h"><kbd>${KEY_OF[n]}</kbd>第${CN[n]}格</div><div class="slot-b">${slotInfo(r)}</div>` +
+        `<div class="slot-btns"><button class="go">${isRun ? '繼續' : '入宅'}</button>${isRun ? `<button class="fresh">${armed.start === n ? '再按一次，從頭' : '從頭'}</button>` : ''}</div>`;
+      d.addEventListener('click', () => { if (sel !== n) { sel = n; disarm(); renderSlots(); } });
+      d.querySelector('.go').addEventListener('click', (ev) => { ev.stopPropagation(); sel = n; startSel(); });
+      const fr = d.querySelector('.fresh');
+      if (fr) fr.addEventListener('click', (ev) => { ev.stopPropagation(); sel = n; if (armed.start === n) { SFX.unlock(); newGame(n); } else { arm('start', n); renderSlots(); } });
+      box.appendChild(d);
+    }
+  }
+  function startSel() { SFX.unlock(); if (readSlot(sel).kind === 'run') { if (!continueGame(sel)) renderSlots(); } else newGame(sel); }
+  // 暫停面板：存到哪一格
+  function renderSaveRow() {
+    const box = $('saverow'); box.innerHTML = '';
+    for (let n = 1; n <= SLOTS; n++) {
+      const r = readSlot(n), mine = n === slot;
+      const b = document.createElement('button');
+      b.className = 'savebtn' + (mine ? ' mine' : ''); b.disabled = !canSave; b.dataset.slot = n;
+      const sub = !canSave ? '存不了' : armed.pause === n ? '再按一次覆蓋' : mine ? '這一局' : r.kind === 'run' ? '另一局' : r.kind === 'done' ? '出宅過' : r.kind === 'bad' ? '壞了' : '空的';
+      b.innerHTML = `<span><kbd>${KEY_OF[n]}</kbd>第${CN[n]}格</span><small>${sub}</small>`;
+      b.addEventListener('click', (ev) => { ev.currentTarget.blur(); saveAs(n); });
+      box.appendChild(b);
+    }
+  }
+  function saveAs(n) {
+    if (!canSave || !running) return;
+    const msg = $('save-msg');
+    if (n === slot) { msg.textContent = saveTo(slot) ? `已存到第${CN[n]}格。` : '存不進去。'; disarm(); renderSaveRow(); return; }
+    const r = readSlot(n);
+    if (r.kind === 'run' && armed.pause !== n) { arm('pause', n); msg.textContent = `第${CN[n]}格是另一局的存檔，再按一次就蓋掉它。`; renderSaveRow(); return; }
+    msg.textContent = saveTo(n, newId()) ? `這一刻抄到第${CN[n]}格了。這一局之後還是自動存在第${CN[slot]}格。` : '存不進去。';
+    disarm(); renderSaveRow();
+  }
+
+  // ---------- 開局、接著玩、暫停、結束 ----------
   function seedFromUrl() { const m = /[?&]seed=(\d+)/.exec(location.search); return m ? +m[1] : (Date.now() % 100000) | 0; }
-  function newGame(seed) {
-    g = E.create({ seed: seed == null ? seedFromUrl() : seed });
-    window.DENG.g = g;
+  function enter(gg) {
+    g = gg; window.DENG.g = g;
     RD.setGame(g);
     $('log').innerHTML = ''; $('hint').classList.add('hidden');
     ['start', 'pause', 'end'].forEach((id) => $(id).classList.add('hidden'));
     $('hud').classList.remove('hidden');
     paused = false; running = true; snap = true; keys.clear(); holdTake = false; press = {};
+    disarm(); $('save-msg').textContent = '';
+    lsSet('xieyi.deng.slot', String(slot));
+  }
+  function newGame(n, seed) {
+    if (n) slot = n;
+    runId = newId();
+    enter(E.create({ seed: seed == null ? seedFromUrl() : seed }));
     handle(g.drain());
+    autosave(false);   // 這一格從現在起是這一局
+  }
+  function continueGame(n) {
+    const r = readSlot(n);
+    if (r.kind !== 'run') return false;
+    const gg = E.restore(r.d.run);
+    if (!gg) { $('slot-msg').textContent = `第${CN[n]}格的存檔讀不出來（可能是別的版本存的）。可以按「從頭」在這一格重新開始。`; return false; }
+    slot = n; runId = r.d.id || newId();
+    enter(gg);
+    log(`從第${CN[n]}格接著玩`, 'good');
+    return true;
   }
   function setPause(on, why) {
     if (!running) return;
     paused = on;
+    if (on) autosave(false);
     $('pause').classList.toggle('hidden', !on);
-    $('pause-why').textContent = why === 'blur' ? '視窗失去焦點，先停下來。冷卻、讀咒、取印都停在原處。' : '冷卻、讀咒、取印都停在原處。';
+    $('pause-why').textContent = (why === 'blur' ? '視窗失去焦點，先停下來。' : '') + '冷卻、讀咒、取印都停在原處。' + (canSave ? `這一局已自動存到第${CN[slot]}格。` : '這個瀏覽器存不了檔。');
     keys.clear(); holdTake = false; press = {};
+    disarm(); $('save-msg').textContent = '';
+    if (on) renderSaveRow();
   }
   function fmt(s) { const m = Math.floor(s / 60), r = Math.floor(s % 60); return m + ':' + String(r).padStart(2, '0'); }
-  function best() { try { return +localStorage.getItem('xieyi.deng.best') || 0; } catch (e) { return 0; } }
+  function best() { return +lsGet('xieyi.deng.best') || 0; }
   function showBest() { const b = best(); $('best').textContent = b ? ' · 最快出宅 ' + fmt(b) : ''; }
   function endGame(win) {
     running = false;
     const s = g.stats;
     let rec = '';
-    if (win) { const b = best(); if (!b || g.t < b) { try { localStorage.setItem('xieyi.deng.best', String(g.t)); } catch (e) { /* 沒有就算了 */ } rec = '（新紀錄）'; } }
+    if (win) { const b = best(); if (!b || g.t < b) { lsSet('xieyi.deng.best', String(g.t)); rec = '（新紀錄）'; } }
+    if (win) lsSet(skey(slot), JSON.stringify({ done: true, id: runId, t: g.t, at: Date.now() }));   // 這一夜結束了，這一格留下出宅的紀錄
+    const r = readSlot(slot), canLoad = !win && r.kind === 'run';
     $('end-seal').textContent = win ? '出' : '失';
     $('end-seal').className = 'endseal' + (win ? '' : ' lose');
     $('end-title').textContent = win ? '出宅' : '失魂';
-    $('end-text').textContent = win ? '天還沒亮，你帶著名印與息印出了大門。' : '寒意滿了。紙宅的夜，還沒過完。';
+    $('end-text').innerHTML = win ? '天還沒亮，你帶著名印與息印出了大門。' : '寒意滿了。紙宅的夜，還沒過完。' + (canLoad ? `<br>第${CN[slot]}格存著：${slotInfo(r)}` : '');
     const rows = [['用時', fmt(g.t) + rec], ['兩印', (g.seals.name ? '名' : '　') + ' ' + (g.seals.breath ? '息' : '　')], ['最高寒意', Math.round(s.maxChill)], ['被咬', s.bites + ' 次（護持擋下 ' + s.armorLost + '）'], ['魄撲空', s.whiffs + ' 次'], ['打散魄', s.disperse + ' 次'], ['用了', `劍 ${s.swordHits + s.swordMiss}・鈴 ${s.bells}・火符 ${s.fires}・咒 ${s.reads}`]];
     $('end-stats').innerHTML = rows.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('');
+    $('btn-load').classList.toggle('hidden', !canLoad);
+    $('btn-load').textContent = `從第${CN[slot]}格的存檔接著`;
+    $('btn-again').textContent = win ? '再一夜' : '從頭再一夜';
+    $('btn-again').className = canLoad ? 'plain' : 'big';
     $('end').classList.remove('hidden');
     SFX.play(win ? 'win' : 'lose');
   }
+  function endPrimary() { SFX.unlock(); if (!$('btn-load').classList.contains('hidden') && continueGame(slot)) return; newGame(slot); }
 
   // ---------- 事件 → 聲音、旁側文字、提示 ----------
   function handle(evs) {
@@ -1752,12 +1987,12 @@ table.stats td:first-child { text-align: right; color: var(--ink-2); }
         case 'borrowDone': log('借火：火會燒十五秒，魄會被火吸引過去', 'good'); break;
         case 'takeStart': log(e.key === 'gate' ? '推門閂……' : '取印中……'); break;
         case 'takeCancel': if (e.why === 'bite') log('被咬，要重來', 'warn'); break;
-        case 'seal': SFX.play('seal'); log('取得' + e.glyph + '印', 'good'); break;
+        case 'seal': SFX.play('seal'); log('取得' + e.glyph + '印', 'good'); autosave(true); break;
         case 'wake': SFX.play('wake'); log(e.why === 'bell' ? '鈴聲吵醒了什麼' : e.why === 'touch' ? '你撞醒了一隻魄' : '宅裡有東西醒了', 'warn'); break;
         case 'disperse': SFX.play('disperse'); log('魄散了，過一陣子會在別處凝回來', 'good'); break;
         case 'reformStart': if (g.spotVisible(e)) log('那裡有東西在凝形', 'warn'); break;
         case 'exitReady': log('兩印到手：回大門推開門閂', 'good'); break;
-        case 'gateOpen': SFX.play('door'); log('門閂推開了，快出去', 'good'); break;
+        case 'gateOpen': SFX.play('door'); log('門閂推開了，快出去', 'good'); autosave(true); break;
         case 'pickup': log('撿到一張火符', 'good'); break;
         case 'lamp': SFX.play('lamp', e.on); break;
         case 'win': endGame(true); break;
@@ -1774,10 +2009,15 @@ table.stats td:first-child { text-align: right; color: var(--ink-2); }
   const HOLD = 'KeyU';
   addEventListener('keydown', (ev) => {
     if (ev.code.startsWith('Arrow') || ev.code === 'Space') ev.preventDefault();
-    if (!$('start').classList.contains('hidden')) { if (ev.code === 'Enter' || ev.code === 'NumpadEnter') { ev.preventDefault(); begin(); } return; }
-    if (!$('end').classList.contains('hidden')) { if (ev.code === 'Enter' || ev.code === 'NumpadEnter') { ev.preventDefault(); newGame(); } return; }
+    if (!$('start').classList.contains('hidden')) {   // 開始畫面：U、I、O 選格，Enter 開始或繼續
+      if (SLOT_KEY[ev.code]) { sel = SLOT_KEY[ev.code]; disarm(); renderSlots(); return; }
+      if (ev.code === 'Enter' || ev.code === 'NumpadEnter') { ev.preventDefault(); startSel(); }
+      return;
+    }
+    if (!$('end').classList.contains('hidden')) { if (ev.code === 'Enter' || ev.code === 'NumpadEnter') { ev.preventDefault(); endPrimary(); } return; }
     if (ev.code === 'Escape' || ev.code === 'KeyP') { setPause(!paused); return; }
-    if (paused || !running) return;
+    if (paused) { if (SLOT_KEY[ev.code] && !ev.repeat) saveAs(SLOT_KEY[ev.code]); return; }   // 暫停時 U、I、O：存到那一格
+    if (!running) return;
     if (MOVE[ev.code]) keys.add(ev.code);
     if (ev.repeat) return;
     if (ACT[ev.code]) press[ACT[ev.code]] = true;
@@ -1785,6 +2025,7 @@ table.stats td:first-child { text-align: right; color: var(--ink-2); }
   });
   addEventListener('keyup', (ev) => { keys.delete(ev.code); if (ev.code === HOLD) holdTake = false; });
   addEventListener('blur', () => { keys.clear(); holdTake = false; if (running && !paused) setPause(true, 'blur'); });
+  addEventListener('pagehide', () => { if (running && g && g.state === 'play') autosave(false); });
   document.addEventListener('visibilitychange', () => { if (document.hidden) { keys.clear(); holdTake = false; if (running && !paused) setPause(true, 'blur'); } });
   addEventListener('mousemove', (ev) => { mouse.x = ev.clientX; mouse.y = ev.clientY; mouse.t = performance.now(); mouse.in = true; });
   document.addEventListener('mouseleave', () => { mouse.in = false; });
@@ -1821,7 +2062,7 @@ table.stats td:first-child { text-align: right; color: var(--ink-2); }
     const ex = g.exposedNow, xe = $('expose');
     xe.className = ex ? 'on' : 'off';
     xe.innerHTML = ex ? '<b>顯</b>' + (p.lampOn ? '燈亮著，魄從遠處看得見你' : '你站在光裡，魄看得見你') : '<b>隱</b>魄要靠很近才察覺';
-    $('goal').innerHTML = `<span class="s${g.seals.name ? ' got' : ''}"><i>名</i>印</span><span class="s${g.seals.breath ? ' got' : ''}"><i>息</i>印</span><span class="door${g.exitOpen ? ' open' : ''}">大門${g.exitOpen ? '開了' : g.exitReady ? '可以推開' : '關著'}</span>`;
+    $('goal').innerHTML = `<span class="slotlab">第${CN[slot]}格</span><span class="s${g.seals.name ? ' got' : ''}"><i>名</i>印</span><span class="s${g.seals.breath ? ' got' : ''}"><i>息</i>印</span><span class="door${g.exitOpen ? ' open' : ''}">大門${g.exitOpen ? '開了' : g.exitReady ? '可以推開' : '關著'}</span>`;
     $('t-sword').style.setProperty('--cd', p.swordCD / R.SWORD.cd);
     $('t-bell').style.setProperty('--cd', p.bellCD / R.BELL.cd);
     $('fire-n').textContent = '×' + p.talismans;
@@ -1856,11 +2097,14 @@ table.stats td:first-child { text-align: right; color: var(--ink-2); }
     requestAnimationFrame(loop);
   }
 
-  function begin() { SFX.unlock(); newGame(); }
-  $('btn-start').addEventListener('click', begin);
-  $('btn-again').addEventListener('click', () => { SFX.unlock(); newGame(); });
+  $('btn-load').addEventListener('click', () => { SFX.unlock(); if (!continueGame(slot)) newGame(slot); });
+  $('btn-again').addEventListener('click', () => { SFX.unlock(); newGame(slot); });
   $('btn-resume').addEventListener('click', () => setPause(false));
-  $('btn-restart').addEventListener('click', () => newGame());
+  $('btn-restart').addEventListener('click', (ev) => {   // 重來會蓋掉這一格的這一局：按兩次
+    ev.currentTarget.blur();
+    if (armed.restart) { newGame(slot); return; }
+    arm('restart', true); ev.currentTarget.textContent = `再按一次：第${CN[slot]}格從頭開始`;
+  });
   $('btn-pause').addEventListener('click', (ev) => { setPause(true); ev.currentTarget.blur(); });
   const muteBtns = () => ['btn-mute', 'btn-mute2'].forEach((id) => { $(id).classList.toggle('off', SFX.muted); $(id).textContent = SFX.muted ? '音效關' : '音效'; });
   ['btn-mute', 'btn-mute2'].forEach((id) => $(id).addEventListener('click', (ev) => { SFX.unlock(); SFX.toggle(); muteBtns(); ev.currentTarget.blur(); }));
@@ -1868,8 +2112,10 @@ table.stats td:first-child { text-align: right; color: var(--ink-2); }
   if (window.matchMedia && matchMedia('(pointer: coarse)').matches && !matchMedia('(pointer: fine)').matches) $('touchnote').textContent = '這一版是試做，只做了鍵盤與滑鼠；手機上還不能玩。';
 
   // 先在背景擺好宅子（開始畫面後面看得到一點點）
-  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, setPause, snap() { snap = true; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
+  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, continueGame, setPause, saveAs, readSlot, canSave, snap() { snap = true; }, get slot() { return slot; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
   g = E.create({ seed: seedFromUrl() }); window.DENG.g = g; RD.setGame(g); g.drain();
+  renderSlots();
+  if (!canSave) $('slot-msg').textContent = '這個瀏覽器存不了檔（例如無痕視窗）：照樣能玩，只是關掉就沒了。';
   const fontReady = document.fonts && document.fonts.load ? document.fonts.load('32px "LXGW WenKai TC"', '燈下無明魄噬人火封') : Promise.resolve();
   fontReady.catch(() => {}).then(() => { RD.rebuild(); window.DENG.ready = true; });
   requestAnimationFrame(loop);

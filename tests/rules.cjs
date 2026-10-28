@@ -303,5 +303,76 @@ const doorRoom = (set) => { for (let y = 1; y < 15; y++) set(5, y, '#'); set(5, 
   ok('劍落空會說原因（差一步／偏了）', m1 && m1.why === 'far' && m2 && m2.why === 'dir', { far: m1 && m1.why, dir: m2 && m2.why });
 }
 
+// ---------- 存檔 ----------
+{ // 任何時刻存檔、讀回來接著跑，和沒存過的那一局一步一步完全一樣（包含魄的計時、尋路、亂數）
+  const rnd = ENGINE.rng(4242);
+  const floors = []; { const g0 = mk(); for (let y = 0; y < g0.m.H; y++) for (let x = 0; x < g0.m.W; x++) if (!g0.blocksMove(x, y, g0.p)) floors.push([x + 0.5, y + 0.5]); }
+  const script = (k) => { const r = ENGINE.rng(1000 + k); const a = r() * 6.283; return (i) => { const q = ENGINE.rng(i * 7919 + k)(); const pr = {}; for (const [key, th] of [['sword', 0.02], ['bell', 0.004], ['fire', 0.004], ['lamp', 0.004], ['read1', 0.004], ['read2', 0.004]]) if (q < th) pr[key] = true; return { mx: Math.cos(a + i / 90), my: Math.sin(a + i / 90), aim: a + i / 50, target: { x: 20, y: 12 }, press: pr, hold: { take: (i % 300) < 120 } }; }; };
+  let same = 0, total = 0; const kinds = new Set(); const bad = [];
+  for (let k = 0; k < 24; k++) {
+    const g = mk({ seed: 300 + k });
+    // 先玩一陣：把人放到魄附近、偶爾取印，製造各種狀態
+    const f0 = floors[Math.floor(rnd() * floors.length)]; g.tp(f0[0], f0[1]);
+    if (k % 3 === 0) { const e = g.pos[0]; g.place(e, g.p.x + 1.1, g.p.y, 'chase'); e.lastKnown = { x: g.p.x, y: g.p.y }; }
+    if (k % 4 === 1) { const a = g.altars[k % 2]; g.tp(a.x + 0.7, a.y); }
+    const s0 = script(k);
+    run(g, 1 + (k % 5) * 0.7, (gg, i) => s0(i));
+    for (const e of g.pos) kinds.add(e.state);
+    if (g.p.reading) kinds.add('reading'); if (g.p.taking) kinds.add('taking'); if (g.shots.length) kinds.add('shot'); if (g.sealed.size) kinds.add('sealed'); if (g.lures.length) kinds.add('lure');
+    if (g.state !== 'play') continue;
+    const snap = JSON.parse(JSON.stringify(g.serialize()));
+    const h = ENGINE.restore(snap);
+    if (!h) { bad.push(k); continue; }
+    total++;
+    const s1 = script(k + 50);
+    for (let i = 0; i < 720; i++) { const v = s1(i); g.step(R.STEP, v); h.step(R.STEP, v); if (g.state !== 'play') break; }
+    const a = JSON.stringify(g.serialize()), b = JSON.stringify(h.serialize());
+    if (a === b && g.state === h.state) same++; else bad.push(k);
+  }
+  ok('隨機時刻存檔讀回來接著跑，六秒後兩局完全一樣', same === total && total >= 20 && bad.length === 0, { same, total, bad, states: [...kinds] });
+}
+{ // 指定的難存時刻：每一種都存一次、讀回來，接著跑六秒和原本完全一樣
+  const ahead = (i) => ({ mx: Math.cos(i / 70), my: Math.sin(i / 70), aim: i / 40, press: i % 97 === 0 ? { sword: true } : {}, hold: { take: true } });
+  const moments = {
+    '魄正在蓄撲': (g) => { const e = g.pos[0]; g.tp(19.5, 3.5); g.place(e, 20.2, 3.5, 'chase'); e.lastKnown = { x: 19.5, y: 3.5 }; run(g, 0.2, {}, () => e.state === 'windup'); run(g, 0.1, {}); return e.state === 'windup'; },
+    '讀借火讀到一半': (g) => { g.tp(14.5, 13.5); run(g, R.STEP, { aim: 0, press: { read1: true } }); run(g, 0.5, {}); return !!g.p.reading; },
+    '讀封戶讀到一半': (g) => { g.tp(18.5, 17.4); run(g, R.STEP, { press: { read2: true } }); run(g, 0.4, {}); return !!g.p.reading && g.p.reading.spell === 'seal'; },
+    '取印取到一半': (g) => { const a = g.altars[0]; g.tp(a.x + 0.7, a.y); run(g, 0.5, { hold: { take: true } }); return !!g.p.taking; },
+    '推門閂推到一半': (g) => { for (const a of g.altars) { g.tp(a.x + 0.7, a.y); run(g, 1.1, { hold: { take: true } }); } for (const e of g.pos) g.place(e, 2.5 + e.id, 2.5, 'recover'), (e.stateT = 99); g.tp(20, 26.4); run(g, 0.7, { hold: { take: true } }); return !!(g.p.taking && g.p.taking.gate); },
+    '火符飛在半空': (g) => { g.tp(14.5, 13.5); run(g, 0.2, { aim: 0, press: { fire: true } }); return g.shots.length > 0; },
+    '魄被擊退、還在燒': (g) => { const e = g.pos[0]; g.tp(19.5, 3.5); g.place(e, 20.5, 3.5, 'recover'); e.stateT = 99; e.burnT = 2; run(g, R.SWORD.windup + R.STEP * 3, { aim: 0, press: { sword: true } }); return e.kt > 0 && e.burnT > 0; },
+    '廊口封著、魄在封印格裡': (g) => { const e = g.pos[0]; g.place(e, 19.5, 18.5, 'investigate'); e.lastKnown = { x: 19.5, y: 21.5 }; g.sealed.set(18 * g.m.W + 19, { id: 77, x: 19, y: 18, t: 6, exempt: new Set([e.id]) }); return g.sealed.size === 1; },
+    '借火燒著、魄被引過去': (g) => { const e = g.pos[0]; g.tp(14.5, 13.5); g.p.lampOn = false; g.lures.push({ id: 88, x: 22.5, y: 13.5, t: 10 }); g.place(e, 23.5, 9.5, 'patrol'); run(g, 0.5, {}); return e.state === 'lure'; },
+    '魄正在凝形': (g) => { const e = g.pos[0]; g.tp(19.5, 3.5); g.place(e, 20.5, 3.5, 'recover'); e.stateT = 99; e.hp = 1; run(g, 0.3, { aim: 0, press: { sword: true } }); e.goneT = 1.0; run(g, 0.1, {}); return e.state === 'gone' && !!e.formSpot; }
+  };
+  const res = {};
+  for (const [name, setup] of Object.entries(moments)) {
+    const g = mk({ seed: 77 }); g.drain();
+    const okSet = setup(g);
+    const h = ENGINE.restore(JSON.parse(JSON.stringify(g.serialize())));
+    if (!okSet || !h) { res[name] = okSet ? '讀不回來' : '沒擺成'; continue; }
+    for (let i = 0; i < 720; i++) { const v = ahead(i); g.step(R.STEP, v); h.step(R.STEP, v); if (g.state !== 'play') break; }
+    res[name] = JSON.stringify(g.serialize()) === JSON.stringify(h.serialize()) && g.state === h.state ? '一樣' : '不一樣';
+  }
+  ok('十種難存時刻：存了讀回來接著跑都一樣', Object.values(res).every((v) => v === '一樣'), res);
+}
+{ // 壞的存檔整份不讀
+  const g = mk(); run(g, 1, { mx: 0, my: -1 });
+  const good = JSON.parse(JSON.stringify(g.serialize()));
+  const mut = (f) => { const d = JSON.parse(JSON.stringify(good)); f(d); return d; };
+  const cases = {
+    '空的': null, '字串': 'garbage', '空物件': {}, '版本不對': mut((d) => { d.v = 99; }), '別的遊戲': mut((d) => { d.game = 'xieyi.zhan'; }),
+    '地圖大小不對': mut((d) => { d.map = [10, 10]; }), '座標不是數字': mut((d) => { d.p.x = 'NaN'; }), '座標在圖外': mut((d) => { d.p.y = 999; }),
+    '魄的數量不對': mut((d) => { d.pos.pop(); }), '魄的狀態不認得': mut((d) => { d.pos[0].state = 'fly'; }), '地圖記憶長度不對': mut((d) => { d.explored = '01'; }),
+    '封戶不在廊口': mut((d) => { d.sealed = [{ i: 0, id: 1, x: 0, y: 0, t: 3, ex: [] }]; }), '少了印': mut((d) => { d.altars = [true]; })
+  };
+  const loaded = Object.entries(cases).filter(([, d]) => ENGINE.restore(d) !== null).map(([k]) => k);
+  ok('壞的存檔整份不讀（13 種）', loaded.length === 0, loaded);
+  const h = ENGINE.restore(good);
+  ok('好的存檔讀得回來', h && h.state === 'play' && Math.abs(h.p.y - g.p.y) < 1e-9);
+  const over = ENGINE.restore(mut((d) => { d.p.chill = 500; d.p.ink = 9; d.p.talismans = -3; }));
+  ok('超出範圍的數值收回範圍內', over && over.p.chill === 100 && over.p.ink === R.P.inkMax && over.p.talismans === 0, over && [over.p.chill, over.p.ink, over.p.talismans]);
+}
+
 const s = summary();
 process.exit(s.fail ? 1 : 0);
