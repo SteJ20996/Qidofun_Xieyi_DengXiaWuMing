@@ -32,7 +32,8 @@
     if (o.glow) x.fillText(ch, size / 2, size / 2 + size * 0.03);
     return c;
   }
-  function tex(canvas) { const t2 = new THREE.CanvasTexture(canvas); t2.encoding = THREE.sRGBEncoding; t2.anisotropy = 4; return t2; }
+  let texs = [];   // 這一座宅子用到的貼圖；回主頁重蓋時一起放掉
+  function tex(canvas) { const t2 = new THREE.CanvasTexture(canvas); t2.encoding = THREE.sRGBEncoding; t2.anisotropy = 4; texs.push(t2); return t2; }
   function latticeCanvas() {
     const c = document.createElement('canvas'); c.width = c.height = 128;
     const x = c.getContext('2d');
@@ -71,7 +72,20 @@
   }
 
   // ---------- 照地圖蓋宅子 ----------
+  // 放掉舊宅子的形狀、材質、貼圖、影子圖（回主頁會再蓋一座，不放掉會一直佔著顯示記憶體）
+  function drop(s) {
+    const mats = new Set();
+    s.traverse((o) => {
+      if (o.geometry) o.geometry.dispose();
+      if (o.material) [].concat(o.material).forEach((mt) => mats.add(mt));
+      if (o.shadow && o.shadow.map) { o.shadow.map.dispose(); o.shadow.map = null; }
+    });
+    mats.forEach((mt) => mt.dispose());
+    texs.forEach((t2) => t2.dispose()); texs = [];
+  }
   function setGame(game) {
+    if (scene) drop(scene);
+    perf.last = 0;   // 玩的時候 3D 沒有在畫：回來的第一幀不要算成一幀很慢
     g = game; candles = []; poSprites = []; screens = []; doors = null; cam = null;
     const m = g.m, W = m.W, H = m.H;
     scene = new THREE.Scene();
@@ -168,7 +182,7 @@
     lanternGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: flameTex, color: 0xffb060, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.8 }));
     lanternGlow.scale.set(1.2, 1.2, 1); lantern.add(lanternGlow);
     lanternLight = new THREE.PointLight(0xffc27a, 1.9, 8.5, 1.6);
-    lanternLight.castShadow = true; lanternLight.shadow.mapSize.set(512, 512); lanternLight.shadow.bias = -0.004; lanternLight.shadow.camera.near = 0.1; lanternLight.shadow.camera.far = 9;
+    lanternLight.castShadow = perf.q === 0; lanternLight.shadow.mapSize.set(512, 512); lanternLight.shadow.bias = -0.004; lanternLight.shadow.camera.near = 0.1; lanternLight.shadow.camera.far = 9;
     lantern.add(lanternLight);
     scene.add(lantern);
     // 光裡的灰塵

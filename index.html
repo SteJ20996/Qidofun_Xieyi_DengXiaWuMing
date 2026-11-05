@@ -49,27 +49,44 @@
 
 <div id="start" class="overlay">
   <div class="panel startpanel">
-    <div class="titleseal"><span>燈</span><span>下</span><span>無</span><span>明</span></div>
-    <h1 aria-label="燈下無明"><span>燈</span><span>下</span><span>無</span><span>明</span></h1>
-    <div class="sub">紙宅 · 試夜</div>
-    <div class="motto">點燈見近 · 掩燈見遠</div>
-    <p class="story">紙糊的宅子，夜裡有魄。今晚是你的試夜：取回<b>名印</b>與<b>息印</b>，再從大門出來。</p>
-    <p class="story">點著燈，看得清身邊，魄卻從遠處就看見你。掩了燈，眼睛會慢慢習慣黑暗，看得比點燈時更遠。</p>
-    <div class="keys">
-      <div><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>／方向鍵</span><b>走動</b></div>
-      <div><span>滑鼠</span><b>對準（不用滑鼠時，劍與火符自動對準看得見的魄）</b></div>
-      <div><span><kbd>J</kbd>／左鍵</span><b>桃木劍</b></div>
-      <div><span><kbd>K</kbd></span><b>銅鈴</b></div>
-      <div><span><kbd>L</kbd>／右鍵</span><b>火符</b></div>
-      <div><span><kbd>：</kbd></span><b>點燈、掩燈（分號鍵）</b></div>
-      <div><span><kbd>《</kbd> <kbd>》</kbd></span><b>《燼琅嬛》：借火、封戶（逗號鍵、句號鍵）</b></div>
-      <div><span><kbd>U</kbd>（按住）</span><b>取印、推門閂</b></div>
-      <div><span><kbd>P</kbd>／<kbd>Esc</kbd></span><b>暫停</b></div>
+    <div class="titlerow">
+      <div class="titleseal"><span>燈</span><span>下</span><span>無</span><span>明</span></div>
+      <div class="titletext">
+        <h1 aria-label="燈下無明"><span>燈</span><span>下</span><span>無</span><span>明</span></h1>
+        <div class="sub">紙宅 · 試夜</div>
+        <div class="motto">點燈見近 · 掩燈見遠</div>
+      </div>
     </div>
+    <p class="story">紙糊的宅子，夜裡有魄。宅子收著你的兩方印：<b>名印</b>記著你的名字，<b>息印</b>記著你的一口氣。今晚是你的試夜，把兩方印取回來，自己走出大門。</p>
+    <div class="goalbox" id="goalbox">
+      <section class="win">
+        <h3><i>出</i>出宅就贏</h3>
+        <ol>
+          <li>到西北的<b>書房</b>取名印、東北的<b>祠堂</b>取息印：站在印臺旁，按住 <kbd>U</kbd>。</li>
+          <li>回南邊的<b>玄關</b>，按住 <kbd>U</kbd> 一秒半推開門閂。兩印到手後，兩隻魄都會守在玄關。</li>
+          <li>走出大門，就出宅了。</li>
+        </ol>
+      </section>
+      <section class="lose">
+        <h3><i>失</i>失魂就輸</h3>
+        <p>寒意（畫面左上的「寒」）滿一百就失魂。魄咬一口，護心衣先擋，一開始擋得了三口；在魄身邊待久了也會冷。只有在火邊，寒意才會退。</p>
+      </section>
+    </div>
+    <p class="story meaning"><b>燈下無明</b>：燈照得到的地方，你看得清，魄也看得見你；燈外的黑暗，你什麼都看不見。掩了燈，眼睛會慢慢習慣，反而看得更遠。這一夜要學的，是什麼時候點燈、什麼時候掩燈。</p>
+    <div class="keys">
+      <div><span><kbd>WASD</kbd></span><b>走動</b></div>
+      <div><span><kbd>J</kbd></span><b>桃木劍</b></div>
+      <div><span><kbd>K</kbd></span><b>銅鈴</b></div>
+      <div><span><kbd>L</kbd></span><b>火符</b></div>
+      <div><span><kbd>：</kbd></span><b>點燈、掩燈</b></div>
+      <div><span><kbd>《</kbd><kbd>》</kbd></span><b>借火、封戶</b></div>
+      <div><span><kbd>U</kbd></span><b>按住：取印、推門閂</b></div>
+      <div><span><kbd>P</kbd><kbd>Esc</kbd></span><b>暫停，可回主頁</b></div>
+    </div>
+    <div class="dim small">點燈、借火、封戶用分號、逗號、句號鍵（畫面寫成：《》），不必按 Shift；方向鍵也能走。滑鼠左鍵是劍、右鍵是火符，跟著滑鼠對準；不用滑鼠時，劍與火符自動對準看得見的魄。</div>
     <div id="slots" class="slots"></div>
     <div class="dim small warn" id="slot-msg"></div>
     <div class="dim small">三格存檔：U、I、O 選一格，Enter 開始或繼續；滑鼠點也可以<span id="best"></span></div>
-    <div class="dim small">左手 WASD 走位，右手 U I O P J K L ：M《》操作；不必按 Shift。</div>
     <div class="dim small" id="touchnote">這一版是試做：一個關卡，只做了鍵盤與滑鼠。</div>
   </div>
 </div>
@@ -78,9 +95,10 @@
   <div class="panel">
     <h2>暫停</h2>
     <p class="dim small" id="pause-why"></p>
-    <div class="row"><button id="btn-resume" class="big">繼續</button><button id="btn-restart">重來</button><button id="btn-mute2">音效</button></div>
+    <div class="row"><button id="btn-resume" class="big">繼續</button><button id="btn-title" title="先把這一局存在自己那格，再回到開始畫面">回主頁（M）</button><button id="btn-restart">重來</button><button id="btn-mute2">音效</button></div>
     <div class="savebox"><div class="dim small">存到（U、I、O）：這一局自動存在自己那格；也可以把這一刻抄進別格，當作存檔點。</div><div id="saverow" class="saverow"></div><div class="small" id="save-msg"></div></div>
     <ul class="rules">
+      <li><b>目標</b>：書房取名印、祠堂取息印（按住 U），回玄關按住 U 推開門閂，走出大門就出宅。寒意滿一百就失魂。</li>
       <li><b>燈</b>：點著看得清，但魄從九格外就看得見你；隔著紙屏也看得到你的燈光。掩燈時，魄要靠到兩格左右才察覺。</li>
       <li><b>噬</b>：魄撲之前會停下來蓄力（約半秒）。看得見時頭上有「噬」字與紅圈；黑暗裡只有一聲嘶。退出紅圈，它就撲空，會愣一下。</li>
       <li><b>寒</b>：被咬時護心衣先擋；久留在魄身邊會直接加寒意。只有在燭火、借火旁邊才會退，但站在火光裡，魄看得見你。</li>
@@ -99,8 +117,8 @@
     <h2 id="end-title"></h2>
     <p id="end-text"></p>
     <table id="end-stats" class="stats"></table>
-    <div class="row"><button id="btn-load" class="big hidden"></button><button id="btn-again" class="big">再一夜</button></div>
-    <div class="dim small">Enter 是左邊那個</div>
+    <div class="row"><button id="btn-load" class="big hidden"></button><button id="btn-again" class="big">再一夜</button><button id="btn-title2" class="plain">回主頁</button></div>
+    <div class="dim small">Enter 是左邊那個；M 回主頁</div>
   </div>
 </div>
 

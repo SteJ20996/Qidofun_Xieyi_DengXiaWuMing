@@ -110,6 +110,33 @@ h2 { font: 32px/1.2 var(--font); margin: 4px 0 10px; letter-spacing: 4px; }
 .sub { font-size: 18px; color: var(--ink-2); letter-spacing: 4px; margin-bottom: 12px; }
 .story { font-size: 17px; line-height: 1.65; margin: 6px auto; max-width: 34em; text-wrap: pretty; }
 .story b { color: var(--red-2); font-weight: normal; }
+/* 開始畫面：怎麼贏、怎麼輸（擁有者 2026-11-05：「獲勝條件和遊戲意義沒有在主頁講明」） */
+.goalbox { display: grid; grid-template-columns: 1.45fr 1fr; gap: 0 18px; margin: 10px auto 4px; padding: 8px 2px; max-width: 37em; text-align: left; font-size: 14.5px; line-height: 1.55; border-top: 1px solid rgba(28,26,23,.25); border-bottom: 1px solid rgba(28,26,23,.25); }
+.goalbox h3 { font: 17px/1.3 var(--font); margin: 0 0 4px; display: flex; align-items: center; gap: 7px; letter-spacing: 2px; }
+.goalbox h3 i { font-style: normal; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 3px; font-size: 14px; letter-spacing: 0; color: #f7efe0; background: var(--red); transform: rotate(-4deg); }
+.goalbox .lose h3 i { background: #3f4b55; }
+.goalbox ol { margin: 0; padding-left: 1.3em; }
+.goalbox li { margin: 0 0 2px; }
+.goalbox p { margin: 0; }
+.goalbox b { color: var(--red-2); font-weight: normal; }
+/* 標題一列：印在左，字在右（省下高度給「怎麼贏、怎麼輸」） */
+.titlerow { display: flex; align-items: center; justify-content: center; gap: 18px; margin-bottom: 8px; }
+.titlerow .titleseal { margin: 0; flex: 0 0 auto; }
+.titletext { text-align: left; }
+.titletext h1 { margin: 0 0 2px; }
+.titletext .sub { margin-bottom: 4px; }
+.titletext .motto { margin: 0; }
+/* 開始畫面的按鍵：三欄、一行一鍵 */
+#start .keys { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px 14px; margin: 10px auto 2px; max-width: 37em; }
+#start .keys span { flex: 0 0 3.9em; }
+#start .keys div:nth-child(7) { grid-column: span 2; }
+@media (max-width: 640px) {
+  .titlerow { flex-direction: column; gap: 6px; }   /* 手機：印在上、字在下，和原來一樣置中 */
+  .titletext { text-align: center; }
+  #start .keys { grid-template-columns: repeat(2, minmax(0, 1fr)); } #start .keys div:nth-child(7) { grid-column: span 2; }
+}
+.story.meaning { font-size: 15px; line-height: 1.6; color: var(--ink-2); }
+@media (max-width: 640px) { .goalbox { grid-template-columns: 1fr; gap: 8px; } }
 .keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 4px 18px; margin: 12px auto; max-width: 600px; font-size: 14px; text-align: left; }
 .keys div { display: flex; gap: 10px; align-items: baseline; }
 .keys span { flex: 0 0 8.6em; text-align: right; white-space: nowrap; }
@@ -282,27 +309,44 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
 
 <div id="start" class="overlay">
   <div class="panel startpanel">
-    <div class="titleseal"><span>燈</span><span>下</span><span>無</span><span>明</span></div>
-    <h1 aria-label="燈下無明"><span>燈</span><span>下</span><span>無</span><span>明</span></h1>
-    <div class="sub">紙宅 · 試夜</div>
-    <div class="motto">點燈見近 · 掩燈見遠</div>
-    <p class="story">紙糊的宅子，夜裡有魄。今晚是你的試夜：取回<b>名印</b>與<b>息印</b>，再從大門出來。</p>
-    <p class="story">點著燈，看得清身邊，魄卻從遠處就看見你。掩了燈，眼睛會慢慢習慣黑暗，看得比點燈時更遠。</p>
-    <div class="keys">
-      <div><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>／方向鍵</span><b>走動</b></div>
-      <div><span>滑鼠</span><b>對準（不用滑鼠時，劍與火符自動對準看得見的魄）</b></div>
-      <div><span><kbd>J</kbd>／左鍵</span><b>桃木劍</b></div>
-      <div><span><kbd>K</kbd></span><b>銅鈴</b></div>
-      <div><span><kbd>L</kbd>／右鍵</span><b>火符</b></div>
-      <div><span><kbd>：</kbd></span><b>點燈、掩燈（分號鍵）</b></div>
-      <div><span><kbd>《</kbd> <kbd>》</kbd></span><b>《燼琅嬛》：借火、封戶（逗號鍵、句號鍵）</b></div>
-      <div><span><kbd>U</kbd>（按住）</span><b>取印、推門閂</b></div>
-      <div><span><kbd>P</kbd>／<kbd>Esc</kbd></span><b>暫停</b></div>
+    <div class="titlerow">
+      <div class="titleseal"><span>燈</span><span>下</span><span>無</span><span>明</span></div>
+      <div class="titletext">
+        <h1 aria-label="燈下無明"><span>燈</span><span>下</span><span>無</span><span>明</span></h1>
+        <div class="sub">紙宅 · 試夜</div>
+        <div class="motto">點燈見近 · 掩燈見遠</div>
+      </div>
     </div>
+    <p class="story">紙糊的宅子，夜裡有魄。宅子收著你的兩方印：<b>名印</b>記著你的名字，<b>息印</b>記著你的一口氣。今晚是你的試夜，把兩方印取回來，自己走出大門。</p>
+    <div class="goalbox" id="goalbox">
+      <section class="win">
+        <h3><i>出</i>出宅就贏</h3>
+        <ol>
+          <li>到西北的<b>書房</b>取名印、東北的<b>祠堂</b>取息印：站在印臺旁，按住 <kbd>U</kbd>。</li>
+          <li>回南邊的<b>玄關</b>，按住 <kbd>U</kbd> 一秒半推開門閂。兩印到手後，兩隻魄都會守在玄關。</li>
+          <li>走出大門，就出宅了。</li>
+        </ol>
+      </section>
+      <section class="lose">
+        <h3><i>失</i>失魂就輸</h3>
+        <p>寒意（畫面左上的「寒」）滿一百就失魂。魄咬一口，護心衣先擋，一開始擋得了三口；在魄身邊待久了也會冷。只有在火邊，寒意才會退。</p>
+      </section>
+    </div>
+    <p class="story meaning"><b>燈下無明</b>：燈照得到的地方，你看得清，魄也看得見你；燈外的黑暗，你什麼都看不見。掩了燈，眼睛會慢慢習慣，反而看得更遠。這一夜要學的，是什麼時候點燈、什麼時候掩燈。</p>
+    <div class="keys">
+      <div><span><kbd>WASD</kbd></span><b>走動</b></div>
+      <div><span><kbd>J</kbd></span><b>桃木劍</b></div>
+      <div><span><kbd>K</kbd></span><b>銅鈴</b></div>
+      <div><span><kbd>L</kbd></span><b>火符</b></div>
+      <div><span><kbd>：</kbd></span><b>點燈、掩燈</b></div>
+      <div><span><kbd>《</kbd><kbd>》</kbd></span><b>借火、封戶</b></div>
+      <div><span><kbd>U</kbd></span><b>按住：取印、推門閂</b></div>
+      <div><span><kbd>P</kbd><kbd>Esc</kbd></span><b>暫停，可回主頁</b></div>
+    </div>
+    <div class="dim small">點燈、借火、封戶用分號、逗號、句號鍵（畫面寫成：《》），不必按 Shift；方向鍵也能走。滑鼠左鍵是劍、右鍵是火符，跟著滑鼠對準；不用滑鼠時，劍與火符自動對準看得見的魄。</div>
     <div id="slots" class="slots"></div>
     <div class="dim small warn" id="slot-msg"></div>
     <div class="dim small">三格存檔：U、I、O 選一格，Enter 開始或繼續；滑鼠點也可以<span id="best"></span></div>
-    <div class="dim small">左手 WASD 走位，右手 U I O P J K L ：M《》操作；不必按 Shift。</div>
     <div class="dim small" id="touchnote">這一版是試做：一個關卡，只做了鍵盤與滑鼠。</div>
   </div>
 </div>
@@ -311,9 +355,10 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   <div class="panel">
     <h2>暫停</h2>
     <p class="dim small" id="pause-why"></p>
-    <div class="row"><button id="btn-resume" class="big">繼續</button><button id="btn-restart">重來</button><button id="btn-mute2">音效</button></div>
+    <div class="row"><button id="btn-resume" class="big">繼續</button><button id="btn-title" title="先把這一局存在自己那格，再回到開始畫面">回主頁（M）</button><button id="btn-restart">重來</button><button id="btn-mute2">音效</button></div>
     <div class="savebox"><div class="dim small">存到（U、I、O）：這一局自動存在自己那格；也可以把這一刻抄進別格，當作存檔點。</div><div id="saverow" class="saverow"></div><div class="small" id="save-msg"></div></div>
     <ul class="rules">
+      <li><b>目標</b>：書房取名印、祠堂取息印（按住 U），回玄關按住 U 推開門閂，走出大門就出宅。寒意滿一百就失魂。</li>
       <li><b>燈</b>：點著看得清，但魄從九格外就看得見你；隔著紙屏也看得到你的燈光。掩燈時，魄要靠到兩格左右才察覺。</li>
       <li><b>噬</b>：魄撲之前會停下來蓄力（約半秒）。看得見時頭上有「噬」字與紅圈；黑暗裡只有一聲嘶。退出紅圈，它就撲空，會愣一下。</li>
       <li><b>寒</b>：被咬時護心衣先擋；久留在魄身邊會直接加寒意。只有在燭火、借火旁邊才會退，但站在火光裡，魄看得見你。</li>
@@ -332,8 +377,8 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     <h2 id="end-title"></h2>
     <p id="end-text"></p>
     <table id="end-stats" class="stats"></table>
-    <div class="row"><button id="btn-load" class="big hidden"></button><button id="btn-again" class="big">再一夜</button></div>
-    <div class="dim small">Enter 是左邊那個</div>
+    <div class="row"><button id="btn-load" class="big hidden"></button><button id="btn-again" class="big">再一夜</button><button id="btn-title2" class="plain">回主頁</button></div>
+    <div class="dim small">Enter 是左邊那個；M 回主頁</div>
   </div>
 </div>
 
@@ -2155,7 +2200,8 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     if (o.glow) x.fillText(ch, size / 2, size / 2 + size * 0.03);
     return c;
   }
-  function tex(canvas) { const t2 = new THREE.CanvasTexture(canvas); t2.encoding = THREE.sRGBEncoding; t2.anisotropy = 4; return t2; }
+  let texs = [];   // 這一座宅子用到的貼圖；回主頁重蓋時一起放掉
+  function tex(canvas) { const t2 = new THREE.CanvasTexture(canvas); t2.encoding = THREE.sRGBEncoding; t2.anisotropy = 4; texs.push(t2); return t2; }
   function latticeCanvas() {
     const c = document.createElement('canvas'); c.width = c.height = 128;
     const x = c.getContext('2d');
@@ -2194,7 +2240,20 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   }
 
   // ---------- 照地圖蓋宅子 ----------
+  // 放掉舊宅子的形狀、材質、貼圖、影子圖（回主頁會再蓋一座，不放掉會一直佔著顯示記憶體）
+  function drop(s) {
+    const mats = new Set();
+    s.traverse((o) => {
+      if (o.geometry) o.geometry.dispose();
+      if (o.material) [].concat(o.material).forEach((mt) => mats.add(mt));
+      if (o.shadow && o.shadow.map) { o.shadow.map.dispose(); o.shadow.map = null; }
+    });
+    mats.forEach((mt) => mt.dispose());
+    texs.forEach((t2) => t2.dispose()); texs = [];
+  }
   function setGame(game) {
+    if (scene) drop(scene);
+    perf.last = 0;   // 玩的時候 3D 沒有在畫：回來的第一幀不要算成一幀很慢
     g = game; candles = []; poSprites = []; screens = []; doors = null; cam = null;
     const m = g.m, W = m.W, H = m.H;
     scene = new THREE.Scene();
@@ -2291,7 +2350,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     lanternGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: flameTex, color: 0xffb060, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.8 }));
     lanternGlow.scale.set(1.2, 1.2, 1); lantern.add(lanternGlow);
     lanternLight = new THREE.PointLight(0xffc27a, 1.9, 8.5, 1.6);
-    lanternLight.castShadow = true; lanternLight.shadow.mapSize.set(512, 512); lanternLight.shadow.bias = -0.004; lanternLight.shadow.camera.near = 0.1; lanternLight.shadow.camera.far = 9;
+    lanternLight.castShadow = perf.q === 0; lanternLight.shadow.mapSize.set(512, 512); lanternLight.shadow.bias = -0.004; lanternLight.shadow.camera.near = 0.1; lanternLight.shadow.camera.far = 9;
     lantern.add(lanternLight);
     scene.add(lantern);
     // 光裡的灰塵
@@ -2579,6 +2638,21 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     SFX.play(win ? 'win' : 'lose');
   }
   function endPrimary() { SFX.unlock(); if (!$('btn-load').classList.contains('hidden') && continueGame(slot)) return; newGame(slot); }
+  // 回主頁（擁有者 2026-11-05：「遊戲內雖有存檔功能但是沒有回到主頁功能」）：
+  // 這一局先自動存在自己那格，再回開始畫面；那一格預先選好，Enter 就接著玩。
+  function toTitle() {
+    if (running && g && g.state === 'play') autosave(false);
+    running = false; paused = false;
+    keys.clear(); holdTake = false; press = {};
+    SFX.ambient(false);
+    ['pause', 'end'].forEach((id) => $(id).classList.add('hidden'));
+    $('hud').classList.add('hidden'); $('log').innerHTML = ''; $('hint').classList.add('hidden');
+    disarm(); $('save-msg').textContent = '';
+    showcase();
+    sel = slot; $('slot-msg').textContent = canSave ? '' : '這個瀏覽器存不了檔（例如無痕視窗）：照樣能玩，只是關掉就沒了。';
+    renderSlots(); showBest();
+    $('start').classList.remove('hidden');
+  }
 
   // ---------- 事件 → 聲音、旁側文字、提示 ----------
   function handle(evs) {
@@ -2636,9 +2710,9 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
       if (ev.code === 'Enter' || ev.code === 'NumpadEnter') { ev.preventDefault(); startSel(); }
       return;
     }
-    if (!$('end').classList.contains('hidden')) { if (ev.code === 'Enter' || ev.code === 'NumpadEnter') { ev.preventDefault(); endPrimary(); } return; }
+    if (!$('end').classList.contains('hidden')) { if (ev.code === 'Enter' || ev.code === 'NumpadEnter') { ev.preventDefault(); endPrimary(); } else if (ev.code === 'KeyM' && !ev.repeat) toTitle(); return; }
     if (ev.code === 'Escape' || ev.code === 'KeyP') { setPause(!paused); return; }
-    if (paused) { if (SLOT_KEY[ev.code] && !ev.repeat) saveAs(SLOT_KEY[ev.code]); return; }   // 暫停時 U、I、O：存到那一格
+    if (paused) { if (SLOT_KEY[ev.code] && !ev.repeat) saveAs(SLOT_KEY[ev.code]); else if (ev.code === 'KeyM' && !ev.repeat) toTitle(); return; }   // 暫停時 U、I、O：存到那一格；M 回主頁
     if (!running) return;
     if (MOVE[ev.code]) keys.add(ev.code);
     if (ev.repeat) return;
@@ -2734,6 +2808,13 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   }
 
   // ---------- 開始畫面的展示：一盞燈在宅子裡飄，魄照常巡行 ----------
+  // 開一局只給開始畫面看的宅子（魄不理那盞燈）；回主頁時再開一次，燈從剛才走到的地方接著走
+  function showcase() {
+    g = E.create({ seed: seedFromUrl() }); g.attract = true;
+    const q = window.TOUR.at(tour.s); g.tp(q.x, q.y); tourDir = { dx: q.dx, dy: q.dy };
+    window.DENG.g = g; RD.setGame(g); g.drain(); snap = true;
+    if (use3d && !RENDER3D.failed) { RENDER3D.setGame(g); $('world3d').classList.remove('hidden'); cv.classList.add('hidden'); }
+  }
   // 路線在 src/tour.js：一條平滑閉合的曲線，等速走，不停不頓，看起來是一個長鏡頭
   const tour = { s: 0 };
   let tourDir = { dx: 1, dy: 0 };
@@ -2784,14 +2865,15 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     arm('restart', true); ev.currentTarget.textContent = `再按一次：第${CN[slot]}格從頭開始`;
   });
   $('btn-pause').addEventListener('click', (ev) => { setPause(true); ev.currentTarget.blur(); });
+  ['btn-title', 'btn-title2'].forEach((id) => $(id).addEventListener('click', (ev) => { ev.currentTarget.blur(); toTitle(); }));
   const muteBtns = () => ['btn-mute', 'btn-mute2'].forEach((id) => { $(id).classList.toggle('off', SFX.muted); $(id).textContent = SFX.muted ? '音效關' : '音效'; });
   ['btn-mute', 'btn-mute2'].forEach((id) => $(id).addEventListener('click', (ev) => { SFX.unlock(); SFX.toggle(); muteBtns(); ev.currentTarget.blur(); }));
   muteBtns(); showBest();
   if (window.matchMedia && matchMedia('(pointer: coarse)').matches && !matchMedia('(pointer: fine)').matches) $('touchnote').textContent = '這一版是試做，只做了鍵盤與滑鼠；手機上還不能玩。';
 
   // 先在背景擺好宅子（開始畫面後面看得到一點點）
-  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, continueGame, setPause, saveAs, readSlot, canSave, snap() { snap = true; }, tour, get use3d() { return use3d; }, get slot() { return slot; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
-  g = E.create({ seed: seedFromUrl() }); g.attract = true; { const q = window.TOUR.at(0); g.tp(q.x, q.y); tourDir = { dx: q.dx, dy: q.dy }; } window.DENG.g = g; RD.setGame(g); g.drain(); snap = true;
+  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, continueGame, setPause, toTitle, saveAs, readSlot, canSave, snap() { snap = true; }, tour, get use3d() { return use3d; }, get slot() { return slot; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
+  showcase();
   renderSlots();
   if (!canSave) $('slot-msg').textContent = '這個瀏覽器存不了檔（例如無痕視窗）：照樣能玩，只是關掉就沒了。';
   const fontReady = document.fonts && document.fonts.load ? document.fonts.load('32px "LXGW WenKai TC"', '燈下無明魄噬人火封') : Promise.resolve();

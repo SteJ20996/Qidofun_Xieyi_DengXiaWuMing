@@ -282,6 +282,19 @@ try {
   await sp.keyboard.press('KeyI'); await sp.keyboard.press('Enter'); await sw(300);
   const back = await sev(() => ({ slot: DENG.slot, name: DENG.g.seals.name, x: DENG.g.p.x, y: DENG.g.p.y, explored: DENG.g.explored.reduce((a, b) => a + b, 0), log: document.getElementById('log').textContent }));
   ok('存檔：繼續第二格，名印、位置、地圖記憶都在', back.slot === 2 && back.name && Math.hypot(back.x - where.x, back.y - where.y) < 0.05 && back.explored === where.explored && back.log.includes('接著玩'), { back, where });
+  // 回主頁：暫停按 M，這一局先存好，回到開始畫面、那一格選好；Enter 接著玩，東西都在
+  await still();
+  await sp.keyboard.press('Escape'); await sw(100);
+  const here = await sev(() => ({ x: DENG.g.p.x, y: DENG.g.p.y, t: DENG.g.t }));
+  await sp.keyboard.press('KeyM'); await sw(400);
+  const home = await sev(() => ({ start: !document.getElementById('start').classList.contains('hidden'), hud: document.getElementById('hud').classList.contains('hidden'), pause: document.getElementById('pause').classList.contains('hidden'), running: DENG.running, attract: DENG.g.attract, sel: document.querySelectorAll('#slots .slot')[1].classList.contains('sel'), kind: DENG.readSlot(2).kind, saved: DENG.readSlot(2).d.run && DENG.readSlot(2).d.run.t, goal: !!document.getElementById('goalbox'), mx: DENG.g.p.x, my: DENG.g.p.y }));
+  await sw(600);
+  const moving = await sev(() => ({ x: DENG.g.p.x, y: DENG.g.p.y }));
+  await sp.screenshot({ path: path.join(out, '22-back-to-title.png') });
+  ok('回主頁：暫停按 M，先存好、回開始畫面、選好這一格、展示接著走', home.start && home.hud && home.pause && !home.running && home.attract && home.sel && home.kind === 'run' && home.goal && Math.hypot(moving.x - home.mx, moving.y - home.my) > 0.05, home);
+  await sp.keyboard.press('Enter'); await sw(300);
+  const resumed = await sev(() => ({ running: DENG.running, slot: DENG.slot, name: DENG.g.seals.name, x: DENG.g.p.x, y: DENG.g.p.y, t: DENG.g.t, hud: !document.getElementById('hud').classList.contains('hidden') }));
+  ok('回主頁之後 Enter 接著玩：位置、名印都在', resumed.running && resumed.slot === 2 && resumed.name && resumed.hud && Math.hypot(resumed.x - here.x, resumed.y - here.y) < 0.05, { resumed, here });
   // 失魂：從存檔接著
   await sev(() => { const g = DENG.g; g.p.chill = 99.5; g.p.armor = 0; const e = g.pos[0]; g.place(e, g.p.x + 0.7, g.p.y, 'chase'); e.lastKnown = { x: g.p.x, y: g.p.y }; });
   await sp.waitForFunction(() => DENG.g.state === 'lose', null, { timeout: 5000 }); await sw(200);
@@ -299,6 +312,9 @@ try {
   await sp.keyboard.down('KeyU'); await sw(1750); await sp.keyboard.up('KeyU');
   await sp.keyboard.down('KeyS'); await sw(600); await sp.keyboard.up('KeyS'); await sw(300);
   ok('存檔：出宅後這一格記下出宅', await sev(() => DENG.g.state === 'win' && DENG.readSlot(2).kind === 'done'));
+  await sp.click('#btn-title2'); await sw(300);
+  const home2 = await sev(() => ({ start: !document.getElementById('start').classList.contains('hidden'), end: document.getElementById('end').classList.contains('hidden'), running: DENG.running, slot2: document.querySelectorAll('#slots .slot-b')[1].textContent }));
+  ok('出宅後按「回主頁」：回開始畫面，第二格寫著出宅過', home2.start && home2.end && !home2.running && home2.slot2.includes('出宅過'), home2);
   // 壞掉的存檔：顯示讀不出來，可以在那一格從頭
   await sev(() => localStorage.setItem('xieyi.deng.save.3', '{壞掉的'));
   await open();
@@ -344,6 +360,15 @@ try {
   // 無頭瀏覽器一秒只有四幀，每幀超過 0.25 秒的上限，所以量到的比 1.15 慢；真機要 20 幀以上才留在 3D，不會碰到上限
   const onRoute = await tp.evaluate(() => { const q = TOUR.at(DENG.tour.s); return Math.hypot(q.x - DENG.g.p.x, q.y - DENG.g.p.y); });
   ok('3D 開始畫面：用 3D 畫、燈沿著路線走、沒有報錯', info.use3d && info.shown && info.flatHidden && speed > 0.5 && speed < 1.3 && onRoute < 0.01 && s1.cam && errs3.length === 0, { info, speed: +speed.toFixed(2), onRoute, errs: errs3.slice(0, 3) });
+  // 入宅（2D）再回主頁：開始畫面換回 3D，燈從剛才的地方接著走
+  await tp.keyboard.press('Enter'); await tp.waitForTimeout(500);
+  const in2d = await tp.evaluate(() => ({ running: DENG.running, flat: !document.getElementById('world').classList.contains('hidden'), d3: document.getElementById('world3d').classList.contains('hidden') }));
+  await tp.keyboard.press('Escape'); await tp.waitForTimeout(100); await tp.keyboard.press('KeyM'); await tp.waitForTimeout(300);
+  const r0 = await tp.evaluate(() => DENG.tour.s);
+  await tp.waitForTimeout(1500);
+  const back3 = await tp.evaluate(() => ({ use3d: DENG.use3d, shown: !document.getElementById('world3d').classList.contains('hidden'), flatHidden: document.getElementById('world').classList.contains('hidden'), attract: DENG.g.attract, s: DENG.tour.s, failed: window.RENDER3D.failed }));
+  await tp.screenshot({ path: path.join(out, '23-title-3d-again.png') });
+  ok('3D：入宅後回主頁，開始畫面換回 3D 長鏡頭、沒有報錯', in2d.running && in2d.flat && in2d.d3 && back3.use3d && back3.shown && back3.flatHidden && back3.attract && back3.s > r0 && !back3.failed && errs3.length === 0, { in2d, back3, r0, errs: errs3.slice(0, 3) });
   await tctx.close();
   // 跑不動 3D 的機器（無頭瀏覽器就是）：幾秒後自己換回 2D 長鏡頭，照樣能入宅
   const sctx2 = await browser.newContext({ viewport: { width: 1280, height: 800 } });

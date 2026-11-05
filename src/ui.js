@@ -211,6 +211,21 @@
     SFX.play(win ? 'win' : 'lose');
   }
   function endPrimary() { SFX.unlock(); if (!$('btn-load').classList.contains('hidden') && continueGame(slot)) return; newGame(slot); }
+  // 回主頁（擁有者 2026-11-05：「遊戲內雖有存檔功能但是沒有回到主頁功能」）：
+  // 這一局先自動存在自己那格，再回開始畫面；那一格預先選好，Enter 就接著玩。
+  function toTitle() {
+    if (running && g && g.state === 'play') autosave(false);
+    running = false; paused = false;
+    keys.clear(); holdTake = false; press = {};
+    SFX.ambient(false);
+    ['pause', 'end'].forEach((id) => $(id).classList.add('hidden'));
+    $('hud').classList.add('hidden'); $('log').innerHTML = ''; $('hint').classList.add('hidden');
+    disarm(); $('save-msg').textContent = '';
+    showcase();
+    sel = slot; $('slot-msg').textContent = canSave ? '' : '這個瀏覽器存不了檔（例如無痕視窗）：照樣能玩，只是關掉就沒了。';
+    renderSlots(); showBest();
+    $('start').classList.remove('hidden');
+  }
 
   // ---------- 事件 → 聲音、旁側文字、提示 ----------
   function handle(evs) {
@@ -268,9 +283,9 @@
       if (ev.code === 'Enter' || ev.code === 'NumpadEnter') { ev.preventDefault(); startSel(); }
       return;
     }
-    if (!$('end').classList.contains('hidden')) { if (ev.code === 'Enter' || ev.code === 'NumpadEnter') { ev.preventDefault(); endPrimary(); } return; }
+    if (!$('end').classList.contains('hidden')) { if (ev.code === 'Enter' || ev.code === 'NumpadEnter') { ev.preventDefault(); endPrimary(); } else if (ev.code === 'KeyM' && !ev.repeat) toTitle(); return; }
     if (ev.code === 'Escape' || ev.code === 'KeyP') { setPause(!paused); return; }
-    if (paused) { if (SLOT_KEY[ev.code] && !ev.repeat) saveAs(SLOT_KEY[ev.code]); return; }   // 暫停時 U、I、O：存到那一格
+    if (paused) { if (SLOT_KEY[ev.code] && !ev.repeat) saveAs(SLOT_KEY[ev.code]); else if (ev.code === 'KeyM' && !ev.repeat) toTitle(); return; }   // 暫停時 U、I、O：存到那一格；M 回主頁
     if (!running) return;
     if (MOVE[ev.code]) keys.add(ev.code);
     if (ev.repeat) return;
@@ -366,6 +381,13 @@
   }
 
   // ---------- 開始畫面的展示：一盞燈在宅子裡飄，魄照常巡行 ----------
+  // 開一局只給開始畫面看的宅子（魄不理那盞燈）；回主頁時再開一次，燈從剛才走到的地方接著走
+  function showcase() {
+    g = E.create({ seed: seedFromUrl() }); g.attract = true;
+    const q = window.TOUR.at(tour.s); g.tp(q.x, q.y); tourDir = { dx: q.dx, dy: q.dy };
+    window.DENG.g = g; RD.setGame(g); g.drain(); snap = true;
+    if (use3d && !RENDER3D.failed) { RENDER3D.setGame(g); $('world3d').classList.remove('hidden'); cv.classList.add('hidden'); }
+  }
   // 路線在 src/tour.js：一條平滑閉合的曲線，等速走，不停不頓，看起來是一個長鏡頭
   const tour = { s: 0 };
   let tourDir = { dx: 1, dy: 0 };
@@ -416,14 +438,15 @@
     arm('restart', true); ev.currentTarget.textContent = `再按一次：第${CN[slot]}格從頭開始`;
   });
   $('btn-pause').addEventListener('click', (ev) => { setPause(true); ev.currentTarget.blur(); });
+  ['btn-title', 'btn-title2'].forEach((id) => $(id).addEventListener('click', (ev) => { ev.currentTarget.blur(); toTitle(); }));
   const muteBtns = () => ['btn-mute', 'btn-mute2'].forEach((id) => { $(id).classList.toggle('off', SFX.muted); $(id).textContent = SFX.muted ? '音效關' : '音效'; });
   ['btn-mute', 'btn-mute2'].forEach((id) => $(id).addEventListener('click', (ev) => { SFX.unlock(); SFX.toggle(); muteBtns(); ev.currentTarget.blur(); }));
   muteBtns(); showBest();
   if (window.matchMedia && matchMedia('(pointer: coarse)').matches && !matchMedia('(pointer: fine)').matches) $('touchnote').textContent = '這一版是試做，只做了鍵盤與滑鼠；手機上還不能玩。';
 
   // 先在背景擺好宅子（開始畫面後面看得到一點點）
-  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, continueGame, setPause, saveAs, readSlot, canSave, snap() { snap = true; }, tour, get use3d() { return use3d; }, get slot() { return slot; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
-  g = E.create({ seed: seedFromUrl() }); g.attract = true; { const q = window.TOUR.at(0); g.tp(q.x, q.y); tourDir = { dx: q.dx, dy: q.dy }; } window.DENG.g = g; RD.setGame(g); g.drain(); snap = true;
+  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, continueGame, setPause, toTitle, saveAs, readSlot, canSave, snap() { snap = true; }, tour, get use3d() { return use3d; }, get slot() { return slot; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
+  showcase();
   renderSlots();
   if (!canSave) $('slot-msg').textContent = '這個瀏覽器存不了檔（例如無痕視窗）：照樣能玩，只是關掉就沒了。';
   const fontReady = document.fonts && document.fonts.load ? document.fonts.load('32px "LXGW WenKai TC"', '燈下無明魄噬人火封') : Promise.resolve();

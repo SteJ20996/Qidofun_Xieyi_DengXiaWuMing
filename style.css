@@ -104,6 +104,33 @@ h2 { font: 32px/1.2 var(--font); margin: 4px 0 10px; letter-spacing: 4px; }
 .sub { font-size: 18px; color: var(--ink-2); letter-spacing: 4px; margin-bottom: 12px; }
 .story { font-size: 17px; line-height: 1.65; margin: 6px auto; max-width: 34em; text-wrap: pretty; }
 .story b { color: var(--red-2); font-weight: normal; }
+/* 開始畫面：怎麼贏、怎麼輸（擁有者 2026-11-05：「獲勝條件和遊戲意義沒有在主頁講明」） */
+.goalbox { display: grid; grid-template-columns: 1.45fr 1fr; gap: 0 18px; margin: 10px auto 4px; padding: 8px 2px; max-width: 37em; text-align: left; font-size: 14.5px; line-height: 1.55; border-top: 1px solid rgba(28,26,23,.25); border-bottom: 1px solid rgba(28,26,23,.25); }
+.goalbox h3 { font: 17px/1.3 var(--font); margin: 0 0 4px; display: flex; align-items: center; gap: 7px; letter-spacing: 2px; }
+.goalbox h3 i { font-style: normal; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 3px; font-size: 14px; letter-spacing: 0; color: #f7efe0; background: var(--red); transform: rotate(-4deg); }
+.goalbox .lose h3 i { background: #3f4b55; }
+.goalbox ol { margin: 0; padding-left: 1.3em; }
+.goalbox li { margin: 0 0 2px; }
+.goalbox p { margin: 0; }
+.goalbox b { color: var(--red-2); font-weight: normal; }
+/* 標題一列：印在左，字在右（省下高度給「怎麼贏、怎麼輸」） */
+.titlerow { display: flex; align-items: center; justify-content: center; gap: 18px; margin-bottom: 8px; }
+.titlerow .titleseal { margin: 0; flex: 0 0 auto; }
+.titletext { text-align: left; }
+.titletext h1 { margin: 0 0 2px; }
+.titletext .sub { margin-bottom: 4px; }
+.titletext .motto { margin: 0; }
+/* 開始畫面的按鍵：三欄、一行一鍵 */
+#start .keys { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px 14px; margin: 10px auto 2px; max-width: 37em; }
+#start .keys span { flex: 0 0 3.9em; }
+#start .keys div:nth-child(7) { grid-column: span 2; }
+@media (max-width: 640px) {
+  .titlerow { flex-direction: column; gap: 6px; }   /* 手機：印在上、字在下，和原來一樣置中 */
+  .titletext { text-align: center; }
+  #start .keys { grid-template-columns: repeat(2, minmax(0, 1fr)); } #start .keys div:nth-child(7) { grid-column: span 2; }
+}
+.story.meaning { font-size: 15px; line-height: 1.6; color: var(--ink-2); }
+@media (max-width: 640px) { .goalbox { grid-template-columns: 1fr; gap: 8px; } }
 .keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 4px 18px; margin: 12px auto; max-width: 600px; font-size: 14px; text-align: left; }
 .keys div { display: flex; gap: 10px; align-items: baseline; }
 .keys span { flex: 0 0 8.6em; text-align: right; white-space: nowrap; }
