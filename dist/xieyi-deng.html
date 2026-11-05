@@ -317,6 +317,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
       <li><b>寒</b>：被咬時護心衣先擋；久留在魄身邊會直接加寒意。只有在燭火、借火旁邊才會退，但站在火光裡，魄看得見你。</li>
       <li><b>鈴</b>：震開身邊的魄，不耗東西；但紙宅擋不住聲音，附近的魄都會過來，睡著的也會醒。</li>
       <li><b>封戶</b>：擋住廊口十秒，人與魄都過不去，劍、鈴、火、咬也都過不去，只有光透得過。</li>
+      <li><b>腳印</b>：走過的地方留下腳印，魄會循著新的腳印追（頭上有「嗅」）。點燈走踩得重，五秒多才淡到聞不到；掩燈放輕腳步，三秒多就淡了。一直走它追不上，停下來就會被追到；封戶擋得住、借火引得開。</li>
       <li>魄被打散後，過一陣子會在別處凝回來。</li>
       <li><b>對準</b>：動一下滑鼠就跟著滑鼠；不用滑鼠時，劍與火符自動對準看得見、在射程內最近的那隻魄（紅括號標著）。黑暗裡看不見的魄不會被對準。</li>
     </ul>
@@ -381,6 +382,11 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
 
     // 光源
     LIGHT: { lamp: { r: 4.2, I: 1 }, candle: { r: 2.8, I: 0.85 }, screen: 0.45, paperGlow: 0.35 },
+
+    // 腳印（擁有者 2026-11-05：魄循著腳印追）：每走 0.42 格留一個，八秒淡完。點燈走得快、踩得重（濃度 1）；
+    // 掩燈摸黑放輕腳步（0.5）。魄聞得到的要新鮮度 0.3 以上：點燈的約 5.6 秒內、掩燈的約 3.2 秒內。
+    // 巡行的魄一格內碰到新腳印就跟上去；搜人時 1.6 格內找；順著走時 1.4 格內有更新的就跳過去。
+    PRINT: { gap: 0.42, life: 8, dark: 0.5, smell: 0.3, pick: 1.0, near: 1.6, skip: 1.4, max: 60 },
 
     // 取暖：火邊每秒退 4 點寒意，但站在火光裡就是暴露
     WARM: { r: 1.6, rate: 4 },
@@ -666,7 +672,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     const g = {
       R, m, seed, rand: rng(seed), t: 0, state: 'play', events: [], acc: 0, nid: 1,
       exitReady: false, exitOpen: false, seals: { name: false, breath: false },
-      sealed: new Map(), lures: [], flashes: [], shots: [],
+      sealed: new Map(), lures: [], flashes: [], shots: [], prints: [], lastPrint: null,
       explored: new Uint8Array(m.W * m.H), hints: new Set(), press: {}, exposedNow: true,
       stats: { bites: 0, whiffs: 0, swordHits: 0, swordMiss: 0, bells: 0, fires: 0, booms: 0, reads: 0, readCancel: 0, sealsPlaced: 0, lures: 0, disperse: 0, interrupts: 0, maxChill: 0, stuck: 0, armorLost: 0, takes: 0 }
     };
@@ -677,7 +683,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
       way: (opt.way || (i === 0 ? R.WAY.po1 : R.WAY.po2)).map(([x, y]) => [x + 0.5, y + 0.5]),
       goal: null, linger: 0, lastKnown: null, lostT: 0, path: null, pathGoal: -1, repathT: 0, waiting: 0,
       windT: 0, windVisible: false, stateT: 0, stag: 0, kvx: 0, kvy: 0, kt: 0, burnT: 0, goneT: 0, formSpot: null, formWait: 0,
-      stuck: 0, sample: { x: s.x, y: s.y, t: 0 }, vis: null, sees: false, lureId: 0
+      stuck: 0, sample: { x: s.x, y: s.y, t: 0 }, vis: null, sees: false, lureId: 0, trail: 0
     }));
     g.altars = m.altars.map((a) => Object.assign({ taken: false }, a));
     if (m.exits.length) g.gate = { x: (m.exits[0].x + m.exits[m.exits.length - 1].x + 1) / 2, y: m.exits[0].y };
@@ -858,15 +864,48 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     // 卡住偵測：該走卻一直沒動，就重新尋路（測試也看這個數）
     if (g.t - e.sample.t >= 0.5) {
       const moved = hyp(e.x - e.sample.x, e.y - e.sample.y);
-      const shouldMove = ['chase', 'investigate', 'search', 'lure', 'patrol'].includes(e.state) && !e.waiting && !(e.state === 'patrol' && e.lingering) && !(e.state === 'lure' && e.lingering);
+      const shouldMove = ['chase', 'investigate', 'search', 'lure', 'patrol', 'track'].includes(e.state) && !e.waiting && !(e.state === 'patrol' && e.lingering) && !(e.state === 'lure' && e.lingering);
       if (shouldMove && moved < 0.05) e.stuck += g.t - e.sample.t; else e.stuck = 0;
       if (e.stuck >= R.PO.stuckT) { g.stats.stuck++; emit(g, 'stuck', { id: e.id, state: e.state, x: e.x, y: e.y }); e.path = null; e.repathT = 0; e.goal = null; e.stuck = 0; }
       e.sample = { x: e.x, y: e.y, t: g.t };
     }
   }
+  // ---------- 腳印 ----------
+  const fresh = (q) => q.s * (1 - q.age / R.PRINT.life);
+  function dropPrint(g) {
+    const p = g.p, last = g.lastPrint;
+    if (!last) { g.lastPrint = { x: p.x, y: p.y }; return; }
+    const d = hyp(p.x - last.x, p.y - last.y);
+    if (d > 2) { g.lastPrint = { x: p.x, y: p.y }; return; }   // 傳送或讀檔，不算走
+    if (d < R.PRINT.gap) return;
+    g.prints.push({ x: p.x, y: p.y, age: 0, s: p.lampOn ? 1 : R.PRINT.dark, n: g.nid++, a: Math.atan2(p.y - last.y, p.x - last.x) });
+    if (g.prints.length > R.PRINT.max) g.prints.shift();
+    g.lastPrint = { x: p.x, y: p.y };
+  }
+  // 聞得到、中間沒隔牆屏封戶、比 after 新的腳印裡，r 以內最新的那個
+  function scent(g, e, r, after) {
+    let best = null;
+    for (const q of g.prints) {
+      if (q.n <= after || fresh(q) < R.PRINT.smell) continue;
+      if (hyp(q.x - e.x, q.y - e.y) > r || !hitClear(g, e.x, e.y, q.x, q.y)) continue;
+      if (!best || q.n > best.n) best = q;
+    }
+    return best;
+  }
+  function nextPrint(g, e) {   // 順著走：比 trail 新、聞得到的腳印裡最舊的那個（照人走過的順序）
+    let best = null;
+    for (const q of g.prints) if (q.n > e.trail && fresh(q) >= R.PRINT.smell && (!best || q.n < best.n)) best = q;
+    return best;
+  }
+  function startTrack(g, e, q) {
+    e.state = 'track'; e.trail = q.n - 1; e.goal = null; e.stateT = 0;
+    const visible = !!(e.vis && e.vis.mode !== 'silhouette');
+    emit(g, 'track', { id: e.id, visible });
+    if (visible) hint(g, 'track');
+  }
   function think(g, e, dt, sees, d) {
     const P = R.PO;
-    if (sees && e.state !== 'chase') { e.state = 'chase'; emit(g, 'spotted', { id: e.id }); }
+    if (sees && e.state !== 'chase') { emit(g, 'spotted', { id: e.id, from: e.state }); e.state = 'chase'; }
     if (e.state !== 'chase' && e.state !== 'investigate' && e.state !== 'lure') { const l = lureFor(g, e); if (l) { e.state = 'lure'; e.lureId = l.id; e.goal = null; } }
     e.lingering = false;
     switch (e.state) {
@@ -886,9 +925,20 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
       }
       case 'search': {
         e.stateT -= dt;
+        const sc = scent(g, e, R.PRINT.near, e.trail);
+        if (sc) { startTrack(g, e, sc); break; }   // 看不見人，但聞得到腳印
         if (e.stateT <= 0) { e.state = 'patrol'; e.goal = null; e.lastKnown = null; break; }
         if (!e.goal || hyp(e.goal.x - e.x, e.goal.y - e.y) < 0.3 || e.waiting) e.goal = searchGoal(g, e);
         moveToward(g, e, e.goal, P.patrol, dt);
+        break;
+      }
+      case 'track': {
+        const q = nextPrint(g, e);
+        if (!q) { e.state = 'search'; e.stateT = P.searchT; e.goal = null; e.lastKnown = { x: e.x, y: e.y }; break; }   // 線斷了：在這裡搜一陣
+        const tgt = scent(g, e, R.PRINT.skip, q.n) || q;   // 附近有更新的就跳過去，不必照著繞
+        if (hyp(tgt.x - e.x, tgt.y - e.y) < 0.35) { e.trail = tgt.n; break; }
+        moveToward(g, e, tgt, P.investigate, dt);
+        if (e.waiting) { e.stateT += dt; if (e.stateT > 2) { e.trail = tgt.n; e.stateT = 0; } } else e.stateT = 0;   // 被封戶擋住：等兩秒就放掉這個腳印
         break;
       }
       case 'lure': {
@@ -903,6 +953,8 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
       }
       default: {   // patrol
         e.state = 'patrol';
+        const sc = scent(g, e, R.PRINT.pick, e.trail);
+        if (sc) { startTrack(g, e, sc); break; }   // 一格內碰到新腳印：跟上去
         if (!e.goal) nextWay(g, e);
         if (hyp(e.goal.x - e.x, e.goal.y - e.y) < 0.35) { e.lingering = true; e.linger -= dt; if (e.linger <= 0) nextWay(g, e); break; }
         moveToward(g, e, e.goal, P.patrol, dt);
@@ -1159,6 +1211,9 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     if (press.read2) tryRead(g, 'seal');
     if (hold.take && !p.taking) tryTake(g);
     for (const k of g.pickups) if (!k.taken && dist(p, k) < 0.6) { k.taken = true; p.talismans = Math.min(R.P.talismanMax, p.talismans + 1); emit(g, 'pickup', { kind: k.kind }); }
+    for (const q of g.prints) q.age += dt;
+    if (g.prints.length && g.prints[0].age >= R.PRINT.life) g.prints = g.prints.filter((q) => q.age < R.PRINT.life);
+    if (!g.attract) dropPrint(g);   // 開始畫面那盞飄著的燈不留腳印
     if (!g.hints.has('altar') && g.altars.some((a) => !a.taken && dist(p, a) < 2)) hint(g, 'altar');
     if (g.exitReady && !g.exitOpen && g.gate && dist(p, g.gate) < 2.5) hint(g, 'gate');
     // 暴露與眼睛
@@ -1256,8 +1311,8 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   // 一局的完整狀態（魄的計時、尋路、亂數都存），讀回來接著跑，結果和沒存過一樣。
   const SAVE_V = 1;
   const PO_KEYS = ['id', 'x', 'y', 'hp', 'state', 'way', 'goal', 'linger', 'lastKnown', 'lostT', 'path', 'pathGoal', 'repathT', 'reach', 'waiting', 'windT', 'windVisible',
-    'stateT', 'stag', 'kvx', 'kvy', 'kt', 'burnT', 'goneT', 'formSpot', 'formWait', 'stuck', 'sample', 'sees', 'lureId', 'lingering'];
-  const PO_STATES = ['dormant', 'patrol', 'lure', 'investigate', 'search', 'chase', 'windup', 'recover', 'recoil', 'stagger', 'gone'];
+    'stateT', 'stag', 'kvx', 'kvy', 'kt', 'burnT', 'goneT', 'formSpot', 'formWait', 'stuck', 'sample', 'sees', 'lureId', 'lingering', 'trail'];
+  const PO_STATES = ['dormant', 'patrol', 'lure', 'investigate', 'search', 'chase', 'windup', 'recover', 'recoil', 'stagger', 'gone', 'track'];
   const P_NUMS = ['x', 'y', 'aim', 'adapt', 'chill', 'armor', 'talismans', 'ink', 'swordCD', 'bellCD'];
   const copy = (v) => (v == null ? v : JSON.parse(JSON.stringify(v)));
   function serialize(g) {
@@ -1269,7 +1324,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
       seed: g.seed, rng: g.rand.s.a, t: g.t, acc: g.acc, nid: g.nid, exposedNow: g.exposedNow,
       exitReady: g.exitReady, exitOpen: g.exitOpen, seals: { name: g.seals.name, breath: g.seals.breath },
       sealed: [...g.sealed].map(([i, q]) => ({ i, id: q.id, x: q.x, y: q.y, t: q.t, ex: [...q.exempt] })),
-      lures: copy(g.lures), flashes: copy(g.flashes), shots: copy(g.shots),
+      lures: copy(g.lures), flashes: copy(g.flashes), shots: copy(g.shots), prints: copy(g.prints), lastPrint: copy(g.lastPrint),
       explored: ex, hints: [...g.hints], stats: Object.assign({}, g.stats),
       p: Object.assign(Object.fromEntries(P_NUMS.map((k) => [k, p[k]])), {
         lampOn: p.lampOn,
@@ -1309,6 +1364,9 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
       g.sealed = new Map();
       for (const q of d.sealed) { if (!m.doors.some((dr) => dr.i === q.i)) return null; g.sealed.set(q.i, { id: q.id, x: q.x, y: q.y, t: q.t, exempt: new Set(Array.isArray(q.ex) ? q.ex : []) }); }
       g.lures = copy(d.lures); g.flashes = copy(d.flashes); g.shots = copy(d.shots);
+      // 腳印是 2026-11-05 加的：之前的存檔沒有，讀進來就是一條空的足跡（格式版本不必加一）
+      if (d.prints != null && (!Array.isArray(d.prints) || d.prints.length > R.PRINT.max || !d.prints.every((q) => inMap(q) && fin(q.age) && fin(q.s) && fin(q.n) && fin(q.a)))) return null;
+      g.prints = copy(d.prints || []); g.lastPrint = d.lastPrint && pt(d.lastPrint) ? copy(d.lastPrint) : null;
       for (let i = 0; i < W * H; i++) g.explored[i] = d.explored.charCodeAt(i) === 49 ? 1 : 0;
       g.hints = new Set(Array.isArray(d.hints) ? d.hints.filter((h) => typeof h === 'string') : []);
       for (const k in g.stats) if (d.stats && fin(d.stats[k])) g.stats[k] = d.stats[k];
@@ -1339,6 +1397,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
         for (const k of PO_KEYS) e[k] = copy(q[k]);
         e.id = i + 1; e.vis = null;
         if (!Array.isArray(e.path)) e.path = null;
+        if (!fin(e.trail)) e.trail = 0;
         if (!fin(e.pathGoal)) e.pathGoal = -1;
         if (!pt(e.sample) || !fin(e.sample.t)) e.sample = { x: e.x, y: e.y, t: g.t };
       });
@@ -1394,7 +1453,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
 
   let cv, ctx, g, art, mask, mctx, warm, wctx, cam = { x: 0, y: 0, s: 40, ox: 0, oy: 0 }, fx = [], floats = [], t = 0;
   // 生動的小東西：光裡的灰塵、腳印、魄拖著的墨煙、被咬時鏡頭一震
-  let motes = [], prints = [], wisps = [], lastPrint = null, printSide = 1, shake = 0, lastPo = {};
+  let motes = [], wisps = [], shake = 0, lastPo = {};
 
   function rnd(seed) { let a = seed; return () => { a = (a * 1103515245 + 12345) & 0x7fffffff; return a / 0x7fffffff; }; }
 
@@ -1541,7 +1600,6 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     ctx.imageSmoothingEnabled = true;
     ctx.drawImage(art, sx(0), sy(0), m.W * s, m.H * s);
     const flick = RM || !p.lampOn ? 1 : 0.9 + 0.1 * Math.sin(t * 13) * Math.sin(t * 7.3 + 1);   // 燈火微微跳動（只動暖色那層，不動看得見的範圍）
-    if (!w.attract) stepPrints(dt);
     drawFloorThings(v);
     drawPrints(v);
     // 墨：看不見的地方蓋起來；走過的地方留一點點牆影
@@ -1684,28 +1742,24 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
         glyph('噬', e.x, e.y - 0.95, 0.55 + 0.15 * f, C.red, { stroke: 4, strokeColor: 'rgba(240,230,210,.85)' });
       }
       if (e.state === 'recover' && vis) glyph('…', e.x, e.y - 0.8, 0.4, '#6b5a48', { a: 0.7 });
+      if (e.state === 'track') {   // 循著腳印：頭上一個「嗅」，前面幾點墨點往地上探
+        glyph('嗅', e.x, e.y - 0.9, 0.36, '#7a4a20', { a: 0.75 + 0.25 * Math.sin(t * 8), stroke: 3, strokeColor: 'rgba(236,226,200,.8)' });
+        for (let k = 0; k < 3; k++) { const f = (t * 1.6 + k / 3) % 1; ctx.fillStyle = `rgba(90,60,30,${0.5 * (1 - f)})`; ctx.beginPath(); ctx.arc(sx(e.x + Math.sin(t * 3 + k) * 0.2), sy(e.y + 0.35 + f * 0.3), 0.04 * cam.s, 0, Math.PI * 2); ctx.fill(); }
+      }
     }
   }
 
   // ---------- 生動的小東西 ----------
-  // 腳印：每走 0.42 格留一個，左右交替，七秒淡掉；畫在墨的下面，只有照得到的地方看得見
-  function stepPrints(dt) {
-    const p = g.p;
-    for (const f of prints) f.t += dt;
-    prints = prints.filter((f) => f.t < 7);
-    if (!lastPrint) { lastPrint = { x: p.x, y: p.y }; return; }
-    const dx = p.x - lastPrint.x, dy = p.y - lastPrint.y, d = hyp(dx, dy);
-    if (d > 2) { lastPrint = { x: p.x, y: p.y }; return; }   // 傳送或讀檔，不畫一長串
-    if (d < 0.42) return;
-    const a = Math.atan2(dy, dx); printSide = -printSide;
-    prints.push({ x: p.x + Math.cos(a + Math.PI / 2) * 0.1 * printSide, y: p.y + Math.sin(a + Math.PI / 2) * 0.1 * printSide, a, t: 0 });
-    if (prints.length > 40) prints.shift();
-    lastPrint = { x: p.x, y: p.y };
-  }
+  // 腳印：就是引擎裡魄聞得到的那些（g.prints）。濃淡照新鮮度；掩燈留的本來就淡。左右腳交替。
+  // 畫在墨的下面，所以只有照得到（或眼睛習慣後）的地方看得見。
   function drawPrints() {
-    for (const f of prints) {
-      ctx.save(); ctx.translate(sx(f.x), sy(f.y)); ctx.rotate(f.a);
-      ctx.fillStyle = `rgba(40,30,22,${0.32 * (1 - f.t / 7)})`;
+    const life = R.PRINT.life;
+    for (const q of g.prints) {
+      const f = q.s * (1 - q.age / life);
+      if (f <= 0) continue;
+      const side = q.n % 2 ? 1 : -1, ox = Math.cos(q.a + Math.PI / 2) * 0.1 * side, oy = Math.sin(q.a + Math.PI / 2) * 0.1 * side;
+      ctx.save(); ctx.translate(sx(q.x + ox), sy(q.y + oy)); ctx.rotate(q.a);
+      ctx.fillStyle = `rgba(40,30,22,${0.5 * f})`;
       ctx.beginPath(); ctx.ellipse(0, 0, 0.09 * cam.s, 0.05 * cam.s, 0, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
     }
@@ -1906,7 +1960,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     const mc = document.createElement('canvas'); mc.width = g.m.W; mc.height = g.m.H; mctx = mc.getContext('2d'); mask = mctx.createImageData(g.m.W, g.m.H);
     const wc = document.createElement('canvas'); wc.width = g.m.W; wc.height = g.m.H; wctx = wc.getContext('2d'); warm = wctx.createImageData(g.m.W, g.m.H);
     cam.x = g.p.x; cam.y = g.p.y;
-    motes = []; prints = []; wisps = []; lastPrint = null; lastPo = {}; shake = 0;
+    motes = []; wisps = []; lastPo = {}; shake = 0;
   }
   function toWorld(px, py) { return { x: (px - cv.width / 2) / cam.s + cam.x, y: (py - cv.height / 2) / cam.s + cam.y }; }
   root.RENDER = { init, setGame, frame, event, minimap, toWorld, FONT, cam, rebuild() { art = null; if (g) art = buildArt(g.m); } };
@@ -2027,6 +2081,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     seal1: '取到一印，寒意退了一些，也補了護持、火符與書墨。宅裡有東西醒了。',
     seal2: '兩印到手。回大門，按住 U 推開門閂（要一秒半）。魄也往玄關去了。',
     gate: '按住 U 推開門閂。推的時候不能動，被咬就要重來。魄在附近時，可以先借火把它引開，或封住它過來的廊口。',
+    track: '那隻魄在聞你的腳印（頭上有「嗅」）。腳印新的時候它跟得上；你一直走，它就追不上，停下來就會被追到。掩燈放輕腳步，腳印淡得快；封戶擋得住它，借火也能把它引開。',
     chill: '寒意很高。到燭火或借火旁邊可以取暖，但站在火光裡，魄看得見你。'
   };
   const SPELL = { borrow: '借火', seal: '封戶' };
@@ -2219,6 +2274,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
         case 'bite': SFX.play('bite'); log(e.absorbed ? (e.chill ? `被咬：護持 −${e.absorbed}，寒意 +${e.chill}` : `被咬：護心衣擋下，護持 −${e.absorbed}`) : `被咬：寒意 +${e.chill}`, 'warn'); break;
         case 'whiff': SFX.play('whiff'); if (e.visible) log('魄撲空了', 'good'); break;
         case 'interrupt': log('打斷了魄的蓄撲', 'good'); break;
+        case 'track': if (e.visible) log('魄在聞你的腳印', 'warn'); break;
         case 'swing': SFX.play('swish'); flash($('t-sword'), 'use', 400); break;
         case 'swordHit': SFX.play('hit'); break;
         case 'bell': SFX.play('bell'); flash($('t-bell'), 'use', 400); break;

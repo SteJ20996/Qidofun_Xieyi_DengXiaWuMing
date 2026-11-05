@@ -27,6 +27,7 @@
     seal1: '取到一印，寒意退了一些，也補了護持、火符與書墨。宅裡有東西醒了。',
     seal2: '兩印到手。回大門，按住 U 推開門閂（要一秒半）。魄也往玄關去了。',
     gate: '按住 U 推開門閂。推的時候不能動，被咬就要重來。魄在附近時，可以先借火把它引開，或封住它過來的廊口。',
+    track: '那隻魄在聞你的腳印（頭上有「嗅」）。腳印新的時候它跟得上；你一直走，它就追不上，停下來就會被追到。掩燈放輕腳步，腳印淡得快；封戶擋得住它，借火也能把它引開。',
     chill: '寒意很高。到燭火或借火旁邊可以取暖，但站在火光裡，魄看得見你。'
   };
   const SPELL = { borrow: '借火', seal: '封戶' };
@@ -219,6 +220,7 @@
         case 'bite': SFX.play('bite'); log(e.absorbed ? (e.chill ? `被咬：護持 −${e.absorbed}，寒意 +${e.chill}` : `被咬：護心衣擋下，護持 −${e.absorbed}`) : `被咬：寒意 +${e.chill}`, 'warn'); break;
         case 'whiff': SFX.play('whiff'); if (e.visible) log('魄撲空了', 'good'); break;
         case 'interrupt': log('打斷了魄的蓄撲', 'good'); break;
+        case 'track': if (e.visible) log('魄在聞你的腳印', 'warn'); break;
         case 'swing': SFX.play('swish'); flash($('t-sword'), 'use', 400); break;
         case 'swordHit': SFX.play('hit'); break;
         case 'bell': SFX.play('bell'); flash($('t-bell'), 'use', 400); break;

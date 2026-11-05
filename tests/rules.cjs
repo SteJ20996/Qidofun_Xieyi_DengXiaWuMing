@@ -346,6 +346,73 @@ const doorRoom = (set) => { for (let y = 1; y < 15; y++) set(5, y, '#'); set(5, 
   ok('開始畫面展示：魄看不見那盞燈、不咬、不冷', g.stats.bites === 0 && g.p.chill === 0 && !['chase', 'windup'].includes(e.state), { state: e.state, chill: g.p.chill });
 }
 
+// ---------- 腳印：魄循著腳印追 ----------
+const walk = (g, path, lamp) => {   // 照著幾個點走過去（真的走，會留腳印）
+  for (const [x, y] of path) for (let i = 0; i < 600; i++) { const dx = x - g.p.x, dy = y - g.p.y, d = Math.hypot(dx, dy); if (d < 0.1) break; g.step(R.STEP, { mx: dx / d, my: dy / d }); }
+  void lamp;
+};
+{ // 走路留腳印：點燈的濃、掩燈的淡；八秒淡完
+  const g = mkArena(), p = g.p; put(g, g.pos[0], 2.5, 13.5, 'recover');
+  walk(g, [[12.5, 8.5]]);
+  const lit = g.prints.length, s1 = g.prints.every((q) => q.s === 1);
+  run(g, R.STEP, { press: { lamp: true } });
+  walk(g, [[12.5, 4.5]]);
+  const dark = g.prints.filter((q) => q.s === R.PRINT.dark).length;
+  run(g, R.PRINT.life + 0.1, {});
+  ok('走路留腳印：點燈的濃、掩燈的淡、八秒淡完', lit >= 8 && s1 && dark >= 8 && g.prints.length === 0, { lit, dark, left: g.prints.length });
+}
+// 一道牆擋在中間（x=10，y 1–7），下面繞得過去
+const wallRoom = (set) => { for (let y = 1; y <= 7; y++) set(10, y, '#'); };
+{ // 巡行的魄碰到新腳印，順著繞過牆找到人
+  const g = mkArena(wallRoom), p = g.p; g.tp(8.5, 5.5);
+  const e = put(g, g.pos[0], 2.5, 13.5, 'recover');
+  walk(g, [[8.5, 8.5], [12.5, 8.5], [12.5, 5.5]]);
+  put(g, e, 8.5, 5.0, 'patrol');
+  const seq = []; let sawFirst = false;
+  run(g, 8, () => ({}), (gg) => { if (seq[seq.length - 1] !== e.state) seq.push(e.state); if (e.state === 'chase' && seq.indexOf('track') < 0) sawFirst = true; return e.state === 'chase' || e.state === 'windup'; });
+  ok('巡行的魄碰到腳印就跟上，繞過牆找到人', seq.includes('track') && !sawFirst && (e.state === 'chase' || e.state === 'windup'), { seq, d: +dist(p, e).toFixed(2) });
+}
+{ // 掩燈的腳印淡得快：四秒後，點燈的還聞得到，掩燈的聞不到
+  const res = {};
+  for (const lamp of ['點燈', '掩燈']) {
+    const g = mkArena(wallRoom); g.tp(8.5, 5.5);
+    const e = put(g, g.pos[0], 2.5, 13.5, 'recover');
+    if (lamp === '掩燈') run(g, R.STEP, { press: { lamp: true } });
+    walk(g, [[8.5, 8.5], [12.5, 8.5], [12.5, 5.5]]);
+    run(g, 4 - 10 / R.P.speed, {});
+    put(g, e, 8.5, 5.0, 'patrol');
+    run(g, 0.3, {});
+    res[lamp] = e.state;
+  }
+  ok('四秒後：點燈的腳印還聞得到，掩燈的聞不到', res['點燈'] === 'track' && res['掩燈'] !== 'track', res);
+}
+{ // 封戶斷線：腳印穿過廊口，封起來，追的魄過不去
+  const g = mkArena(doorRoom), p = g.p; g.tp(2.5, 8.5);
+  const e = put(g, g.pos[0], 2.5, 13.5, 'recover');
+  walk(g, [[8.5, 8.5], [8.5, 5.5]]);
+  g.sealed.set(8 * g.m.W + 5, { id: 99, x: 5, y: 8, t: 30, exempt: new Set() });
+  put(g, e, 2.5, 8.0, 'patrol');
+  let maxX = 0, tracked = false;
+  run(g, 12, () => ({}), (gg) => { maxX = Math.max(maxX, e.x); if (e.state === 'track') tracked = true; return false; });
+  ok('封戶斷了腳印：追的魄過不去，放棄去搜', tracked && maxX < 5 && ['search', 'patrol'].includes(e.state), { maxX: +maxX.toFixed(2), state: e.state });
+}
+{ // 借火引開追蹤的魄
+  const g = mkArena(wallRoom); g.tp(8.5, 5.5);
+  const e = put(g, g.pos[0], 2.5, 13.5, 'recover');
+  walk(g, [[8.5, 8.5], [12.5, 8.5], [12.5, 5.5]]);
+  put(g, e, 8.5, 5.0, 'patrol');
+  run(g, 0.3, {});
+  const was = e.state;
+  g.lures.push({ id: 500, x: 3.5, y: 12.5, t: 10 });
+  run(g, 0.2, {});
+  ok('借火把追腳印的魄引開', was === 'track' && e.state === 'lure', { was, now: e.state });
+}
+{ // 開始畫面那盞飄著的燈不留腳印
+  const g = mk({ seed: 3 }); g.attract = true;
+  for (let i = 0; i < 240; i++) { g.tp(19.5, 25.5 - i * 0.02); g.step(R.STEP, {}); }
+  ok('開始畫面的燈不留腳印', g.prints.length === 0);
+}
+
 // ---------- 存檔 ----------
 { // 任何時刻存檔、讀回來接著跑，和沒存過的那一局一步一步完全一樣（包含魄的計時、尋路、亂數）
   const rnd = ENGINE.rng(4242);
@@ -386,6 +453,7 @@ const doorRoom = (set) => { for (let y = 1; y < 15; y++) set(5, y, '#'); set(5, 
     '魄被擊退、還在燒': (g) => { const e = g.pos[0]; g.tp(19.5, 3.5); g.place(e, 20.5, 3.5, 'recover'); e.stateT = 99; e.burnT = 2; run(g, R.SWORD.windup + R.STEP * 3, { aim: 0, press: { sword: true } }); return e.kt > 0 && e.burnT > 0; },
     '廊口封著、魄在封印格裡': (g) => { const e = g.pos[0]; g.place(e, 19.5, 18.5, 'investigate'); e.lastKnown = { x: 19.5, y: 21.5 }; g.sealed.set(18 * g.m.W + 19, { id: 77, x: 19, y: 18, t: 6, exempt: new Set([e.id]) }); return g.sealed.size === 1; },
     '借火燒著、魄被引過去': (g) => { const e = g.pos[0]; g.tp(14.5, 13.5); g.p.lampOn = false; g.lures.push({ id: 88, x: 22.5, y: 13.5, t: 10 }); g.place(e, 23.5, 9.5, 'patrol'); run(g, 0.5, {}); return e.state === 'lure'; },
+    '魄正在循著腳印走': (g) => { const e = g.pos[0]; g.tp(19.5, 3.5); g.place(e, 4.5, 25.5, 'recover'); e.stateT = 999; for (let i = 0; i < 300; i++) g.step(R.STEP, { mx: 1, my: 0.2 }); g.place(e, 19.5, 3.3, 'patrol'); g.p.lampOn = false; run(g, 0.2, {}); return e.state === 'track' && g.prints.length > 3; },
     '魄正在凝形': (g) => { const e = g.pos[0]; g.tp(19.5, 3.5); g.place(e, 20.5, 3.5, 'recover'); e.stateT = 99; e.hp = 1; run(g, 0.3, { aim: 0, press: { sword: true } }); e.goneT = 1.0; run(g, 0.1, {}); return e.state === 'gone' && !!e.formSpot; }
   };
   const res = {};
@@ -397,7 +465,7 @@ const doorRoom = (set) => { for (let y = 1; y < 15; y++) set(5, y, '#'); set(5, 
     for (let i = 0; i < 720; i++) { const v = ahead(i); g.step(R.STEP, v); h.step(R.STEP, v); if (g.state !== 'play') break; }
     res[name] = JSON.stringify(g.serialize()) === JSON.stringify(h.serialize()) && g.state === h.state ? '一樣' : '不一樣';
   }
-  ok('十種難存時刻：存了讀回來接著跑都一樣', Object.values(res).every((v) => v === '一樣'), res);
+  ok('十一種難存時刻：存了讀回來接著跑都一樣', Object.values(res).every((v) => v === '一樣'), res);
 }
 { // 壞的存檔整份不讀
   const g = mk(); run(g, 1, { mx: 0, my: -1 });
@@ -407,12 +475,15 @@ const doorRoom = (set) => { for (let y = 1; y < 15; y++) set(5, y, '#'); set(5, 
     '空的': null, '字串': 'garbage', '空物件': {}, '版本不對': mut((d) => { d.v = 99; }), '別的遊戲': mut((d) => { d.game = 'xieyi.zhan'; }),
     '地圖大小不對': mut((d) => { d.map = [10, 10]; }), '座標不是數字': mut((d) => { d.p.x = 'NaN'; }), '座標在圖外': mut((d) => { d.p.y = 999; }),
     '魄的數量不對': mut((d) => { d.pos.pop(); }), '魄的狀態不認得': mut((d) => { d.pos[0].state = 'fly'; }), '地圖記憶長度不對': mut((d) => { d.explored = '01'; }),
-    '封戶不在廊口': mut((d) => { d.sealed = [{ i: 0, id: 1, x: 0, y: 0, t: 3, ex: [] }]; }), '少了印': mut((d) => { d.altars = [true]; })
+    '封戶不在廊口': mut((d) => { d.sealed = [{ i: 0, id: 1, x: 0, y: 0, t: 3, ex: [] }]; }), '少了印': mut((d) => { d.altars = [true]; }),
+    '腳印不是數字': mut((d) => { d.prints = [{ x: 3, y: 3, age: 'old', s: 1, n: 1, a: 0 }]; })
   };
   const loaded = Object.entries(cases).filter(([, d]) => ENGINE.restore(d) !== null).map(([k]) => k);
-  ok('壞的存檔整份不讀（13 種）', loaded.length === 0, loaded);
+  ok('壞的存檔整份不讀（14 種）', loaded.length === 0, loaded);
   const h = ENGINE.restore(good);
   ok('好的存檔讀得回來', h && h.state === 'play' && Math.abs(h.p.y - g.p.y) < 1e-9);
+  const old = ENGINE.restore(mut((d) => { delete d.prints; delete d.lastPrint; d.pos.forEach((q) => { delete q.trail; }); }));
+  ok('加腳印以前的存檔也讀得回來（沒有腳印）', old && old.prints.length === 0 && old.pos.every((e) => e.trail === 0));
   const over = ENGINE.restore(mut((d) => { d.p.chill = 500; d.p.ink = 9; d.p.talismans = -3; }));
   ok('超出範圍的數值收回範圍內', over && over.p.chill === 100 && over.p.ink === R.P.inkMax && over.p.talismans === 0, over && [over.p.chill, over.p.ink, over.p.talismans]);
 }

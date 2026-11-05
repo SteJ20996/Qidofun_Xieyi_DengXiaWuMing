@@ -161,7 +161,7 @@
     const g = {
       R, m, seed, rand: rng(seed), t: 0, state: 'play', events: [], acc: 0, nid: 1,
       exitReady: false, exitOpen: false, seals: { name: false, breath: false },
-      sealed: new Map(), lures: [], flashes: [], shots: [],
+      sealed: new Map(), lures: [], flashes: [], shots: [], prints: [], lastPrint: null,
       explored: new Uint8Array(m.W * m.H), hints: new Set(), press: {}, exposedNow: true,
       stats: { bites: 0, whiffs: 0, swordHits: 0, swordMiss: 0, bells: 0, fires: 0, booms: 0, reads: 0, readCancel: 0, sealsPlaced: 0, lures: 0, disperse: 0, interrupts: 0, maxChill: 0, stuck: 0, armorLost: 0, takes: 0 }
     };
@@ -172,7 +172,7 @@
       way: (opt.way || (i === 0 ? R.WAY.po1 : R.WAY.po2)).map(([x, y]) => [x + 0.5, y + 0.5]),
       goal: null, linger: 0, lastKnown: null, lostT: 0, path: null, pathGoal: -1, repathT: 0, waiting: 0,
       windT: 0, windVisible: false, stateT: 0, stag: 0, kvx: 0, kvy: 0, kt: 0, burnT: 0, goneT: 0, formSpot: null, formWait: 0,
-      stuck: 0, sample: { x: s.x, y: s.y, t: 0 }, vis: null, sees: false, lureId: 0
+      stuck: 0, sample: { x: s.x, y: s.y, t: 0 }, vis: null, sees: false, lureId: 0, trail: 0
     }));
     g.altars = m.altars.map((a) => Object.assign({ taken: false }, a));
     if (m.exits.length) g.gate = { x: (m.exits[0].x + m.exits[m.exits.length - 1].x + 1) / 2, y: m.exits[0].y };
@@ -353,15 +353,48 @@
     // 卡住偵測：該走卻一直沒動，就重新尋路（測試也看這個數）
     if (g.t - e.sample.t >= 0.5) {
       const moved = hyp(e.x - e.sample.x, e.y - e.sample.y);
-      const shouldMove = ['chase', 'investigate', 'search', 'lure', 'patrol'].includes(e.state) && !e.waiting && !(e.state === 'patrol' && e.lingering) && !(e.state === 'lure' && e.lingering);
+      const shouldMove = ['chase', 'investigate', 'search', 'lure', 'patrol', 'track'].includes(e.state) && !e.waiting && !(e.state === 'patrol' && e.lingering) && !(e.state === 'lure' && e.lingering);
       if (shouldMove && moved < 0.05) e.stuck += g.t - e.sample.t; else e.stuck = 0;
       if (e.stuck >= R.PO.stuckT) { g.stats.stuck++; emit(g, 'stuck', { id: e.id, state: e.state, x: e.x, y: e.y }); e.path = null; e.repathT = 0; e.goal = null; e.stuck = 0; }
       e.sample = { x: e.x, y: e.y, t: g.t };
     }
   }
+  // ---------- 腳印 ----------
+  const fresh = (q) => q.s * (1 - q.age / R.PRINT.life);
+  function dropPrint(g) {
+    const p = g.p, last = g.lastPrint;
+    if (!last) { g.lastPrint = { x: p.x, y: p.y }; return; }
+    const d = hyp(p.x - last.x, p.y - last.y);
+    if (d > 2) { g.lastPrint = { x: p.x, y: p.y }; return; }   // 傳送或讀檔，不算走
+    if (d < R.PRINT.gap) return;
+    g.prints.push({ x: p.x, y: p.y, age: 0, s: p.lampOn ? 1 : R.PRINT.dark, n: g.nid++, a: Math.atan2(p.y - last.y, p.x - last.x) });
+    if (g.prints.length > R.PRINT.max) g.prints.shift();
+    g.lastPrint = { x: p.x, y: p.y };
+  }
+  // 聞得到、中間沒隔牆屏封戶、比 after 新的腳印裡，r 以內最新的那個
+  function scent(g, e, r, after) {
+    let best = null;
+    for (const q of g.prints) {
+      if (q.n <= after || fresh(q) < R.PRINT.smell) continue;
+      if (hyp(q.x - e.x, q.y - e.y) > r || !hitClear(g, e.x, e.y, q.x, q.y)) continue;
+      if (!best || q.n > best.n) best = q;
+    }
+    return best;
+  }
+  function nextPrint(g, e) {   // 順著走：比 trail 新、聞得到的腳印裡最舊的那個（照人走過的順序）
+    let best = null;
+    for (const q of g.prints) if (q.n > e.trail && fresh(q) >= R.PRINT.smell && (!best || q.n < best.n)) best = q;
+    return best;
+  }
+  function startTrack(g, e, q) {
+    e.state = 'track'; e.trail = q.n - 1; e.goal = null; e.stateT = 0;
+    const visible = !!(e.vis && e.vis.mode !== 'silhouette');
+    emit(g, 'track', { id: e.id, visible });
+    if (visible) hint(g, 'track');
+  }
   function think(g, e, dt, sees, d) {
     const P = R.PO;
-    if (sees && e.state !== 'chase') { e.state = 'chase'; emit(g, 'spotted', { id: e.id }); }
+    if (sees && e.state !== 'chase') { emit(g, 'spotted', { id: e.id, from: e.state }); e.state = 'chase'; }
     if (e.state !== 'chase' && e.state !== 'investigate' && e.state !== 'lure') { const l = lureFor(g, e); if (l) { e.state = 'lure'; e.lureId = l.id; e.goal = null; } }
     e.lingering = false;
     switch (e.state) {
@@ -381,9 +414,20 @@
       }
       case 'search': {
         e.stateT -= dt;
+        const sc = scent(g, e, R.PRINT.near, e.trail);
+        if (sc) { startTrack(g, e, sc); break; }   // 看不見人，但聞得到腳印
         if (e.stateT <= 0) { e.state = 'patrol'; e.goal = null; e.lastKnown = null; break; }
         if (!e.goal || hyp(e.goal.x - e.x, e.goal.y - e.y) < 0.3 || e.waiting) e.goal = searchGoal(g, e);
         moveToward(g, e, e.goal, P.patrol, dt);
+        break;
+      }
+      case 'track': {
+        const q = nextPrint(g, e);
+        if (!q) { e.state = 'search'; e.stateT = P.searchT; e.goal = null; e.lastKnown = { x: e.x, y: e.y }; break; }   // 線斷了：在這裡搜一陣
+        const tgt = scent(g, e, R.PRINT.skip, q.n) || q;   // 附近有更新的就跳過去，不必照著繞
+        if (hyp(tgt.x - e.x, tgt.y - e.y) < 0.35) { e.trail = tgt.n; break; }
+        moveToward(g, e, tgt, P.investigate, dt);
+        if (e.waiting) { e.stateT += dt; if (e.stateT > 2) { e.trail = tgt.n; e.stateT = 0; } } else e.stateT = 0;   // 被封戶擋住：等兩秒就放掉這個腳印
         break;
       }
       case 'lure': {
@@ -398,6 +442,8 @@
       }
       default: {   // patrol
         e.state = 'patrol';
+        const sc = scent(g, e, R.PRINT.pick, e.trail);
+        if (sc) { startTrack(g, e, sc); break; }   // 一格內碰到新腳印：跟上去
         if (!e.goal) nextWay(g, e);
         if (hyp(e.goal.x - e.x, e.goal.y - e.y) < 0.35) { e.lingering = true; e.linger -= dt; if (e.linger <= 0) nextWay(g, e); break; }
         moveToward(g, e, e.goal, P.patrol, dt);
@@ -654,6 +700,9 @@
     if (press.read2) tryRead(g, 'seal');
     if (hold.take && !p.taking) tryTake(g);
     for (const k of g.pickups) if (!k.taken && dist(p, k) < 0.6) { k.taken = true; p.talismans = Math.min(R.P.talismanMax, p.talismans + 1); emit(g, 'pickup', { kind: k.kind }); }
+    for (const q of g.prints) q.age += dt;
+    if (g.prints.length && g.prints[0].age >= R.PRINT.life) g.prints = g.prints.filter((q) => q.age < R.PRINT.life);
+    if (!g.attract) dropPrint(g);   // 開始畫面那盞飄著的燈不留腳印
     if (!g.hints.has('altar') && g.altars.some((a) => !a.taken && dist(p, a) < 2)) hint(g, 'altar');
     if (g.exitReady && !g.exitOpen && g.gate && dist(p, g.gate) < 2.5) hint(g, 'gate');
     // 暴露與眼睛
@@ -751,8 +800,8 @@
   // 一局的完整狀態（魄的計時、尋路、亂數都存），讀回來接著跑，結果和沒存過一樣。
   const SAVE_V = 1;
   const PO_KEYS = ['id', 'x', 'y', 'hp', 'state', 'way', 'goal', 'linger', 'lastKnown', 'lostT', 'path', 'pathGoal', 'repathT', 'reach', 'waiting', 'windT', 'windVisible',
-    'stateT', 'stag', 'kvx', 'kvy', 'kt', 'burnT', 'goneT', 'formSpot', 'formWait', 'stuck', 'sample', 'sees', 'lureId', 'lingering'];
-  const PO_STATES = ['dormant', 'patrol', 'lure', 'investigate', 'search', 'chase', 'windup', 'recover', 'recoil', 'stagger', 'gone'];
+    'stateT', 'stag', 'kvx', 'kvy', 'kt', 'burnT', 'goneT', 'formSpot', 'formWait', 'stuck', 'sample', 'sees', 'lureId', 'lingering', 'trail'];
+  const PO_STATES = ['dormant', 'patrol', 'lure', 'investigate', 'search', 'chase', 'windup', 'recover', 'recoil', 'stagger', 'gone', 'track'];
   const P_NUMS = ['x', 'y', 'aim', 'adapt', 'chill', 'armor', 'talismans', 'ink', 'swordCD', 'bellCD'];
   const copy = (v) => (v == null ? v : JSON.parse(JSON.stringify(v)));
   function serialize(g) {
@@ -764,7 +813,7 @@
       seed: g.seed, rng: g.rand.s.a, t: g.t, acc: g.acc, nid: g.nid, exposedNow: g.exposedNow,
       exitReady: g.exitReady, exitOpen: g.exitOpen, seals: { name: g.seals.name, breath: g.seals.breath },
       sealed: [...g.sealed].map(([i, q]) => ({ i, id: q.id, x: q.x, y: q.y, t: q.t, ex: [...q.exempt] })),
-      lures: copy(g.lures), flashes: copy(g.flashes), shots: copy(g.shots),
+      lures: copy(g.lures), flashes: copy(g.flashes), shots: copy(g.shots), prints: copy(g.prints), lastPrint: copy(g.lastPrint),
       explored: ex, hints: [...g.hints], stats: Object.assign({}, g.stats),
       p: Object.assign(Object.fromEntries(P_NUMS.map((k) => [k, p[k]])), {
         lampOn: p.lampOn,
@@ -804,6 +853,9 @@
       g.sealed = new Map();
       for (const q of d.sealed) { if (!m.doors.some((dr) => dr.i === q.i)) return null; g.sealed.set(q.i, { id: q.id, x: q.x, y: q.y, t: q.t, exempt: new Set(Array.isArray(q.ex) ? q.ex : []) }); }
       g.lures = copy(d.lures); g.flashes = copy(d.flashes); g.shots = copy(d.shots);
+      // 腳印是 2026-11-05 加的：之前的存檔沒有，讀進來就是一條空的足跡（格式版本不必加一）
+      if (d.prints != null && (!Array.isArray(d.prints) || d.prints.length > R.PRINT.max || !d.prints.every((q) => inMap(q) && fin(q.age) && fin(q.s) && fin(q.n) && fin(q.a)))) return null;
+      g.prints = copy(d.prints || []); g.lastPrint = d.lastPrint && pt(d.lastPrint) ? copy(d.lastPrint) : null;
       for (let i = 0; i < W * H; i++) g.explored[i] = d.explored.charCodeAt(i) === 49 ? 1 : 0;
       g.hints = new Set(Array.isArray(d.hints) ? d.hints.filter((h) => typeof h === 'string') : []);
       for (const k in g.stats) if (d.stats && fin(d.stats[k])) g.stats[k] = d.stats[k];
@@ -834,6 +886,7 @@
         for (const k of PO_KEYS) e[k] = copy(q[k]);
         e.id = i + 1; e.vis = null;
         if (!Array.isArray(e.path)) e.path = null;
+        if (!fin(e.trail)) e.trail = 0;
         if (!fin(e.pathGoal)) e.pathGoal = -1;
         if (!pt(e.sample) || !fin(e.sample.t)) e.sample = { x: e.x, y: e.y, t: g.t };
       });

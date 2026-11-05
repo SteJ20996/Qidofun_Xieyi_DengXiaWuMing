@@ -5,6 +5,7 @@ const fs = require('fs'), path = require('path');
 const { R, MAP, ENGINE, mk, mkArena, put, dist } = require('./lib.cjs');
 const T = MAP.T, STEP = R.STEP, hyp = Math.hypot;
 const which = process.argv[2] || 'all';
+if (process.env.PRINT) Object.assign(R.PRINT, JSON.parse(process.env.PRINT));   // 調腳印用：PRINT='{"dark":0.6}' node tests/review.cjs hesitate
 const out = {};
 let REACT = 0.25;   // 控制器的反應時間（看到或聽到蓄撲後多久才動）
 
@@ -116,12 +117,14 @@ function escapeRun(o) {
   const goals = (o.order === 'name' ? ['name', 'breath'] : ['breath', 'name']).map((k) => ({ k, a: alt(k) })).concat([{ k: 'exit' }]);
   let gi = 0, pth = null, replan = 0, ctx = {}, dodgeT = 0, dodgeDir = null, lastPos = { x: p.x, y: p.y, t: 0 }, stalls = 0;
   const frame = o.dt;
-  let time = 0, firstLampOff = false;
+  let time = 0, firstLampOff = false, hold = 0, sincePause = 0, tracks = 0, caught = 0;
   const LIMIT = 300;
   while (g.state === 'play' && time < LIMIT) {
     const inp = { press: {}, hold: {} };
     if (time < o.wait) { g.advance(frame, inp); time += frame; continue; }
     if (o.lamp === 'dark' && !firstLampOff) { inp.press.lamp = true; firstLampOff = true; }
+    // 猶豫的玩家：每走一陣就停下來看看（o.hesitate = [每幾秒, 停幾秒]）
+    if (o.hesitate) { sincePause += frame; if (sincePause >= o.hesitate[0]) { hold = o.hesitate[1]; sincePause = 0; } }
     const goal = goals[gi];
     const tgt = goal.k === 'exit' ? (g.exitOpen ? { x: 19.5, y: 27.3 } : { x: g.gate.x, y: g.gate.y - 0.5 }) : { x: goal.a.x, y: goal.a.y };
     const { e, d } = nearest(g);
@@ -136,6 +139,7 @@ function escapeRun(o) {
       defending = e.state === 'windup' || open(e) || d < 1.2;
     }
     if (dodgeT > 0) { dodgeT -= frame; inp.mx = dodgeDir[0]; inp.my = dodgeDir[1]; }
+    else if (hold > 0 && !(e && d < 2.5)) { hold -= frame; }   // 停下來看看（魄貼近時照樣躲）
     else if (goal.k !== 'exit' && dist(p, goal.a) <= 0.9) {
       if (!(e && d < 2.2 && e.state !== 'search')) inp.hold.take = true;
       if (goal.a.taken) { gi++; pth = null; }
@@ -156,10 +160,11 @@ function escapeRun(o) {
     time += frame;
     if (goal.k !== 'exit' && goal.a.taken && gi < goals.length && goals[gi] === goal) { gi++; pth = null; }
     if (g.t - lastPos.t > 5) { if (hyp(p.x - lastPos.x, p.y - lastPos.y) < 0.3 && g.state === 'play') stalls++; lastPos = { x: p.x, y: p.y, t: g.t }; }
+    for (const ev of g.events) { if (ev.type === 'track') tracks++; if (ev.type === 'spotted' && ev.from === 'track') caught++; }
     if (process.env.DEBUG) for (const ev of g.events) if (ev.type === 'stuck') { const po = g.pos.find((q) => q.id === ev.id); console.log('stuck', JSON.stringify(ev), po.state, JSON.stringify(po.goal), JSON.stringify(po.lastKnown), po.waiting, po.path && po.path.length, 'player', p.x.toFixed(2), p.y.toFixed(2)); }
     g.drain();
   }
-  return { ok: g.state === 'win', state: g.state, t: +g.t.toFixed(2), maxChill: +g.stats.maxChill.toFixed(1), bites: g.stats.bites, disperse: g.stats.disperse, bells: g.stats.bells, fires: g.stats.fires, stuck: g.stats.stuck, stalls, seals: g.seals };
+  return { tracks, caught, ok: g.state === 'win', state: g.state, t: +g.t.toFixed(2), maxChill: +g.stats.maxChill.toFixed(1), bites: g.stats.bites, disperse: g.stats.disperse, bells: g.stats.bells, fires: g.stats.fires, stuck: g.stats.stuck, stalls, seals: g.seals };
 }
 function escape() {
   const rows = [];
@@ -185,6 +190,30 @@ function escape() {
   const sum = {};
   for (const [k, f] of Object.entries(groups)) { const b = by(f); sum[k] = b; console.log(`${k.padEnd(16)}  ${String(b.n).padStart(4)} ${String(b.ok).padStart(4)} ${String(b.lost).padStart(4)} ${String(b.timeout).padStart(4)}  ${String(b.tMin).padStart(6)}  ${String(b.tMax).padStart(6)}  ${String(b.maxChill).padStart(7)}  ${String(b.bites).padStart(7)}  ${b.stuck}`); }
   out.escape = { sum, rows };
+}
+
+// ---------- 腳印到底改了什麼：猶豫的玩家（每走六秒停兩秒半），有腳印 vs 關掉腳印 ----------
+function hesitate() {
+  const rows = [];
+  const smell0 = R.PRINT.smell;
+  for (const tracking of [true, false]) {
+    R.PRINT.smell = tracking ? smell0 : 99;   // 99：沒有腳印聞得到，等於關掉
+    let k = 0;   // 兩組用同樣的種子，差別只在有沒有腳印
+    for (const lamp of ['lit', 'dark']) for (const order of ['name', 'breath']) for (const wait of [0, 3, 6, 9]) for (const dt of [1 / 60, 0.04]) {
+      const r = escapeRun({ order, dt, wait, empty: false, lamp, seed: 900 + k++, hesitate: [6, 2.5] });
+      rows.push(Object.assign({ tracking, lamp, order, wait }, r));
+    }
+  }
+  R.PRINT.smell = smell0;
+  const by = (f) => { const q = rows.filter(f), n = q.length; return { n, ok: q.filter((r) => r.ok).length, lost: q.filter((r) => r.state === 'lose').length, bites: +(q.reduce((a, r) => a + r.bites, 0) / n).toFixed(2), maxChill: +(q.reduce((a, r) => a + r.maxChill, 0) / n).toFixed(1), tracks: +(q.reduce((a, r) => a + r.tracks, 0) / n).toFixed(2), caught: +(q.reduce((a, r) => a + r.caught, 0) / n).toFixed(2), t: +(q.filter((r) => r.ok).reduce((a, r) => a + r.t, 0) / Math.max(1, q.filter((r) => r.ok).length)).toFixed(1) }; };
+  const sum = {};
+  console.log('\n腳印改了什麼：猶豫的玩家（每走六秒停兩秒半；控制器知道地圖；兩種順序 × 四種等待 × 兩種步長 = 每組 16 次）');
+  console.log('組別              出宅 失魂  平均被咬 平均最高寒意 平均被追蹤 循腳印找到人 平均秒數');
+  for (const tr of [true, false]) for (const lamp of ['lit', 'dark']) {
+    const k = `${tr ? '有腳印' : '沒腳印'}・${lamp === 'lit' ? '點燈' : '掩燈'}`, b = by((r) => r.tracking === tr && r.lamp === lamp); sum[k] = b;
+    console.log(`${k.padEnd(12)}  ${String(b.ok).padStart(4)} ${String(b.lost).padStart(4)}  ${String(b.bites).padStart(7)}  ${String(b.maxChill).padStart(11)}  ${String(b.tracks).padStart(9)}  ${String(b.caught).padStart(11)}  ${String(b.t).padStart(7)}`);
+  }
+  out.hesitate = { sum, rows };
 }
 
 // ---------- 混合操作壓力檢查 ----------
@@ -240,6 +269,7 @@ function stress() {
 const t0 = Date.now();
 if (which === 'all' || which === 'duel') duel();
 if (which === 'all' || which === 'escape') escape();
+if (which === 'all' || which === 'hesitate') hesitate();
 if (which === 'all' || which === 'stress') stress();
 const file = path.join(__dirname, 'review-results.json');
 let prev = {}; try { prev = JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { /* 第一次 */ }

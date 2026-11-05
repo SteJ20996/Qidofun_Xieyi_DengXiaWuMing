@@ -9,7 +9,7 @@
 
   let cv, ctx, g, art, mask, mctx, warm, wctx, cam = { x: 0, y: 0, s: 40, ox: 0, oy: 0 }, fx = [], floats = [], t = 0;
   // 生動的小東西：光裡的灰塵、腳印、魄拖著的墨煙、被咬時鏡頭一震
-  let motes = [], prints = [], wisps = [], lastPrint = null, printSide = 1, shake = 0, lastPo = {};
+  let motes = [], wisps = [], shake = 0, lastPo = {};
 
   function rnd(seed) { let a = seed; return () => { a = (a * 1103515245 + 12345) & 0x7fffffff; return a / 0x7fffffff; }; }
 
@@ -156,7 +156,6 @@
     ctx.imageSmoothingEnabled = true;
     ctx.drawImage(art, sx(0), sy(0), m.W * s, m.H * s);
     const flick = RM || !p.lampOn ? 1 : 0.9 + 0.1 * Math.sin(t * 13) * Math.sin(t * 7.3 + 1);   // 燈火微微跳動（只動暖色那層，不動看得見的範圍）
-    if (!w.attract) stepPrints(dt);
     drawFloorThings(v);
     drawPrints(v);
     // 墨：看不見的地方蓋起來；走過的地方留一點點牆影
@@ -299,28 +298,24 @@
         glyph('噬', e.x, e.y - 0.95, 0.55 + 0.15 * f, C.red, { stroke: 4, strokeColor: 'rgba(240,230,210,.85)' });
       }
       if (e.state === 'recover' && vis) glyph('…', e.x, e.y - 0.8, 0.4, '#6b5a48', { a: 0.7 });
+      if (e.state === 'track') {   // 循著腳印：頭上一個「嗅」，前面幾點墨點往地上探
+        glyph('嗅', e.x, e.y - 0.9, 0.36, '#7a4a20', { a: 0.75 + 0.25 * Math.sin(t * 8), stroke: 3, strokeColor: 'rgba(236,226,200,.8)' });
+        for (let k = 0; k < 3; k++) { const f = (t * 1.6 + k / 3) % 1; ctx.fillStyle = `rgba(90,60,30,${0.5 * (1 - f)})`; ctx.beginPath(); ctx.arc(sx(e.x + Math.sin(t * 3 + k) * 0.2), sy(e.y + 0.35 + f * 0.3), 0.04 * cam.s, 0, Math.PI * 2); ctx.fill(); }
+      }
     }
   }
 
   // ---------- 生動的小東西 ----------
-  // 腳印：每走 0.42 格留一個，左右交替，七秒淡掉；畫在墨的下面，只有照得到的地方看得見
-  function stepPrints(dt) {
-    const p = g.p;
-    for (const f of prints) f.t += dt;
-    prints = prints.filter((f) => f.t < 7);
-    if (!lastPrint) { lastPrint = { x: p.x, y: p.y }; return; }
-    const dx = p.x - lastPrint.x, dy = p.y - lastPrint.y, d = hyp(dx, dy);
-    if (d > 2) { lastPrint = { x: p.x, y: p.y }; return; }   // 傳送或讀檔，不畫一長串
-    if (d < 0.42) return;
-    const a = Math.atan2(dy, dx); printSide = -printSide;
-    prints.push({ x: p.x + Math.cos(a + Math.PI / 2) * 0.1 * printSide, y: p.y + Math.sin(a + Math.PI / 2) * 0.1 * printSide, a, t: 0 });
-    if (prints.length > 40) prints.shift();
-    lastPrint = { x: p.x, y: p.y };
-  }
+  // 腳印：就是引擎裡魄聞得到的那些（g.prints）。濃淡照新鮮度；掩燈留的本來就淡。左右腳交替。
+  // 畫在墨的下面，所以只有照得到（或眼睛習慣後）的地方看得見。
   function drawPrints() {
-    for (const f of prints) {
-      ctx.save(); ctx.translate(sx(f.x), sy(f.y)); ctx.rotate(f.a);
-      ctx.fillStyle = `rgba(40,30,22,${0.32 * (1 - f.t / 7)})`;
+    const life = R.PRINT.life;
+    for (const q of g.prints) {
+      const f = q.s * (1 - q.age / life);
+      if (f <= 0) continue;
+      const side = q.n % 2 ? 1 : -1, ox = Math.cos(q.a + Math.PI / 2) * 0.1 * side, oy = Math.sin(q.a + Math.PI / 2) * 0.1 * side;
+      ctx.save(); ctx.translate(sx(q.x + ox), sy(q.y + oy)); ctx.rotate(q.a);
+      ctx.fillStyle = `rgba(40,30,22,${0.5 * f})`;
       ctx.beginPath(); ctx.ellipse(0, 0, 0.09 * cam.s, 0.05 * cam.s, 0, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
     }
@@ -521,7 +516,7 @@
     const mc = document.createElement('canvas'); mc.width = g.m.W; mc.height = g.m.H; mctx = mc.getContext('2d'); mask = mctx.createImageData(g.m.W, g.m.H);
     const wc = document.createElement('canvas'); wc.width = g.m.W; wc.height = g.m.H; wctx = wc.getContext('2d'); warm = wctx.createImageData(g.m.W, g.m.H);
     cam.x = g.p.x; cam.y = g.p.y;
-    motes = []; prints = []; wisps = []; lastPrint = null; lastPo = {}; shake = 0;
+    motes = []; wisps = []; lastPo = {}; shake = 0;
   }
   function toWorld(px, py) { return { x: (px - cv.width / 2) / cam.s + cam.x, y: (py - cv.height / 2) / cam.s + cam.y }; }
   root.RENDER = { init, setGame, frame, event, minimap, toWorld, FONT, cam, rebuild() { art = null; if (g) art = buildArt(g.m); } };

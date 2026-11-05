@@ -62,6 +62,17 @@ try {
   await page.mouse.move(700, 300); await wait(100);
   ok('動一下滑鼠：改成跟著滑鼠', (await ev(() => document.getElementById('aimmode').textContent)).includes('滑鼠'));
   await page.mouse.move(640, 400); await ev(() => { DENG.g.p.swordCD = 0; });
+  // 腳印：掩燈走一段，留下淡腳印；巡行的魄碰到就循著追（看得見時頭上有「嗅」）
+  await ev(() => { const g = DENG.g; g.tp(12.5, 13.5); DENG.snap(); g.p.lampOn = false; g.p.adapt = 1; g.prints = []; g.lastPrint = null; });
+  await page.keyboard.down('KeyD'); await wait(1250); await page.keyboard.up('KeyD');
+  const np = await ev(() => ({ n: DENG.g.prints.length, dark: DENG.g.prints.every((q) => q.s < 1) }));
+  await ev(() => { const g = DENG.g, e = g.pos[0], q = g.prints[0]; g.p.adapt = 1; g.place(e, q.x, q.y - 0.3, 'patrol'); e.trail = 0; e.lastKnown = null; e.hp = 60; });
+  await page.waitForFunction(() => DENG.g.pos[0].state === 'track', null, { timeout: 3000 }).catch(() => {});
+  await wait(250);
+  const tr = await ev(() => ({ state: DENG.g.pos[0].state, vis: DENG.g.pos[0].vis && DENG.g.pos[0].vis.mode, log: document.getElementById('log').textContent }));
+  await shot('02c-track');
+  ok('腳印：掩燈留下淡腳印，魄循著追，看得見時有「嗅」', np.n >= 6 && np.dark && tr.state === 'track' && tr.vis === 'dark' && tr.log.includes('聞'), { np, tr });
+  await calm(); await ev(() => { DENG.g.p.lampOn = true; DENG.g.prints = []; });
 
   // 掩燈與眼睛
   await page.keyboard.press('Semicolon'); await wait(2800);
