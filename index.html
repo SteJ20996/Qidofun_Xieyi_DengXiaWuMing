@@ -17,7 +17,7 @@
   <div id="seal" title="燈下無明"><span>燈</span><span>下</span><span>無</span><span>明</span></div>
   <div id="bars">
     <div class="hbar chill" title="寒意：被咬、久留在魄身邊都會上升；滿了就失魂。只有在火邊才會退。"><b>寒</b><div class="track"><div class="fill" id="chill-fill"></div></div><span id="chill-num"></span></div>
-    <div class="hbar armor" title="護持：護心衣先擋下被咬的寒傷，一格擋一次；用掉不會自己回來，取印時補一格。"><b>護</b><div class="track segs"><div class="fill" id="armor-fill"></div></div><span id="armor-num"></span></div>
+    <div class="hbar armor" title="護持：護心衣先擋下被咬的寒傷，一格擋一次；用掉不會自己回來，取印時補一格。"><b>護</b><div class="seals3" id="armor-segs"></div><span id="armor-num"></span></div>
     <div class="hbar eye" title="目：掩燈後，眼睛慢慢習慣黑暗，看得比點燈時更遠。點燈或站進光裡就重來。"><b>目</b><div class="track"><div class="fill" id="eye-fill"></div></div><span id="eye-num"></span></div>
   </div>
   <div id="expose"></div>
@@ -27,6 +27,8 @@
   </div>
   <div id="log" aria-live="polite"></div>
   <div id="hint" class="hidden"></div>
+  <div id="aimmode" title="沒用滑鼠時，劍與火符自動對準看得見、在射程內最近的那隻魄（紅括號標著）；動一下滑鼠就改成跟著滑鼠"></div>
+  <div id="bigstamp" class="hidden"><span></span></div>
   <div id="tools">
     <button class="tool" id="t-sword" data-act="sword" title="桃木劍：朝對準的方向揮一劍。打中能打斷蓄撲，但擋不住下一次撲，打了就要退。"><b>劍</b><kbd>J</kbd><i class="cd"></i><small>桃木劍</small></button>
     <button class="tool" id="t-bell" data-act="bell" title="銅鈴：把身邊的魄震開、愣住一會兒。不耗東西，但鈴聲穿得過紙牆，附近的魄都會往這裡來。讀咒時也能搖。"><b>鈴</b><kbd>K</kbd><i class="cd"></i><small>銅鈴</small></button>
@@ -47,13 +49,14 @@
 <div id="start" class="overlay">
   <div class="panel startpanel">
     <div class="titleseal"><span>燈</span><span>下</span><span>無</span><span>明</span></div>
-    <h1>燈下無明</h1>
+    <h1 aria-label="燈下無明"><span>燈</span><span>下</span><span>無</span><span>明</span></h1>
     <div class="sub">紙宅 · 試夜</div>
+    <div class="motto">點燈見近 · 掩燈見遠</div>
     <p class="story">紙糊的宅子，夜裡有魄。今晚是你的試夜：取回<b>名印</b>與<b>息印</b>，再從大門出來。</p>
     <p class="story">點著燈，看得清身邊，魄卻從遠處就看見你。掩了燈，眼睛會慢慢習慣黑暗，看得比點燈時更遠。</p>
     <div class="keys">
       <div><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>／方向鍵</span><b>走動</b></div>
-      <div><span>滑鼠</span><b>對準（不用滑鼠就朝走的方向）</b></div>
+      <div><span>滑鼠</span><b>對準（不用滑鼠時，劍與火符自動對準看得見的魄）</b></div>
       <div><span><kbd>J</kbd>／左鍵</span><b>桃木劍</b></div>
       <div><span><kbd>K</kbd></span><b>銅鈴</b></div>
       <div><span><kbd>L</kbd>／右鍵</span><b>火符</b></div>
@@ -83,6 +86,7 @@
       <li><b>鈴</b>：震開身邊的魄，不耗東西；但紙宅擋不住聲音，附近的魄都會過來，睡著的也會醒。</li>
       <li><b>封戶</b>：擋住廊口十秒，人與魄都過不去，劍、鈴、火、咬也都過不去，只有光透得過。</li>
       <li>魄被打散後，過一陣子會在別處凝回來。</li>
+      <li><b>對準</b>：動一下滑鼠就跟著滑鼠；不用滑鼠時，劍與火符自動對準看得見、在射程內最近的那隻魄（紅括號標著）。黑暗裡看不見的魄不會被對準。</li>
     </ul>
   </div>
 </div>

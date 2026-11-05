@@ -48,10 +48,31 @@
     wake() { tone(55, 1.2, 0.25, 'sawtooth', null, 48); noise(1.0, 0.1, 'lowpass', 300, 120); },
     lamp(on) { noise(0.08, 0.12, 'bandpass', on ? 1800 : 600); },
     door() { tone(70, 1.2, 0.3, 'triangle', null, 50); noise(0.8, 0.2, 'lowpass', 500, 100); },
+    // 心跳：寒意高或魄就在身邊時；v 0–1 越大越重
+    heart(v) { const d = out(); tone(58, 0.16, 0.18 + 0.2 * v, 'sine', d, 40); setTimeout(() => ac && tone(52, 0.18, 0.12 + 0.15 * v, 'sine', d, 38), 170); },
+    // 木頭的嘎吱聲：偶爾一聲，讓宅子像在呼吸
+    creak() { const d = out((Math.random() - 0.5) * 1.6); tone(150 + Math.random() * 60, 0.5, 0.05, 'sawtooth', d, 90 + Math.random() * 30); noise(0.4, 0.03, 'bandpass', 700, 300, d, 6); },
     win() { [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => ac && tone(f, 0.9, 0.12, 'sine'), i * 160)); },
     lose() { tone(196, 1.6, 0.2, 'sine', null, 98); noise(1.5, 0.15, 'lowpass', 600, 80); }
   };
+  // 宅子的底噪：很輕的風聲，濾波器慢慢晃
+  let amb = null;
+  function ambient(on) {
+    if (!ac) return;
+    if (on && !amb) {
+      const src = ac.createBufferSource(), bf = ac.createBiquadFilter(), gn = ac.createGain(), lfo = ac.createOscillator(), lg = ac.createGain();
+      src.buffer = noiseBuf; src.loop = true; bf.type = 'lowpass'; bf.frequency.value = 320; bf.Q.value = 0.7; gn.gain.value = 0.0001;
+      lfo.frequency.value = 0.07; lg.gain.value = 140; lfo.connect(lg); lg.connect(bf.frequency);
+      src.connect(bf); bf.connect(gn); gn.connect(master); src.start(); lfo.start();
+      gn.gain.exponentialRampToValueAtTime(0.05, ac.currentTime + 2.5);
+      amb = { src, lfo, gn };
+    } else if (!on && amb) {
+      const a = amb; amb = null;
+      try { a.gn.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + 0.6); setTimeout(() => { try { a.src.stop(); a.lfo.stop(); } catch (e) { /* 已經停了 */ } }, 700); } catch (e) { /* 沒有就算了 */ }
+    }
+  }
   root.SFX = {
+    ambient: (on) => { try { ambient(on); } catch (e) { /* 聲音出錯不影響遊戲 */ } },
     unlock: ensure,
     play(name, ...a) { if (!ac || muted || !S[name]) return; try { S[name](...a); } catch (e) { /* 聲音出錯不影響遊戲 */ } },
     get muted() { return muted; },

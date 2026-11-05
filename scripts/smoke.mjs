@@ -33,6 +33,11 @@ try {
   ok('字體載入（霞鶩文楷）', await ev(() => document.fonts.check('32px "LXGW WenKai TC"', '燈下無明魄噬')));
   await shot('01-start');
   ok('開始畫面', await ev(() => !document.getElementById('start').classList.contains('hidden')));
+  // 開始畫面的展示：一盞燈在宅子裡飄，魄照常巡行但不理它
+  const a0 = await ev(() => ({ x: DENG.g.p.x, y: DENG.g.p.y, attract: DENG.g.attract }));
+  await wait(1200);
+  const a1 = await ev(() => ({ x: DENG.g.p.x, y: DENG.g.p.y, bites: DENG.g.stats.bites, chill: DENG.g.p.chill }));
+  ok('開始畫面：燈在宅子裡飄、魄不理它', a0.attract && Math.hypot(a1.x - a0.x, a1.y - a0.y) > 0.5 && a1.bites === 0 && a1.chill === 0, { a0, a1 });
   await page.keyboard.press('Enter'); await wait(400);
   ok('Enter 入宅、HUD 出現', await ev(() => DENG.running && !document.getElementById('hud').classList.contains('hidden')));
   // 測試裡先把魄放遠，免得亂入
@@ -45,6 +50,18 @@ try {
   await page.keyboard.down('KeyW'); await wait(500); await page.keyboard.up('KeyW');
   const p1 = await ev(() => [DENG.g.p.x, DENG.g.p.y]);
   ok('鍵盤走動', p1[1] < p0[1] - 0.8, [p0, p1]);
+  // 沒用滑鼠：自動對準背後看得見的魄
+  await ev(() => { const g = DENG.g; g.tp(19.5, 4.5); DENG.snap(); const e = g.pos[0]; g.place(e, 18.4, 4.5, 'recover'); e.stateT = 999; e.hp = 60; g.p.aim = 0; });
+  await wait(200);
+  const chip = await ev(() => document.getElementById('aimmode').textContent);
+  await page.keyboard.press('KeyJ'); await wait(250);
+  const aimHit = await ev(() => DENG.g.stats.swordHits);
+  await shot('02b-autoaim');
+  ok('沒用滑鼠：自動對準，劍打中背後的魄', chip.includes('自動') && aimHit === 1, { chip, aimHit });
+  await calm();
+  await page.mouse.move(700, 300); await wait(100);
+  ok('動一下滑鼠：改成跟著滑鼠', (await ev(() => document.getElementById('aimmode').textContent)).includes('滑鼠'));
+  await page.mouse.move(640, 400); await ev(() => { DENG.g.p.swordCD = 0; });
 
   // 掩燈與眼睛
   await page.keyboard.press('Semicolon'); await wait(2800);
@@ -161,7 +178,9 @@ try {
 
   // 取兩印、推門閂、出宅
   await ev(() => { const g = DENG.g; const a = g.altars.find((q) => q.key === 'name'); g.tp(a.x + 0.8, a.y); });
-  await page.keyboard.down('KeyU'); await wait(1250); await page.keyboard.up('KeyU');
+  await page.keyboard.down('KeyU'); await wait(1150); await page.keyboard.up('KeyU');
+  ok('取印：大印蓋在畫面正中', await ev(() => !document.getElementById('bigstamp').classList.contains('hidden') && document.querySelector('#bigstamp span').textContent === '名'));
+  await wait(100);
   await ev(() => { const g = DENG.g; const a = g.altars.find((q) => q.key === 'breath'); g.tp(a.x - 0.8, a.y); });
   await page.keyboard.down('KeyU'); await wait(1250); await page.keyboard.up('KeyU');
   await calm();
@@ -283,6 +302,18 @@ try {
   ok('存不了檔時照樣能玩，存檔鈕關掉並說明', !info.can && info.msg.includes('存不了') && info.slot.includes('存不了') && pz.running && pz.disabled, { info, pz });
   await nctx.close();
 } catch (e) { ok('存不了檔的情況', false, String(e && e.message || e)); }
+
+// 減少動態：照樣能玩、不報錯
+try {
+  const rctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce' });
+  const rp = await rctx.newPage(); watch(rp);
+  await rp.goto(base + Q + 'seed=7');
+  await rp.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 30000 });
+  await rp.keyboard.press('Enter'); await rp.waitForTimeout(300);
+  await rp.keyboard.down('KeyW'); await rp.waitForTimeout(400); await rp.keyboard.up('KeyW');
+  ok('減少動態：照樣能玩', await rp.evaluate(() => DENG.running && DENG.g.state === 'play'));
+  await rctx.close();
+} catch (e) { ok('減少動態', false, String(e && e.message || e)); }
 
 // 手機寬度：開始畫面放得下
 const mctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });

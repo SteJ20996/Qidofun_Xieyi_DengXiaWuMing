@@ -337,7 +337,7 @@
     if (e.burnT > 0) { e.burnT -= dt; e.hp -= R.FIRE.burn * dt; if (e.hp <= 0) { disperse(g, e, 'burn'); return; } }   // 灼燒只扣血
     if (e.kt > 0) { const s = Math.min(dt, e.kt); moveEnt(g, e, e.kvx * s, e.kvy * s); e.kt -= s; }
     const p = g.p, d = dist(p, e);
-    const sees = poSees(g, e);
+    const sees = !g.attract && poSees(g, e);   // attract：開始畫面的展示，魄看不見那盞飄過的燈
     e.sees = sees;
     if (sees) { e.lastKnown = { x: p.x, y: p.y }; e.lostT = 0; } else e.lostT += dt;
     e.vis = poVis(g, e);
@@ -349,7 +349,7 @@
       default: think(g, e, dt, sees, d);
     }
     // 久留身邊：寒意（不經護心衣；隔牆、隔紙屏、隔封戶都傳不過來）
-    if (awake(e) && d <= R.PO.auraR && hitClear(g, e.x, e.y, p.x, p.y)) addChill(g, R.PO.aura * dt);
+    if (!g.attract && awake(e) && d <= R.PO.auraR && hitClear(g, e.x, e.y, p.x, p.y)) addChill(g, R.PO.aura * dt);
     // 卡住偵測：該走卻一直沒動，就重新尋路（測試也看這個數）
     if (g.t - e.sample.t >= 0.5) {
       const moved = hyp(e.x - e.sample.x, e.y - e.sample.y);
@@ -491,13 +491,32 @@
     }
     hint(g, 'bell');
   }
+  // 沒用滑鼠時的自動對準：看得見的（照見，或眼睛習慣後看見）、在射程內、中間沒有牆屏封戶的魄，挑最近的；
+  // 前後左右都算（邊跑邊回身丟火符也行）。看不見的魄不會被對準，黑暗裡照樣只能靠聲音。
+  const AUTO = { sword: R.SWORD.reach + 0.3, fire: R.FIRE.range };
+  function autoTarget(g, kind) {
+    const p = g.p;
+    let best = null, bd = AUTO[kind] + 1e-9;
+    for (const e of g.pos) {
+      if (!awake(e) || !e.vis || e.vis.mode === 'silhouette') continue;
+      const d = dist(p, e);
+      if (d > bd || !hitClear(g, p.x, p.y, e.x, e.y)) continue;
+      bd = d; best = e;
+    }
+    return best;
+  }
+  function aimFor(g, kind) {
+    if (!g.autoAim) return g.p.aim;
+    const e = autoTarget(g, kind);
+    return e ? Math.atan2(e.y - g.p.y, e.x - g.p.x) : g.p.aim;
+  }
   function trySword(g) {
     const p = g.p;
     if (p.reading || p.taking) { emit(g, 'busy', { what: 'sword' }); return; }
     if (p.act) return;
     if (p.swordCD > 1e-6) { emit(g, 'cooldown', { what: 'sword', left: p.swordCD }); return; }
     p.swordCD = R.SWORD.cd;
-    p.act = { kind: 'sword', t: R.SWORD.windup, dir: p.aim };   // 方向在起手時定，位置用出手那一刻的
+    p.act = { kind: 'sword', t: R.SWORD.windup, dir: aimFor(g, 'sword') };   // 方向在起手時定，位置用出手那一刻的
   }
   function tryFire(g) {
     const p = g.p;
@@ -505,7 +524,7 @@
     if (p.act) return;
     if (p.talismans <= 0) { emit(g, 'noTalisman'); return; }
     p.talismans--;
-    p.act = { kind: 'fire', t: R.FIRE.windup, dir: p.aim };
+    p.act = { kind: 'fire', t: R.FIRE.windup, dir: aimFor(g, 'fire') };
   }
   function swordRelease(g, dir) {
     const p = g.p, arc = (R.SWORD.arc * PI) / 180;
@@ -619,6 +638,7 @@
     // 人
     p.swordCD = Math.max(0, p.swordCD - dt); p.bellCD = Math.max(0, p.bellCD - dt);
     if (inp.aim != null) p.aim = inp.aim;
+    g.autoAim = !!inp.autoAim;
     if (press.lamp) { p.lampOn = !p.lampOn; if (p.lampOn) p.adapt = 0; emit(g, 'lamp', { on: p.lampOn }); if (!p.lampOn) hint(g, 'dark'); }
     let mx = inp.mx || 0, my = inp.my || 0;
     const ml = hyp(mx, my), moving = ml > 0.05;
@@ -846,6 +866,7 @@
       blocksMove: (x, y, e) => blocksMove(g, x, y, e),
       drain() { const ev = g.events; g.events = []; return ev; },
       serialize: () => serialize(g),
+      autoTarget: (k) => autoTarget(g, k),
       // 測試與除錯用
       tp(x, y) { g.p.x = x; g.p.y = y; },
       place(e, x, y, state) { e.x = x; e.y = y; if (state) e.state = state; e.path = null; e.goal = null; e.sample = { x, y, t: g.t }; }

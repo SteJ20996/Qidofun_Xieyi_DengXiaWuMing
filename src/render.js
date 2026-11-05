@@ -7,7 +7,9 @@
   const RM = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;   // 減少動態：不抖、不晃
   const hyp = Math.hypot;
 
-  let cv, ctx, g, art, mask, mctx, warm, wctx, cam = { x: 0, y: 0, s: 40 }, fx = [], floats = [], t = 0;
+  let cv, ctx, g, art, mask, mctx, warm, wctx, cam = { x: 0, y: 0, s: 40, ox: 0, oy: 0 }, fx = [], floats = [], t = 0;
+  // 生動的小東西：光裡的灰塵、腳印、魄拖著的墨煙、被咬時鏡頭一震
+  let motes = [], prints = [], wisps = [], lastPrint = null, printSide = 1, shake = 0, lastPo = {};
 
   function rnd(seed) { let a = seed; return () => { a = (a * 1103515245 + 12345) & 0x7fffffff; return a / 0x7fffffff; }; }
 
@@ -86,8 +88,8 @@
   }
 
   // ---------- 座標 ----------
-  const sx = (x) => (x - cam.x) * cam.s + cv.width / 2;
-  const sy = (y) => (y - cam.y) * cam.s + cv.height / 2;
+  const sx = (x) => (x - cam.x) * cam.s + cv.width / 2 + cam.ox;
+  const sy = (y) => (y - cam.y) * cam.s + cv.height / 2 + cam.oy;
 
   function glyph(ch, x, y, size, color, o) {
     o = o || {};
@@ -120,7 +122,7 @@
       case 'swordMiss': float(e.why === 'dir' ? '空 · 偏了' : e.why === 'far' ? '空 · 差一步' : e.why === 'wall' ? '空 · 隔著' : '空', e.x, e.y, '#6b5a48', { size: 0.42 }); break;
       case 'bell': fx.push({ k: 'ring', x: e.x, y: e.y, t: 0, life: 0.45, r: R.BELL.r }); fx.push({ k: 'hear', x: e.x, y: e.y, t: 0, life: 1.4, r: R.BELL.hear }); float('鈴', e.x, e.y - 0.9, '#8a6a1c'); break;
       case 'fireBoom': fx.push({ k: 'boom', x: e.x, y: e.y, t: 0, life: 0.5 }); break;
-      case 'bite': fx.push({ k: 'bite', t: 0, life: 0.45 }); float('噬', p.x, p.y - 0.8, C.red, { size: 0.7 }); float(e.absorbed ? (e.chill ? `護 −${e.absorbed}　寒 +${e.chill}` : `護 −${e.absorbed}`) : `寒 +${e.chill}`, p.x, p.y + 0.8, e.absorbed ? '#5b4a8a' : '#3f6f8a', { size: 0.36 }); break;
+      case 'bite': fx.push({ k: 'bite', t: 0, life: 0.45 }); fx.push({ k: 'splat', t: 0, life: 1.1, seed: Math.random() * 1e6 }); shake = 0.3; float('噬', p.x, p.y - 0.8, C.red, { size: 0.7 }); float(e.absorbed ? (e.chill ? `護 −${e.absorbed}　寒 +${e.chill}` : `護 −${e.absorbed}`) : `寒 +${e.chill}`, p.x, p.y + 0.8, e.absorbed ? '#5b4a8a' : '#3f6f8a', { size: 0.36 }); break;
       case 'whiff': { const po = g.pos.find((q) => q.id === e.id); if (po && po.vis) float('撲空', e.x, e.y - 0.8, '#6b5a48', { size: 0.4 }); break; }
       case 'interrupt': { const po = g.pos.find((q) => q.id === e.id); if (po) float('斷', po.x, po.y - 0.9, C.red, { size: 0.5 }); break; }
       case 'disperse': fx.push({ k: 'disperse', x: e.x, y: e.y, t: 0, life: 1.0, seed: Math.random() * 1e6 }); if (g.poVis({ state: 'patrol', x: e.x, y: e.y }) || hyp(e.x - p.x, e.y - p.y) < 4.5) float('散', e.x, e.y - 0.6, '#4a4540', { size: 0.6 }); break;
@@ -134,21 +136,29 @@
 
   // ---------- 一幀 ----------
   function frame(dt, w) {
+    w = w || {};
     t += dt;
     const W = cv.width, H = cv.height, m = g.m, p = g.p;
+    shake = Math.max(0, shake - dt);
+    const sh = RM ? 0 : shake / 0.3;
+    cam.ox = sh ? (Math.random() - 0.5) * 16 * sh : 0; cam.oy = sh ? (Math.random() - 0.5) * 16 * sh : 0;
     // 鏡頭：每格大小跟著螢幕；跟著人走，稍微平滑
     const s = Math.max(26, Math.min(76, Math.min(W / 21, H / 12.5)));
     cam.s = s;
     const k = 1 - Math.pow(0.0005, dt);
-    cam.x += (p.x - cam.x) * k; cam.y += (p.y - cam.y) * k;
-    if (w && w.snap) { cam.x = p.x; cam.y = p.y; }
+    const offX = w.attract && cv.clientWidth > 980 ? -0.2 * W / s : 0;   // 開始畫面：選單在左，燈放在右半邊
+    cam.x += (p.x + offX - cam.x) * k; cam.y += (p.y - cam.y) * k;
+    if (w.snap) { cam.x = p.x + offX; cam.y = p.y; }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = C.ink; ctx.fillRect(0, 0, W, H);
     const v = g.view(13);
     // 底圖
     ctx.imageSmoothingEnabled = true;
     ctx.drawImage(art, sx(0), sy(0), m.W * s, m.H * s);
+    const flick = RM || !p.lampOn ? 1 : 0.9 + 0.1 * Math.sin(t * 13) * Math.sin(t * 7.3 + 1);   // 燈火微微跳動（只動暖色那層，不動看得見的範圍）
+    if (!w.attract) stepPrints(dt);
     drawFloorThings(v);
+    drawPrints(v);
     // 墨：看不見的地方蓋起來；走過的地方留一點點牆影
     const md = mask.data;
     for (let i = 0; i < m.W * m.H; i++) {
@@ -157,7 +167,7 @@
       if (g.explored[i] && a > 0.9) a = 0.9;
       md[i * 4] = 13; md[i * 4 + 1] = 12; md[i * 4 + 2] = 11; md[i * 4 + 3] = Math.round(a * 255);
       const L = v.light[i] * (v.paper[i] ? 0.4 : 1) * (v.vis[i] > 0 ? 1 : 0);
-      const wd = warm.data; wd[i * 4] = 255; wd[i * 4 + 1] = 150; wd[i * 4 + 2] = 60; wd[i * 4 + 3] = Math.round(Math.min(1, L) * 60);
+      const wd = warm.data; wd[i * 4] = 255; wd[i * 4 + 1] = 150; wd[i * 4 + 2] = 60; wd[i * 4 + 3] = Math.round(Math.min(1, L) * 60 * flick);
     }
     mctx.putImageData(mask, 0, 0); wctx.putImageData(warm, 0, 0);
     ctx.drawImage(mctx.canvas, sx(0), sy(0), m.W * s, m.H * s);
@@ -165,8 +175,12 @@
     ctx.drawImage(wctx.canvas, sx(0), sy(0), m.W * s, m.H * s);
     ctx.globalCompositeOperation = 'source-over';
     drawLights(v);
+    drawGate();
+    drawWisps(v, dt);
     drawPos(v);
-    drawPlayer();
+    if (w.attract) drawLantern(); else drawPlayer();
+    if (w.autoAim && !w.attract) drawAim();
+    drawMotes(v, dt);
     drawShots();
     drawFx(dt);
     drawFloats(dt);
@@ -219,6 +233,11 @@
       if (line === 'clear') {
         ctx.fillStyle = '#efe6d2'; ctx.fillRect(sx(c.x - 0.06), sy(c.y - 0.05), 0.12 * cam.s, 0.32 * cam.s);
         ctx.fillStyle = `rgba(255,${190 + 30 * fl | 0},90,.95)`; ctx.beginPath(); ctx.ellipse(sx(c.x), sy(c.y - 0.16), 0.07 * cam.s, 0.13 * cam.s * fl, 0, 0, Math.PI * 2); ctx.fill();
+        if (!RM) for (let k = 0; k < 3; k++) {   // 燭煙
+          const f = (t * 0.45 + k / 3 + c.x * 0.13) % 1;
+          ctx.fillStyle = `rgba(120,110,100,${0.22 * (1 - f)})`;
+          ctx.beginPath(); ctx.arc(sx(c.x + Math.sin(t * 1.7 + k * 2 + f * 4) * 0.08 * (1 + f)), sy(c.y - 0.3 - f * 0.7), (0.03 + 0.06 * f) * cam.s, 0, Math.PI * 2); ctx.fill();
+        }
       }
       void b;
     }
@@ -283,6 +302,95 @@
     }
   }
 
+  // ---------- 生動的小東西 ----------
+  // 腳印：每走 0.42 格留一個，左右交替，七秒淡掉；畫在墨的下面，只有照得到的地方看得見
+  function stepPrints(dt) {
+    const p = g.p;
+    for (const f of prints) f.t += dt;
+    prints = prints.filter((f) => f.t < 7);
+    if (!lastPrint) { lastPrint = { x: p.x, y: p.y }; return; }
+    const dx = p.x - lastPrint.x, dy = p.y - lastPrint.y, d = hyp(dx, dy);
+    if (d > 2) { lastPrint = { x: p.x, y: p.y }; return; }   // 傳送或讀檔，不畫一長串
+    if (d < 0.42) return;
+    const a = Math.atan2(dy, dx); printSide = -printSide;
+    prints.push({ x: p.x + Math.cos(a + Math.PI / 2) * 0.1 * printSide, y: p.y + Math.sin(a + Math.PI / 2) * 0.1 * printSide, a, t: 0 });
+    if (prints.length > 40) prints.shift();
+    lastPrint = { x: p.x, y: p.y };
+  }
+  function drawPrints() {
+    for (const f of prints) {
+      ctx.save(); ctx.translate(sx(f.x), sy(f.y)); ctx.rotate(f.a);
+      ctx.fillStyle = `rgba(40,30,22,${0.32 * (1 - f.t / 7)})`;
+      ctx.beginPath(); ctx.ellipse(0, 0, 0.09 * cam.s, 0.05 * cam.s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+  }
+  // 光裡的灰塵：在鏡頭附近慢慢飄，只在照得到的地方亮
+  function drawMotes(v, dt) {
+    if (!motes.length) for (let k = 0; k < 42; k++) motes.push({ x: cam.x + (Math.random() - 0.5) * 20, y: cam.y + (Math.random() - 0.5) * 13, ph: Math.random() * 6.28, sp: 0.1 + Math.random() * 0.2 });
+    for (const q of motes) {
+      if (!RM) { q.x += Math.cos(q.ph + t * 0.3) * q.sp * dt; q.y += (Math.sin(q.ph + t * 0.23) * q.sp - 0.04) * dt; }
+      if (Math.abs(q.x - cam.x) > 11 || Math.abs(q.y - cam.y) > 7) { q.x = cam.x + (Math.random() - 0.5) * 20; q.y = cam.y + (Math.random() - 0.5) * 13; }
+      const i = Math.floor(q.y) * g.m.W + Math.floor(q.x), L = v.light[i] || 0;
+      if (L < 0.25 || !(v.vis[i] > 0.2) || v.paper[i]) continue;
+      const tw = 0.5 + 0.5 * Math.sin(t * 2 + q.ph * 3);
+      ctx.fillStyle = `rgba(255,236,190,${0.55 * L * tw})`;
+      ctx.beginPath(); ctx.arc(sx(q.x), sy(q.y), Math.max(1, cam.s * 0.022), 0, Math.PI * 2); ctx.fill();
+    }
+  }
+  // 魄走動時拖著墨煙（看得見才畫，免得洩露位置）
+  function drawWisps(v, dt) {
+    for (const e of g.pos) {
+      const last = lastPo[e.id], moved = last ? hyp(e.x - last.x, e.y - last.y) : 0;
+      lastPo[e.id] = { x: e.x, y: e.y };
+      if (!e.vis || e.vis.mode === 'silhouette' || e.state === 'gone' || moved < 0.004 || moved > 1) continue;
+      if (Math.random() < Math.min(1, dt * 22)) wisps.push({ x: e.x + (Math.random() - 0.5) * 0.3, y: e.y + 0.15 + (Math.random() - 0.5) * 0.2, t: 0, life: 0.9, dark: e.vis.mode === 'dark' });
+    }
+    if (wisps.length > 90) wisps.splice(0, wisps.length - 90);
+    for (const q of wisps) {
+      q.t += dt; q.y -= dt * 0.25;
+      const f = q.t / q.life;
+      ctx.fillStyle = q.dark ? `rgba(180,235,225,${0.35 * (1 - f)})` : `rgba(45,48,54,${0.32 * (1 - f)})`;
+      ctx.beginPath(); ctx.arc(sx(q.x), sy(q.y), (0.06 + 0.12 * f) * cam.s, 0, Math.PI * 2); ctx.fill();
+    }
+    wisps = wisps.filter((q) => q.t < q.life);
+  }
+  // 大門：可以推的時候門縫透出一線天光；推開後月光灑進來
+  function drawGate() {
+    const ex = g.m.exits;
+    if (!ex.length || !(g.exitReady || g.exitOpen)) return;
+    const cx = (ex[0].x + ex[ex.length - 1].x + 1) / 2, cy = ex[0].y;
+    if (g.sightLine(g.p.x, g.p.y, cx, cy - 0.3) === 'blocked' || hyp(cx - g.p.x, cy - g.p.y) > 14) return;
+    if (g.exitOpen) {
+      const X = sx(cx), Y = sy(cy), R0 = 3.2 * cam.s, gr = ctx.createRadialGradient(X, Y + cam.s * 0.4, 0, X, Y + cam.s * 0.4, R0);
+      gr.addColorStop(0, 'rgba(200,225,255,.55)'); gr.addColorStop(1, 'rgba(200,225,255,0)');
+      ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(X, Y + cam.s * 0.4, R0, Math.PI, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#4a2618';   // 兩扇門往外推開
+      for (const sd of [-1, 1]) { ctx.save(); ctx.translate(sx(cx + sd * 1.0), sy(cy)); ctx.rotate(sd * 0.9); ctx.fillRect(sd > 0 ? -cam.s : 0, 0, cam.s, cam.s * 0.16); ctx.restore(); }
+    } else {
+      const a = 0.35 + 0.25 * Math.abs(Math.sin(t * 2));
+      ctx.fillStyle = `rgba(210,230,255,${a})`; ctx.fillRect(sx(cx - 0.04), sy(cy + 0.05), cam.s * 0.08, cam.s * 0.8);
+    }
+  }
+  // 自動對準：被對準的那隻魄四角加一對紅括號（劍打得到是實線，只有火符丟得到是虛線）
+  function drawAim() {
+    const e = g.autoTarget('fire');
+    if (!e) return;
+    const near = hyp(e.x - g.p.x, e.y - g.p.y) <= R.SWORD.reach + 0.3, X = sx(e.x), Y = sy(e.y), r = 0.55 * cam.s, c = 0.2 * cam.s;
+    ctx.save(); ctx.strokeStyle = `rgba(180,57,42,${0.6 + 0.3 * Math.sin(t * 6)})`; ctx.lineWidth = 2.5; if (!near) ctx.setLineDash([4, 4]);
+    for (const [ax, ay] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { ctx.beginPath(); ctx.moveTo(X + ax * r, Y + ay * (r - c)); ctx.lineTo(X + ax * r, Y + ay * r); ctx.lineTo(X + ax * (r - c), Y + ay * r); ctx.stroke(); }
+    ctx.restore();
+  }
+  // 開始畫面：一盞燈自己在宅子裡飄（沒有人）
+  function drawLantern() {
+    const p = g.p, bob = RM ? 0 : Math.sin(t * 2.2) * 0.08;
+    glow(p.x, p.y + bob, 0.9, 'rgba(255,190,90,A)', 0.75);
+    ctx.strokeStyle = '#5a3a1e'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(sx(p.x), sy(p.y + bob - 0.42)); ctx.lineTo(sx(p.x), sy(p.y + bob - 0.2)); ctx.stroke();
+    ctx.fillStyle = '#ffdc96'; ctx.beginPath(); ctx.ellipse(sx(p.x), sy(p.y + bob), 0.16 * cam.s, 0.21 * cam.s, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    glyph('燈', p.x, p.y + bob + 0.01, 0.22, '#7a3a14', { a: 0.85 });
+  }
+
   function drawPlayer() {
     const p = g.p, x = p.x, y = p.y;
     // 讀咒與取印的進度圈
@@ -300,8 +408,9 @@
     ctx.strokeStyle = 'rgba(180,57,42,.9)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(sx(x + Math.cos(p.aim) * 0.36), sy(y + Math.sin(p.aim) * 0.36)); ctx.lineTo(sx(ax), sy(ay)); ctx.stroke();
     // 手燈：掛在身側
-    const lx = x + Math.cos(p.aim + 1.9) * 0.36, ly = y + Math.sin(p.aim + 1.9) * 0.36;
-    if (p.lampOn) { glow(lx, ly, 0.5, 'rgba(255,190,90,A)', 0.8); ctx.fillStyle = '#ffdc96'; }
+    const bob = RM ? 0 : p.moving ? Math.sin(t * 10) * 0.05 : Math.sin(t * 2) * 0.02;   // 手燈隨腳步晃
+    const lx = x + Math.cos(p.aim + 1.9) * 0.36, ly = y + Math.sin(p.aim + 1.9) * 0.36 + bob;
+    if (p.lampOn) { glow(lx, ly, 0.55, 'rgba(255,190,90,A)', RM ? 0.8 : 0.7 + 0.15 * Math.sin(t * 13) * Math.sin(t * 7.3 + 1)); ctx.fillStyle = '#ffdc96'; }
     else ctx.fillStyle = '#2a2420';
     ctx.strokeStyle = '#5a3a1e'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(sx(lx), sy(ly), 0.11 * cam.s, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
   }
@@ -374,6 +483,15 @@
     }
     if (!p.lampOn && p.adapt > 0) { ctx.fillStyle = `rgba(30,50,70,${0.12 * p.adapt})`; ctx.fillRect(0, 0, W, H); }
     for (const f of fx) if (f.k === 'bite') { const q = f.t / f.life; ctx.fillStyle = `rgba(160,30,20,${0.28 * (1 - q)})`; ctx.fillRect(0, 0, W, H); }
+    for (const f of fx) if (f.k === 'splat') {   // 紅墨濺在畫面四邊
+      const q = f.t / f.life, r2 = rnd(f.seed | 0);
+      for (let k = 0; k < 7; k++) {
+        const side = k % 4, u = r2(), X = side === 0 ? u * W : side === 1 ? W - r2() * W * 0.08 : side === 2 ? u * W : r2() * W * 0.08, Y = side === 0 ? r2() * H * 0.1 : side === 2 ? H - r2() * H * 0.1 : u * H;
+        const rr = (14 + r2() * 30) * (W / 1280) * (1 + q * 0.3);
+        ctx.fillStyle = `rgba(140,24,16,${0.42 * (1 - q)})`; ctx.beginPath(); ctx.arc(X, Y, rr, 0, Math.PI * 2); ctx.fill();
+        for (let j = 0; j < 4; j++) { const a = r2() * 6.28, d2 = rr * (1.1 + r2() * 0.9); ctx.beginPath(); ctx.arc(X + Math.cos(a) * d2, Y + Math.sin(a) * d2, rr * 0.18, 0, Math.PI * 2); ctx.fill(); }
+      }
+    }
     void frost;
   }
 
@@ -403,6 +521,7 @@
     const mc = document.createElement('canvas'); mc.width = g.m.W; mc.height = g.m.H; mctx = mc.getContext('2d'); mask = mctx.createImageData(g.m.W, g.m.H);
     const wc = document.createElement('canvas'); wc.width = g.m.W; wc.height = g.m.H; wctx = wc.getContext('2d'); warm = wctx.createImageData(g.m.W, g.m.H);
     cam.x = g.p.x; cam.y = g.p.y;
+    motes = []; prints = []; wisps = []; lastPrint = null; lastPo = {}; shake = 0;
   }
   function toWorld(px, py) { return { x: (px - cv.width / 2) / cam.s + cam.x, y: (py - cv.height / 2) / cam.s + cam.y }; }
   root.RENDER = { init, setGame, frame, event, minimap, toWorld, FONT, cam, rebuild() { art = null; if (g) art = buildArt(g.m); } };

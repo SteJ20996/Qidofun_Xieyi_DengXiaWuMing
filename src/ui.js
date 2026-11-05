@@ -152,6 +152,7 @@
     paused = false; running = true; snap = true; keys.clear(); holdTake = false; press = {};
     disarm(); $('save-msg').textContent = '';
     lsSet('xieyi.deng.slot', String(slot));
+    SFX.ambient(true); heartT = 0.3; creakT = 6 + Math.random() * 6;
   }
   function newGame(n, seed) {
     if (n) slot = n;
@@ -174,6 +175,7 @@
     if (!running) return;
     paused = on;
     if (on) autosave(false);
+    SFX.ambient(!on);
     $('pause').classList.toggle('hidden', !on);
     $('pause-why').textContent = (why === 'blur' ? '視窗失去焦點，先停下來。' : '') + '冷卻、讀咒、取印都停在原處。' + (canSave ? `這一局已自動存到第${CN[slot]}格。` : '這個瀏覽器存不了檔。');
     keys.clear(); holdTake = false; press = {};
@@ -185,6 +187,8 @@
   function showBest() { const b = best(); $('best').textContent = b ? ' · 最快出宅 ' + fmt(b) : ''; }
   function endGame(win) {
     running = false;
+    SFX.ambient(false);
+    $('end').classList.toggle('win', win); $('end').classList.toggle('lose', !win);
     const s = g.stats;
     let rec = '';
     if (win) { const b = best(); if (!b || g.t < b) { lsSet('xieyi.deng.best', String(g.t)); rec = '（新紀錄）'; } }
@@ -215,12 +219,12 @@
         case 'bite': SFX.play('bite'); log(e.absorbed ? (e.chill ? `被咬：護持 −${e.absorbed}，寒意 +${e.chill}` : `被咬：護心衣擋下，護持 −${e.absorbed}`) : `被咬：寒意 +${e.chill}`, 'warn'); break;
         case 'whiff': SFX.play('whiff'); if (e.visible) log('魄撲空了', 'good'); break;
         case 'interrupt': log('打斷了魄的蓄撲', 'good'); break;
-        case 'swing': SFX.play('swish'); break;
+        case 'swing': SFX.play('swish'); flash($('t-sword'), 'use', 400); break;
         case 'swordHit': SFX.play('hit'); break;
-        case 'bell': SFX.play('bell'); break;
-        case 'fireThrow': SFX.play('throwIt'); break;
+        case 'bell': SFX.play('bell'); flash($('t-bell'), 'use', 400); break;
+        case 'fireThrow': SFX.play('throwIt'); flash($('t-fire'), 'use', 400); break;
         case 'fireBoom': SFX.play('boom'); break;
-        case 'readStart': SFX.play('page'); log('讀咒：' + SPELL[e.spell]); break;
+        case 'readStart': SFX.play('page'); flash($('t-book'), 'use', 400); log('讀咒：' + SPELL[e.spell]); break;
         case 'readCancel': log({ bell: '讀咒中斷，書墨未耗', move: '合上書，書墨未耗', bite: '被咬，讀咒中斷，書墨未耗', near: '魄貼近，讀咒中斷，書墨未耗' }[e.why] || '讀咒中斷，書墨未耗', e.why === 'move' ? '' : 'warn'); break;
         case 'readBlocked': SFX.play('fail'); log('魄太近，讀不了咒。先搖鈴把它震開', 'warn'); break;
         case 'sealNoDoor': SFX.play('fail'); log({ far: '要站在廊口旁邊才能封戶', standing: '站在廊口上封不了，先退開一步', already: '這個廊口已經封著', moved: '廊口不見了' }[e.why] || '這裡封不了'); break;
@@ -233,14 +237,14 @@
         case 'borrowDone': log('借火：火會燒十五秒，魄會被火吸引過去', 'good'); break;
         case 'takeStart': log(e.key === 'gate' ? '推門閂……' : '取印中……'); break;
         case 'takeCancel': if (e.why === 'bite') log('被咬，要重來', 'warn'); break;
-        case 'seal': SFX.play('seal'); log('取得' + e.glyph + '印', 'good'); autosave(true); break;
+        case 'seal': SFX.play('seal'); bigStamp(e.glyph); log('取得' + e.glyph + '印', 'good'); autosave(true); break;
         case 'wake': SFX.play('wake'); log(e.why === 'bell' ? '鈴聲吵醒了什麼' : e.why === 'touch' ? '你撞醒了一隻魄' : '宅裡有東西醒了', 'warn'); break;
         case 'disperse': SFX.play('disperse'); log('魄散了，過一陣子會在別處凝回來', 'good'); break;
         case 'reformStart': if (g.spotVisible(e)) log('那裡有東西在凝形', 'warn'); break;
         case 'exitReady': log('兩印到手：回大門推開門閂', 'good'); break;
-        case 'gateOpen': SFX.play('door'); log('門閂推開了，快出去', 'good'); autosave(true); break;
+        case 'gateOpen': SFX.play('door'); bigStamp('開'); log('門閂推開了，快出去', 'good'); autosave(true); break;
         case 'pickup': log('撿到一張火符', 'good'); break;
-        case 'lamp': SFX.play('lamp', e.on); break;
+        case 'lamp': SFX.play('lamp', e.on); flash($('t-lamp'), 'use', 400); break;
         case 'win': endGame(true); break;
         case 'lose': endGame(false); break;
       }
@@ -284,6 +288,7 @@
   cv.addEventListener('contextmenu', (ev) => ev.preventDefault());
   document.querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', (ev) => { ev.preventDefault(); if (running && !paused) press[b.dataset.act] = true; b.blur(); }));
 
+  let aimAuto = true;
   function input() {
     let mx = 0, my = 0;
     for (const k of keys) { const v = MOVE[k]; if (v) { mx += v[0]; my += v[1]; } }
@@ -294,26 +299,48 @@
       const d = Math.min(2, window.devicePixelRatio || 1), w = RD.toWorld(mouse.x * d, mouse.y * d);
       aim = Math.atan2(w.y - g.p.y, w.x - g.p.x); target = w;
     } else if (mx || my) aim = moveDir;
-    return { mx, my, aim, target, press, hold: { take: holdTake } };
+    aimAuto = !useMouse;   // 沒用滑鼠：劍與火符自動對準看得見的魄
+    return { mx, my, aim, target, autoAim: aimAuto, press, hold: { take: holdTake } };
   }
 
   // ---------- HUD ----------
+  // 只有內容變了才改，免得 CSS 動畫每一幀重來
+  const shown = {};
+  const setHTML = (id, html) => { if (shown[id] !== html) { shown[id] = html; $(id).innerHTML = html; } };
+  const flash = (el, cls, ms) => { if (!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); clearTimeout(el['_' + cls]); el['_' + cls] = setTimeout(() => el.classList.remove(cls), ms); };
+  let prev = null;
   function hud() {
     const p = g.p;
     const set = (id, v) => $(id).style.setProperty('--p', v);
+    if (!prev || g !== prev.g) prev = { g, chill: p.chill, armor: p.armor, ink: p.ink, bell: p.bellCD };
     set('chill-fill', p.chill / R.P.chillMax); $('chill-num').textContent = Math.round(p.chill) + '/100';
     $('chill-fill').parentNode.parentNode.classList.toggle('high', p.chill >= 60);
-    set('armor-fill', p.armor / R.P.armorMax); $('armor-num').textContent = p.armor + '/' + R.P.armorMax;
+    if (p.chill > prev.chill + 0.6) flash($('chill-fill').parentNode, 'hit', 450);
+    // 護持：三方「護」印，一方擋一咬；少了一方就裂開
+    const segs = [0, 1, 2].map((k) => { const v = Math.max(0, Math.min(18, p.armor - 18 * k)) / 18; return v >= 1 ? 'full' : v > 0 ? 'half' : 'empty'; });
+    setHTML('armor-segs', segs.map((c) => `<i class="${c}">護</i>`).join(''));
+    if (p.armor < prev.armor) { const k = Math.min(2, Math.floor(prev.armor / 18 - 1e-9)); flash($('armor-segs').children[k], 'crack', 700); }
+    $('armor-num').textContent = p.armor + '/' + R.P.armorMax;
     set('eye-fill', p.lampOn ? 0 : p.adapt); $('eye-num').textContent = p.lampOn ? '點著燈' : Math.round(p.adapt * 100) + '%';
     const ex = g.exposedNow, xe = $('expose');
     xe.className = ex ? 'on' : 'off';
-    xe.innerHTML = ex ? '<b>顯</b>' + (p.lampOn ? '燈亮著，魄從遠處看得見你' : '你站在光裡，魄看得見你') : '<b>隱</b>魄要靠很近才察覺';
-    $('goal').innerHTML = `<span class="slotlab">第${CN[slot]}格</span><span class="s${g.seals.name ? ' got' : ''}"><i>名</i>印</span><span class="s${g.seals.breath ? ' got' : ''}"><i>息</i>印</span><span class="door${g.exitOpen ? ' open' : ''}">大門${g.exitOpen ? '開了' : g.exitReady ? '可以推開' : '關著'}</span>`;
+    setHTML('expose', ex ? '<b>顯</b>' + (p.lampOn ? '燈亮著，魄從遠處看得見你' : '你站在光裡，魄看得見你') : '<b>隱</b>魄要靠很近才察覺');
+    if (!$('goal-name')) $('goal').innerHTML = '<span class="slotlab" id="goal-slot"></span><span class="s" id="goal-name"><i>名</i>印</span><span class="s" id="goal-breath"><i>息</i>印</span><span class="door" id="goal-door"></span>';
+    $('goal-slot').textContent = `第${CN[slot]}格`;
+    for (const [id, got] of [['goal-name', g.seals.name], ['goal-breath', g.seals.breath]]) {
+      const el = $(id), was = el.classList.contains('got');
+      el.classList.toggle('got', got);
+      if (got && !was && prev.g === g && prev.sealsSeen) flash(el.querySelector('i'), 'stampin', 600);   // 剛取到：蓋一下
+    }
+    prev.sealsSeen = true;
+    $('goal-door').classList.toggle('open', g.exitOpen); $('goal-door').textContent = '大門' + (g.exitOpen ? '開了' : g.exitReady ? '可以推開' : '關著');
     $('t-sword').style.setProperty('--cd', p.swordCD / R.SWORD.cd);
     $('t-bell').style.setProperty('--cd', p.bellCD / R.BELL.cd);
-    $('fire-n').textContent = '×' + p.talismans;
-    $('t-fire').classList.toggle('off', p.talismans <= 0);
-    $('ink-n').textContent = '墨 ' + '●'.repeat(p.ink) + '○'.repeat(Math.max(0, R.P.inkMax - p.ink));
+    if (prev.bell > 0 && p.bellCD <= 0) flash($('t-bell'), 'ready', 800);   // 鈴好了：亮一下
+    setHTML('fire-n', '<b class="strip"></b>'.repeat(p.talismans) || '<span class="none">無</span>');
+    $('t-fire').title = `火符：還有 ${p.talismans} 張。朝對準的方向丟出去，碰到第一隻魄或牆就燒起來。`;
+    setHTML('ink-n', '墨' + [...Array(R.P.inkMax)].map((_, k) => `<i class="drop${k < p.ink ? ' on' : ''}"></i>`).join(''));
+    if (p.ink < prev.ink) flash($('ink-n').children[p.ink], 'drip', 700);
     const door = g.findDoor();
     $('pg-seal').classList.toggle('off', !door.ok || p.ink <= 0);
     $('pg-borrow').classList.toggle('off', p.ink <= 0);
@@ -323,24 +350,57 @@
     $('t-sword').classList.toggle('off', reading); $('t-fire').classList.toggle('off', reading || p.talismans <= 0);
     $('t-bell').classList.toggle('busy', reading);
     $('t-lamp').classList.toggle('covered', !p.lampOn); $('lamp-s').textContent = p.lampOn ? '點著' : '掩著';
+    setHTML('aimmode', aimAuto ? '<b>對準</b>自動（看得見的魄）' : '<b>對準</b>跟著滑鼠');
     if (frameN % 6 === 0) RD.minimap($('minimap'));
+    prev.chill = p.chill; prev.armor = p.armor; prev.ink = p.ink; prev.bell = p.bellCD;
+  }
+  // 大印：取到印時蓋在畫面正中
+  function bigStamp(glyph) {
+    const el = $('bigstamp'); el.querySelector('span').textContent = glyph;
+    el.classList.remove('hidden'); flash(el, 'show', 1500);
+    clearTimeout(el._hide); el._hide = setTimeout(() => el.classList.add('hidden'), 1500);
   }
 
+  // ---------- 開始畫面的展示：一盞燈在宅子裡飄，魄照常巡行 ----------
+  const TOUR = [[19.5, 24.2], [19.5, 20.5], [19.5, 18.5], [19.5, 15.2], [17.2, 11.5], [14.5, 9.6], [14.5, 8.5], [14.5, 5.2], [11.0, 4.5], [9.5, 4.5], [5.5, 4.0], [4.5, 6.8], [4.5, 8.5], [4.5, 11.0], [7.0, 12.4], [7.0, 15.6], [4.5, 17.2], [4.5, 18.5], [4.5, 21.0], [7.5, 22.5], [9.5, 22.5], [13.0, 22.5]];
+  const tour = { seg: 0, f: 0 };
+  function tourStep(dt) {
+    const a = TOUR[tour.seg], b = TOUR[(tour.seg + 1) % TOUR.length], L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+    tour.f += (RD_SPEED * dt) / L;
+    if (tour.f >= 1) { tour.f = 0; tour.seg = (tour.seg + 1) % TOUR.length; }
+    const e = tour.f * tour.f * (3 - 2 * tour.f);   // 每段起止慢一點
+    g.tp(a[0] + (b[0] - a[0]) * e, a[1] + (b[1] - a[1]) * e);
+    g.p.lampOn = true;
+  }
+  const RD_SPEED = 1.4;
+
   // ---------- 主迴圈 ----------
+  let heartT = 0, creakT = 8;
   function loop(ts) {
     const dt = last ? Math.min(0.25, (ts - last) / 1000) : 0;
     last = ts; frameN++;
     if (g) {
+      const onStart = !$('start').classList.contains('hidden') && g.attract;
       if (running && !paused) {
         const n = g.advance(dt, input());
         if (n > 0 || Object.keys(press).length) press = {};
         handle(g.drain());
-      }
-      RD.frame(running && !paused ? dt : 0, { snap });
+        mood(dt);
+      } else if (onStart) { tourStep(dt); g.advance(dt, {}); g.drain(); }
+      RD.frame(running && !paused || onStart ? dt : 0, { snap, attract: onStart, autoAim: aimAuto });
       snap = false;
-      hud();
+      if (!onStart) hud();
     }
     requestAnimationFrame(loop);
+  }
+  // 心跳（寒意高、或魄就在身邊而且中間沒有牆）與偶爾的嘎吱聲
+  function mood(dt) {
+    const p = g.p;
+    let near = 0;
+    for (const e of g.pos) { if (e.state === 'gone' || e.state === 'dormant') continue; const d = Math.hypot(e.x - p.x, e.y - p.y); if (d < 3 && g.hitClear(e.x, e.y, p.x, p.y)) near = Math.max(near, 1 - d / 3); }
+    const v = Math.max((p.chill - 50) / 50, near);
+    if (v > 0) { heartT -= dt; if (heartT <= 0) { SFX.play('heart', v); heartT = 1.15 - 0.55 * v; } } else heartT = 0.3;
+    creakT -= dt; if (creakT <= 0) { SFX.play('creak'); creakT = 9 + Math.random() * 13; }
   }
 
   $('btn-load').addEventListener('click', () => { SFX.unlock(); if (!continueGame(slot)) newGame(slot); });
@@ -359,7 +419,7 @@
 
   // 先在背景擺好宅子（開始畫面後面看得到一點點）
   window.DENG = { R, ENGINE: E, RENDER: RD, newGame, continueGame, setPause, saveAs, readSlot, canSave, snap() { snap = true; }, get slot() { return slot; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
-  g = E.create({ seed: seedFromUrl() }); window.DENG.g = g; RD.setGame(g); g.drain();
+  g = E.create({ seed: seedFromUrl() }); g.attract = true; g.tp(TOUR[0][0], TOUR[0][1]); window.DENG.g = g; RD.setGame(g); g.drain();
   renderSlots();
   if (!canSave) $('slot-msg').textContent = '這個瀏覽器存不了檔（例如無痕視窗）：照樣能玩，只是關掉就沒了。';
   const fontReady = document.fonts && document.fonts.load ? document.fonts.load('32px "LXGW WenKai TC"', '燈下無明魄噬人火封') : Promise.resolve();

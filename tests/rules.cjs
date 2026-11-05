@@ -303,6 +303,49 @@ const doorRoom = (set) => { for (let y = 1; y < 15; y++) set(5, y, '#'); set(5, 
   ok('劍落空會說原因（差一步／偏了）', m1 && m1.why === 'far' && m2 && m2.why === 'dir', { far: m1 && m1.why, dir: m2 && m2.why });
 }
 
+// ---------- 沒用滑鼠時的自動對準 ----------
+{ // 背後一格的魄：自動對準打得到；關掉自動對準就「偏了」
+  const g = mkArena(), p = g.p; put(g, g.pos[0], p.x - 1.0, p.y, 'recover');
+  run(g, R.STEP, {});
+  run(g, R.SWORD.windup + R.STEP * 2, { aim: 0, autoAim: true, press: { sword: true } });
+  const hit = g.drain().some((x) => x.type === 'swordHit');
+  const h = mkArena(), q = h.p; put(h, h.pos[0], q.x - 1.0, q.y, 'recover');
+  run(h, R.STEP, {});
+  run(h, R.SWORD.windup + R.STEP * 2, { aim: 0, press: { sword: true } });
+  const miss = h.drain().find((x) => x.type === 'swordMiss');
+  ok('自動對準：背後的魄劍打得到；不自動就偏了', hit && miss && miss.why === 'dir', { hit, miss: miss && miss.why });
+}
+{ // 火符回身丟：背後三格半的魄（燈照得到約 3.6 格；再遠就看不見，也就不對準）
+  const g = mkArena(), p = g.p, e = put(g, g.pos[0], p.x - 3.5, p.y, 'recover');
+  run(g, R.STEP, {});
+  run(g, 0.6, (gg, i) => ({ aim: 0, autoAim: true, press: i === 0 ? { fire: true } : {} }));
+  const b = g.drain().find((x) => x.type === 'fireBoom');
+  ok('自動對準：火符回身丟中背後三格半的魄', b && b.hit.includes(e.id), b && { x: +(b.x - p.x).toFixed(2), hit: b.hit });
+}
+{ // 看不見的魄不對準（黑暗、眼睛還沒習慣）；隔牆的不對準；兩隻挑近的
+  const g = mkArena(), p = g.p; p.lampOn = false; p.adapt = 0;
+  put(g, g.pos[0], p.x - 1.0, p.y, 'recover');
+  run(g, R.STEP, {});
+  ok('自動對準：黑暗裡看不見的魄不會被對準', g.autoTarget('sword') === null, g.pos[0].vis);
+  const w = mkArena((set) => { for (let y = 1; y < 15; y++) set(6, y, '#'); }), wp = w.p;
+  put(w, w.pos[0], 5.5, wp.y, 'recover');
+  run(w, R.STEP, {});
+  ok('自動對準：隔牆的魄不對準', w.autoTarget('fire') === null);
+  const t = mkArena(), tp = t.p;
+  const far = put(t, t.pos[0], tp.x + 3.5, tp.y, 'recover');
+  run(t, R.STEP, {});
+  const near = { x: tp.x, y: tp.y + 2.0 };
+  t.place(far, near.x, near.y, 'recover'); far.stateT = 999;
+  run(t, R.STEP, {});
+  ok('自動對準：挑看得見的最近那隻', t.autoTarget('fire') === far && Math.abs(Math.atan2(far.y - tp.y, far.x - tp.x) - Math.PI / 2) < 1e-9);
+}
+{ // 開始畫面的展示：魄照常巡行，但不追、不咬、不冷
+  const g = mk({ seed: 3 }); g.attract = true;
+  const e = g.pos[0]; g.tp(e.x + 1.0, e.y);
+  run(g, 4, {});
+  ok('開始畫面展示：魄看不見那盞燈、不咬、不冷', g.stats.bites === 0 && g.p.chill === 0 && !['chase', 'windup'].includes(e.state), { state: e.state, chill: g.p.chill });
+}
+
 // ---------- 存檔 ----------
 { // 任何時刻存檔、讀回來接著跑，和沒存過的那一局一步一步完全一樣（包含魄的計時、尋路、亂數）
   const rnd = ENGINE.rng(4242);
