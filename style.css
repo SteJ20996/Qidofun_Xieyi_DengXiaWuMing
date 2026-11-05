@@ -10,6 +10,7 @@
 html, body { margin: 0; height: 100%; overflow: hidden; background: var(--night); color: var(--ink); font-family: var(--ui); }
 body { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 canvas#world { position: fixed; inset: 0; display: block; cursor: crosshair; touch-action: none; }
+canvas#world3d { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
 .hidden { display: none !important; }
 kbd { display: inline-block; min-width: 1.3em; padding: 0 .3em; border: 1px solid var(--ink-2); border-radius: 3px; font: 12px/1.5 var(--ui); text-align: center; background: rgba(255,255,255,.4); margin: 0 1px; color: var(--ink); }
 .dim { color: var(--dim); }

@@ -13,6 +13,7 @@
 - **自動對準與生動的介面**（擁有者 2026-11-05：「加上沒用滑鼠時的自動對準。然後我在想，能不能優化一下整個程序介面，更有趣生動一些」）：沒用滑鼠時劍與火符對準看得見、在射程內、沒隔牆的最近那隻魄（前後左右都算；看不見的不對準）。介面的改動只在畫面與聲音、不改規則，細目見 `docs/DESIGN.md` 第 6b 節；標語「點燈見近 · 掩燈見遠」是 Claude 擬的，擁有者 2026-11-05 回覆「標語就用「點燈見近 · 掩燈見遠」」，定案。
 - **腳印做成玩法**（擁有者 2026-11-05：「腳印做成玩法吧，魄循著腳印追」）：每 0.42 格一個、八秒淡完，點燈濃度 1、掩燈 0.5；新鮮度 0.3 以上才聞得到（點燈約 5.6 秒、掩燈約 3.2 秒）；巡行一格內碰到、追丟後 1.6 格內找到就循著追（`track`，速度同探查 2.0）；封戶擋、借火引得開；看得見時頭上有「嗅」。細目與「它改了什麼」的數據見 `docs/DESIGN.md` 第 6c 節。
 - **開始畫面的長鏡頭**（擁有者 2026-11-05：「主頁的實機片，有很明顯的拼接感，每三五秒的短視頻拼接起來的，我們嘗試修改」）：燈的路線改成 `src/tour.js` 一條平滑閉合、等速、不穿牆屏的曲線，鏡頭跟得慢、往前看；原因與量測見 `docs/DESIGN.md` 第 6b 節。以後改路線要跑規則回歸裡的三條路線檢查與瀏覽器的「長鏡頭」檢查。
+- **3D**（擁有者 2026-11-05：「可以做一個3d版的實機demo嗎」，選「先做 3D 長鏡頭，再做可玩版」、可玩版的鏡頭「人的背後」）：第一步只把開始畫面換成 3D 長鏡頭（`src/render3d.js`），進一局仍是 2D；擁有者看過點頭才做可玩的 3D 版。細目見 `docs/DESIGN.md` 第 6d 節。
 - Repo：`SteJ20996/Qidofun_Xieyi_DengXiaWuMing`（擁有者 2026-10-28 建好）。擁有者 2026-10-29 要「請存放在這個repo裡」：`main` 放最新的完整版本（repo 首頁看得到）。開發照舊在工作分支 `claude/xieyi-deng`（照《力透紙背》的 `claude/xieyi-zhan`），每次更新推到工作分支後，把 `main` 快轉到同一個提交；只快轉、不強推，`main` 若有別的提交就先停下來問擁有者。
 - 私人試玩頁（claude.ai Artifact，只有擁有者看得到）：https://claude.ai/artifact/97AkBkGAZwMwZcMcgU3qw6 。每次更新都發佈到同一個網址（用 `dist/xieyi-deng.html`），不要另開新的。
 
@@ -26,7 +27,7 @@
 
 1. `node tests/rules.cjs`，全部 PASS。
 2. 動到數值或魄的行為時跑 `node tests/review.cjs`（攻防對照、完整逃脫、壓力檢查），壓力檢查 0 違規、魄卡住 0 次；把新的表格更新進 `docs/DESIGN.md` 第 6 節，並如實寫它能證明什麼、不能證明什麼。
-3. `node scripts/smoke.mjs`（無頭 Chromium、`file://`；字體走 Google Fonts，腳本自動用 `HTTPS_PROXY`），全部 PASS、零報錯；截圖要真的看過。
+3. `node scripts/smoke.mjs`（無頭 Chromium、`file://`；字體與 three.js 走網路，腳本自動用 `HTTPS_PROXY`），全部 PASS、零報錯；截圖要真的看過。大部分項目在 2D 開始畫面跑（`?flat=1`），3D 開始畫面另有三項。
 4. `python3 scripts/build-single.py`，再 `python3 scripts/build-single.py --page && node scripts/smoke.mjs "file://$PWD/dist/index.html"` 驗單檔；把 `dist/xieyi-deng.html` 發佈到上面那個 Artifact。
 5. 回覆裡用這個格式附上入口，網址獨立成行：
 
@@ -40,6 +41,7 @@
 - 地圖 `src/map.js`：`MAP.ROWS`（記號見檔頭）、`MAP.T`、`MAP.ROOMS`、`parse(rows)`（測試可以給自己的場地）、`walk()`（線段走過的格，穿過格角時兩旁都走到）。
 - 引擎 `src/engine.js`（不碰畫面）：判定 `blocksMove`／`blocksHit`／`sightLine`／`transmission`；光 `sources`／`lightAt`；碰撞 `moveEnt`／`pushOut`／`clearMove`；尋路 `findPath`（八方向、不切牆角，走不到就走到最近處）；看見 `exposed`／`poSees`／`poVis`（lit／dark／silhouette）／`spotVisible`；魄 `updatePo`／`think`（patrol、lure、investigate、search、chase、track）／腳印 `dropPrint`／`fresh`／`scent`／`nextPrint`／`startTrack`（`g.prints`、`g.lastPrint`、每隻魄的 `trail`）／`startWindup`／`resolveBite`／`hurtPo`／`disperse`／`pickReform`／`updateGone`／`wake`；人 `tryBell`／`trySword`（自動對準 `AUTO`、`autoTarget`、`aimFor`；輸入帶 `autoAim` 才用）／`swordRelease`／`tryFire`／`updateShots`／`boom`／`tryRead`／`completeRead`／`cancelRead`／`findDoor`／`borrowSpot`／`tryTake`／`completeTake`；`step()`（順序見檔頭）；`view()`（每格的光與看見程度、走過的地圖）；存檔 `serialize()`／`restore()`（`SAVE_V`、`PO_KEYS`、`PO_STATES`、`P_NUMS`；讀檔逐項檢查，不對就回傳 null；沒有 `prints`、`trail` 的舊存檔當作沒有腳印）。開始畫面的展示 `g.attract = true`（魄看不見那盞燈、不咬、不冷，也不推它、不被它撞醒）。對外：`ENGINE.create({ seed, loadout, rows, way })` → `g.step`／`g.advance`（固定步長）／`g.view`／`g.drain`（事件）／`g.serialize`／`g.autoTarget(kind)`／`g.tp`／`g.place`；`ENGINE.restore(存檔)` → 一局或 null。亂數 `rng()` 的狀態在 `f.s.a`。
 - 畫面 `src/render.js`：`buildArt`（地板、牆、紙屏、井、廊口、房名）、墨的遮罩（每格一像素放大平滑）、`drawFloorThings`、`drawLights`、`drawPos`（剪影落在紙屏上）、`drawPlayer`、`drawFx`、`drawFloats`、`drawScreenFx`（結霜、被咬一閃與紅墨濺）、生動的小東西 `drawPrints`（畫引擎的 `g.prints`，濃淡照新鮮度）、追腳印的魄頭上「嗅」（在 `drawPos`）、`drawMotes`（光裡的灰塵）、`drawWisps`（魄的墨煙，看得見才畫）、`drawGate`（門縫天光、月光）、`drawAim`（自動對準的紅括號）、`drawLantern`（開始畫面那盞燈）、被咬一震 `shake`（減少動態 `RM` 時不震不晃）、`minimap`（只記牆、屏、門、印，不記魄）、`toWorld`；`frame(dt, { snap, attract, lead, autoAim })`（`attract` 時鏡頭跟得慢、往 `lead` 方向多看 1.4 格）。
+- 3D 開始畫面 `src/render3d.js`（three.js r128，index.html 從 cdnjs 載，單檔打包時照樣留連結）：`RENDER3D.ok`／`init`／`setGame`（照地圖蓋：地板用 `RENDER.floorCanvas`、牆 InstancedMesh、紙屏照引擎的光發亮、井、燭、印臺、大門、魄的字貼圖、紙燈籠與會投影子的光、灰塵）／`frame(dt, { lead, snap })`（鏡頭 `CAM` 在後上方）／`resize`；畫質 `quality`（0 全開、1 關影子、2 太慢）與 `failed`（ui 看到就換回 2D）。網址 `?flat=1` 強制 2D、`?keep3d=1` 不自動降。
 - 開始畫面的路線 `src/tour.js`：`TOUR.WAY`（路線點，穿過廊口時順著廊口）、`SPEED`、`STEP`、`PTS`（照弧長等距取樣）、`LEN`、`at(s)`（走了 s 格時的位置與方向）。
 - 聲音 `src/sfx.js`：WebAudio 合成；`hiss(距離, 左右)` 是黑暗中唯一的蓄撲提示，算規則的一部分；`SFX.ambient(開關)` 宅子的底噪、`heart(v)` 心跳、`creak()` 嘎吱。
 - 介面 `src/ui.js`：`HINT`（教學提示）、`log`（旁側文字）、`handle`（事件 → 聲音、文字；取印、推開門閂時 `autosave`）、存檔（`SLOTS`、`readSlot`、`saveTo`、`autosave`、`slotInfo`、`renderSlots`／`startSel`（開始畫面）、`renderSaveRow`／`saveAs`（暫停面板）、`arm`／`disarm`（按兩次才算）、`canSave`）、`newGame(格, 種子)`／`continueGame(格)`／`enter`、按鍵與滑鼠、`input`、`hud`、暫停（Esc、P、失去焦點自動暫停並放開按鍵，暫停時自動存）、結束畫面（`endGame`、`endPrimary`）、自動對準 `aimAuto`（`input()` 帶 `autoAim`）、HUD 只在內容變了才改（`setHTML`）與一次性動畫（`flash`）、大印 `bigStamp`、開始畫面的展示 `tour`／`tourStep`（照 `TOUR.at` 走，方向給鏡頭 `lead`；`window.DENG.tour` 可以跳到路線上任一處）、心跳與嘎吱 `mood`、`window.DENG`（`g`、`slot`、`newGame`、`continueGame`、`saveAs`、`readSlot`、`canSave`、`setPause`、`snap`、`paused`、`running`、`keys`、`ready`）。

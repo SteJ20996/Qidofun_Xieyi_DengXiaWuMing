@@ -6,7 +6,8 @@
   const cv = $('world');
   RD.init(cv);
 
-  let g = null, paused = false, running = false, last = 0, snap = false, frameN = 0;
+  let g = null, paused = false, running = false, last = 0, snap = false, frameN = 0, use3d = false;
+  const RENDER3D = window.RENDER3D;
   let press = {}, holdTake = false;
   const keys = new Set();
   const mouse = { x: 0, y: 0, t: -1e9, in: false };
@@ -38,7 +39,7 @@
     cv.width = Math.round(innerWidth * d); cv.height = Math.round(innerHeight * d);
     cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px';
   }
-  addEventListener('resize', resize); resize();
+  addEventListener('resize', () => { resize(); if (use3d) RENDER3D.resize(); }); resize();
 
   // ---------- 旁側文字與提示 ----------
   const recent = new Map();
@@ -146,6 +147,7 @@
   function seedFromUrl() { const m = /[?&]seed=(\d+)/.exec(location.search); return m ? +m[1] : (Date.now() % 100000) | 0; }
   function enter(gg) {
     g = gg; window.DENG.g = g;
+    if (use3d) { $('world3d').classList.add('hidden'); cv.classList.remove('hidden'); }   // 可玩的部分目前還是 2D
     RD.setGame(g);
     $('log').innerHTML = ''; $('hint').classList.add('hidden');
     ['start', 'pause', 'end'].forEach((id) => $(id).classList.add('hidden'));
@@ -387,7 +389,9 @@
         handle(g.drain());
         mood(dt);
       } else if (onStart) { tourStep(dt); g.advance(dt, {}); g.drain(); }
-      RD.frame(running && !paused || onStart ? dt : 0, { snap, attract: onStart, lead: onStart ? tourDir : null, autoAim: aimAuto });
+      if (onStart && use3d && RENDER3D.failed) { use3d = false; $('world3d').classList.add('hidden'); cv.classList.remove('hidden'); snap = true; }   // 這台跑不動 3D：回 2D
+      if (onStart && use3d) RENDER3D.frame(dt, { lead: tourDir, snap });
+      else RD.frame(running && !paused || onStart ? dt : 0, { snap, attract: onStart, lead: onStart ? tourDir : null, autoAim: aimAuto });
       snap = false;
       if (!onStart) hud();
     }
@@ -418,11 +422,19 @@
   if (window.matchMedia && matchMedia('(pointer: coarse)').matches && !matchMedia('(pointer: fine)').matches) $('touchnote').textContent = '這一版是試做，只做了鍵盤與滑鼠；手機上還不能玩。';
 
   // 先在背景擺好宅子（開始畫面後面看得到一點點）
-  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, continueGame, setPause, saveAs, readSlot, canSave, snap() { snap = true; }, tour, get slot() { return slot; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
+  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, continueGame, setPause, saveAs, readSlot, canSave, snap() { snap = true; }, tour, get use3d() { return use3d; }, get slot() { return slot; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
   g = E.create({ seed: seedFromUrl() }); g.attract = true; { const q = window.TOUR.at(0); g.tp(q.x, q.y); tourDir = { dx: q.dx, dy: q.dy }; } window.DENG.g = g; RD.setGame(g); g.drain(); snap = true;
   renderSlots();
   if (!canSave) $('slot-msg').textContent = '這個瀏覽器存不了檔（例如無痕視窗）：照樣能玩，只是關掉就沒了。';
   const fontReady = document.fonts && document.fonts.load ? document.fonts.load('32px "LXGW WenKai TC"', '燈下無明魄噬人火封') : Promise.resolve();
-  fontReady.catch(() => {}).then(() => { RD.rebuild(); window.DENG.ready = true; });
+  fontReady.catch(() => {}).then(() => {
+    RD.rebuild();
+    // 開始畫面的 3D 長鏡頭：three.js 載到了、瀏覽器能 3D、網址沒有 ?flat=1 才用；不然照舊 2D
+    if (!/[?&]flat=1/.test(location.search) && RENDER3D && RENDER3D.ok() && !running) {
+      try { RENDER3D.init($('world3d')); RENDER3D.setGame(g); use3d = true; $('world3d').classList.remove('hidden'); cv.classList.add('hidden'); snap = true; }
+      catch (e) { use3d = false; $('world3d').classList.add('hidden'); cv.classList.remove('hidden'); }
+    }
+    window.DENG.ready = true;
+  });
   requestAnimationFrame(loop);
 })();

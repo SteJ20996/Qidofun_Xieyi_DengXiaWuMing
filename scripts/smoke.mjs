@@ -28,7 +28,7 @@ const ev = (f) => page.evaluate(f);
 const wait = (ms) => page.waitForTimeout(ms);
 
 try {
-  await page.goto(base + (base.includes('?') ? '&' : '?') + 'seed=7');
+  await page.goto(base + (base.includes('?') ? '&' : '?') + 'seed=7&flat=1');
   await page.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 30000 });
   ok('字體載入（霞鶩文楷）', await ev(() => document.fonts.check('32px "LXGW WenKai TC"', '燈下無明魄噬')));
   await shot('01-start');
@@ -44,10 +44,11 @@ try {
   const speeds = [];
   for (let i = 0, j = 0; i < samp.length; i++) { while (j < samp.length - 1 && samp[j][0] - samp[i][0] < 500) j++; if (samp[j][0] - samp[i][0] >= 500) speeds.push(win(i, j)); }
   const lv = speeds.map((q) => q[0]), cv2 = speeds.map((q) => q[1]), mean = (a) => a.reduce((x, y) => x + y, 0) / a.length;
+  // 每一幀的速度（位移 ÷ 那一幀的秒數）：最快的一幀不能比平均快太多（快很多就是跳了一下）
   let jump = 0, camJump = 0;
-  for (let i = 1; i < samp.length; i++) { jump = Math.max(jump, Math.hypot(samp[i][1] - samp[i - 1][1], samp[i][2] - samp[i - 1][2])); camJump = Math.max(camJump, Math.hypot(samp[i][3] - samp[i - 1][3], samp[i][4] - samp[i - 1][4])); }
-  const flow = { frames: samp.length, lampMean: +mean(lv).toFixed(2), lampMinOverMean: +(Math.min(...lv) / mean(lv)).toFixed(2), camMinOverMean: +(Math.min(...cv2) / mean(cv2)).toFixed(2), jump: +jump.toFixed(3), camJump: +camJump.toFixed(3) };
-  ok('開始畫面是一個長鏡頭：燈等速不停、鏡頭不跳', flow.frames > 100 && flow.lampMinOverMean > 0.7 && flow.camMinOverMean > 0.4 && jump < 0.15 && camJump < 0.15, flow);
+  for (let i = 1; i < samp.length; i++) { const dt = Math.max(0.001, (samp[i][0] - samp[i - 1][0]) / 1000); jump = Math.max(jump, Math.hypot(samp[i][1] - samp[i - 1][1], samp[i][2] - samp[i - 1][2]) / dt); camJump = Math.max(camJump, Math.hypot(samp[i][3] - samp[i - 1][3], samp[i][4] - samp[i - 1][4]) / dt); }
+  const flow = { frames: samp.length, lampMean: +mean(lv).toFixed(2), lampMinOverMean: +(Math.min(...lv) / mean(lv)).toFixed(2), camMinOverMean: +(Math.min(...cv2) / mean(cv2)).toFixed(2), lampPeakOverMean: +(jump / mean(lv)).toFixed(2), camPeakOverMean: +(camJump / mean(cv2)).toFixed(2) };
+  ok('開始畫面是一個長鏡頭：燈等速不停、鏡頭不跳', flow.frames > 100 && flow.lampMinOverMean > 0.7 && flow.camMinOverMean > 0.4 && flow.lampPeakOverMean < 1.6 && flow.camPeakOverMean < 2.5, flow);
   await page.keyboard.press('Enter'); await wait(400);
   ok('Enter 入宅、HUD 出現', await ev(() => DENG.running && !document.getElementById('hud').classList.contains('hidden')));
   // 測試裡先把魄放遠，免得亂入
@@ -236,7 +237,7 @@ try {
   const sp = await sctx.newPage(); watch(sp);
   const sev = (f) => sp.evaluate(f);
   const sw = (ms) => sp.waitForTimeout(ms);
-  const open = async () => { await sp.goto(base + Q + 'seed=7'); await sp.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 30000 }); await sw(150); };
+  const open = async () => { await sp.goto(base + Q + 'seed=7&flat=1'); await sp.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 30000 }); await sw(150); };
   const slotTexts = () => sev(() => [...document.querySelectorAll('#slots .slot-b')].map((e) => e.textContent));
   const still = () => sev(() => { const g = DENG.g; g.pos.forEach((e, i) => { g.place(e, 2.5 + i, 25.5, 'recover'); e.stateT = 999; }); });
   await open();
@@ -313,7 +314,7 @@ try {
   const nctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   await nctx.addInitScript(() => { Object.defineProperty(window, 'localStorage', { configurable: true, get() { throw new Error('blocked'); } }); });
   const np = await nctx.newPage(); watch(np);
-  await np.goto(base + Q + 'seed=7');
+  await np.goto(base + Q + 'seed=7&flat=1');
   await np.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 30000 });
   const info = await np.evaluate(() => ({ can: DENG.canSave, msg: document.getElementById('slot-msg').textContent, slot: document.querySelector('#slots .slot-b').textContent }));
   await np.keyboard.press('Enter'); await np.waitForTimeout(300);
@@ -324,11 +325,55 @@ try {
   await nctx.close();
 } catch (e) { ok('存不了檔的情況', false, String(e && e.message || e)); }
 
+// ---------- 3D 的開始畫面 ----------
+try {
+  const tctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const tp = await tctx.newPage();
+  const errs3 = [];
+  tp.on('pageerror', (e) => errs3.push('pageerror: ' + e.message));
+  tp.on('console', (m) => { if (m.type() === 'error' && !/fonts\.g/.test(m.text())) errs3.push('console: ' + m.text()); });
+  await tp.goto(base + Q + 'seed=7&keep3d=1');
+  await tp.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 40000 });
+  const info = await tp.evaluate(() => ({ use3d: DENG.use3d, shown: !document.getElementById('world3d').classList.contains('hidden'), flatHidden: document.getElementById('world').classList.contains('hidden') }));
+  // 燈照路線等速走：用「走過的距離 ÷ 經過的時間」量（無頭瀏覽器是軟體算圖，一秒只有幾幀）
+  const s0 = await tp.evaluate(() => ({ t: performance.now(), x: DENG.g.p.x, y: DENG.g.p.y, s: DENG.tour.s }));
+  await tp.waitForTimeout(3000);
+  const s1 = await tp.evaluate(() => ({ t: performance.now(), x: DENG.g.p.x, y: DENG.g.p.y, s: DENG.tour.s, cam: window.RENDER3D.cam }));
+  const speed = (s1.s - s0.s) / ((s1.t - s0.t) / 1000);
+  await tp.screenshot({ path: path.join(out, '21-start-3d.png') });
+  // 無頭瀏覽器一秒只有四幀，每幀超過 0.25 秒的上限，所以量到的比 1.15 慢；真機要 20 幀以上才留在 3D，不會碰到上限
+  const onRoute = await tp.evaluate(() => { const q = TOUR.at(DENG.tour.s); return Math.hypot(q.x - DENG.g.p.x, q.y - DENG.g.p.y); });
+  ok('3D 開始畫面：用 3D 畫、燈沿著路線走、沒有報錯', info.use3d && info.shown && info.flatHidden && speed > 0.5 && speed < 1.3 && onRoute < 0.01 && s1.cam && errs3.length === 0, { info, speed: +speed.toFixed(2), onRoute, errs: errs3.slice(0, 3) });
+  await tctx.close();
+  // 跑不動 3D 的機器（無頭瀏覽器就是）：幾秒後自己換回 2D 長鏡頭，照樣能入宅
+  const sctx2 = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const sp2 = await sctx2.newPage(); watch(sp2);
+  await sp2.goto(base + Q + 'seed=7');
+  await sp2.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 40000 });
+  const first = await sp2.evaluate(() => DENG.use3d);
+  await sp2.waitForFunction(() => !DENG.use3d, null, { timeout: 20000 }).catch(() => {});
+  const fb = await sp2.evaluate(() => ({ use3d: DENG.use3d, flatShown: !document.getElementById('world').classList.contains('hidden'), q: window.RENDER3D.quality }));
+  await sp2.keyboard.press('Enter'); await sp2.waitForTimeout(300);
+  const started = await sp2.evaluate(() => DENG.running && DENG.g.state === 'play');
+  ok('跑不動 3D 的機器：自己換回 2D，照樣能入宅', first && !fb.use3d && fb.flatShown && started, { first, fb, started });
+  await sctx2.close();
+  // three.js 載不到：直接用 2D，不報錯
+  const bctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  await bctx.route('**/three.min.js', (r) => r.abort());
+  const bp = await bctx.newPage();
+  const errsB = []; bp.on('pageerror', (e) => errsB.push(e.message));
+  await bp.goto(base + Q + 'seed=7');
+  await bp.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 40000 });
+  const nb = await bp.evaluate(() => ({ use3d: DENG.use3d, flatShown: !document.getElementById('world').classList.contains('hidden') }));
+  ok('three.js 載不到：直接用 2D、頁面不出錯', !nb.use3d && nb.flatShown && errsB.length === 0, { nb, errsB });
+  await bctx.close();
+} catch (e) { ok('3D 開始畫面', false, String(e && e.message || e)); }
+
 // 減少動態：照樣能玩、不報錯
 try {
   const rctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce' });
   const rp = await rctx.newPage(); watch(rp);
-  await rp.goto(base + Q + 'seed=7');
+  await rp.goto(base + Q + 'seed=7&flat=1');
   await rp.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 30000 });
   await rp.keyboard.press('Enter'); await rp.waitForTimeout(300);
   await rp.keyboard.down('KeyW'); await rp.waitForTimeout(400); await rp.keyboard.up('KeyW');
@@ -339,7 +384,7 @@ try {
 // 手機寬度：開始畫面放得下
 const mctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 const mp = await mctx.newPage(); watch(mp);
-await mp.goto(base + (base.includes('?') ? '&' : '?') + 'seed=7');
+await mp.goto(base + (base.includes('?') ? '&' : '?') + 'seed=7&flat=1');
 await mp.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 30000 });
 await mp.screenshot({ path: path.join(out, '16-phone-start.png') });
 const over = await mp.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);

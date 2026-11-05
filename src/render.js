@@ -14,7 +14,16 @@
   function rnd(seed) { let a = seed; return () => { a = (a * 1103515245 + 12345) & 0x7fffffff; return a / 0x7fffffff; }; }
 
   // ---------- 靜態底圖：地板、牆、紙屏、井、廊口、房名 ----------
-  function buildArt(m) {
+  function drawDoors(x, m) {
+    // 廊口：兩側門框
+    for (const d of m.doors) {
+      const px = d.x * TS, py = d.y * TS, vert = m.at(d.x, d.y - 1) === T.WALL || m.at(d.x, d.y - 1) === T.SCREEN;
+      x.fillStyle = 'rgba(70,45,25,.55)';
+      if (vert) { x.fillRect(px, py + 2, TS, 3); x.fillRect(px, py + TS - 5, TS, 3); }
+      else { x.fillRect(px + 2, py, 3, TS); x.fillRect(px + TS - 5, py, 3, TS); }
+    }
+  }
+  function buildArt(m, floorOnly) {   // floorOnly：給 3D 當地板，不畫牆、紙屏、井（3D 裡它們是立起來的東西）
     const c = document.createElement('canvas');
     c.width = m.W * TS; c.height = m.H * TS;
     const x = c.getContext('2d'), r = rnd(1016);
@@ -41,6 +50,7 @@
       x.font = `${Math.round(TS * 1.6)}px ${FONT}`; x.fillStyle = 'rgba(40,30,20,.075)';
       x.fillText(name, ((x0 + x1 + 1) / 2) * TS, ((y0 + y1 + 1) / 2) * TS);
     }
+    if (floorOnly) { drawDoors(x, m); return c; }
     // 牆：墨塊加毛邊
     for (let ty = 0; ty < m.H; ty++) for (let tx = 0; tx < m.W; tx++) {
       if (m.at(tx, ty) !== T.WALL) continue;
@@ -77,13 +87,7 @@
       x.fillStyle = 'rgba(12,10,9,1)'; x.beginPath(); x.arc(cx, cy, TS * 0.62, 0, Math.PI * 2); x.fill();
       x.font = `${Math.round(TS * 1.2)}px ${FONT}`; x.fillStyle = 'rgba(235,224,198,.55)'; x.fillText('井', cx, cy + 2);
     }
-    // 廊口：兩側門框
-    for (const d of m.doors) {
-      const px = d.x * TS, py = d.y * TS, vert = m.at(d.x, d.y - 1) === T.WALL || m.at(d.x, d.y - 1) === T.SCREEN;
-      x.fillStyle = 'rgba(70,45,25,.55)';
-      if (vert) { x.fillRect(px, py + 2, TS, 3); x.fillRect(px, py + TS - 5, TS, 3); }
-      else { x.fillRect(px + 2, py, 3, TS); x.fillRect(px + TS - 5, py, 3, TS); }
-    }
+    drawDoors(x, m);
     return c;
   }
 
@@ -521,5 +525,6 @@
     motes = []; wisps = []; lastPo = {}; shake = 0;
   }
   function toWorld(px, py) { return { x: (px - cv.width / 2) / cam.s + cam.x, y: (py - cv.height / 2) / cam.s + cam.y }; }
-  root.RENDER = { init, setGame, frame, event, minimap, toWorld, FONT, cam, rebuild() { art = null; if (g) art = buildArt(g.m); } };
+  let floorArt = null;
+  root.RENDER = { init, setGame, frame, event, minimap, toWorld, FONT, cam, rebuild() { art = null; floorArt = null; if (g) art = buildArt(g.m); }, floorCanvas(m) { return floorArt || (floorArt = buildArt(m, true)); } };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

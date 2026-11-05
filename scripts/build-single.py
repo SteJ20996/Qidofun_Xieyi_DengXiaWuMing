@@ -13,7 +13,8 @@ head = html[html.index('<head>') + 6: html.index('</head>')]
 body = html[html.index('<body>') + 6: html.index('</body>')]
 
 font_links = '\n'.join(l.strip() for l in head.splitlines() if 'fonts.g' in l)
-body = re.sub(r'<script src="([^"]+)"></script>',
+# 本機的腳本內嵌；外面的（cdnjs 的 three.js）照樣留著連結
+body = re.sub(r'<script src="((?!https?://)[^"]+)"></script>',
               lambda m: '<script>\n' + (root / m.group(1)).read_text(encoding='utf-8') + '\n</script>', body)
 fragment = ('<title>燈下無明</title>\n<meta name="claude:viewport-fit-sides" content="cover">\n' + font_links +
             '\n<style>\n' + css + '\n</style>\n' + body.strip() + '\n')
