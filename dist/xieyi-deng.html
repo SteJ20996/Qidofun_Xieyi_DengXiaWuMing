@@ -191,7 +191,20 @@ table.stats td:first-child { text-align: right; color: var(--ink-2); }
 /* 開始畫面：選單靠左，右邊看得到宅子 */
 #start.overlay { background: linear-gradient(90deg, rgba(8,7,6,.9) 0%, rgba(8,7,6,.62) 50%, rgba(8,7,6,.1) 100%); justify-items: start; }
 #start .startpanel { margin-left: 2vw; max-width: min(640px, 94vw); background: rgba(239,229,207,.96); }
-@media (max-width: 980px) { #start.overlay { background: rgba(8,7,6,.6); justify-items: center; } #start .startpanel { margin-left: 0; } }
+/* 窄螢幕（手機、claude.ai 的側欄）：上面留給宅子的長鏡頭，選單從四成高的地方開始，往下捲 */
+@media (max-width: 980px) {
+  #start.overlay { background: linear-gradient(180deg, rgba(8,7,6,0) 0, rgba(8,7,6,0) 30vh, rgba(8,7,6,.66) 44vh); justify-items: center; align-items: start; padding-top: 40vh; }
+  #start .startpanel { margin-left: 0; }
+}
+/* 右上角：開始畫面用立體還是平面 */
+.viewmode { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; align-items: flex-end; gap: 6px; z-index: 6; font-family: var(--font); }
+.vm-row { display: flex; align-items: stretch; background: rgba(239,229,207,.92); border: 1.5px solid var(--ink); border-radius: 4px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.35); }
+.vm-lab { font-size: 13px; color: var(--ink-2); padding: 5px 8px 0; }
+.vm-row button { font: 15px var(--font); padding: 4px 13px; border: 0; border-left: 1px solid rgba(28,26,23,.35); background: transparent; color: var(--ink); cursor: pointer; }
+.vm-row button.on { background: var(--ink); color: var(--paper); }
+.vm-row button:disabled { opacity: .4; cursor: not-allowed; }
+.vm-note { max-width: 300px; font-size: 13px; line-height: 1.5; background: rgba(239,229,207,.94); color: var(--red-2); padding: 4px 9px; border-radius: 4px; text-align: left; box-shadow: 0 2px 10px rgba(0,0,0,.35); }
+.vm-note:empty { display: none; }
 h1 span { display: inline-block; animation: inkin 1.1s cubic-bezier(.2,.7,.3,1) both; }
 h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-delay: .28s; } h1 span:nth-child(3) { animation-delay: .46s; } h1 span:nth-child(4) { animation-delay: .64s; }
 @keyframes inkin { from { opacity: 0; filter: blur(9px); transform: translateY(8px) scale(1.12); } 60% { opacity: 1; } to { opacity: 1; filter: none; transform: none; } }
@@ -308,6 +321,10 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
 </div>
 
 <div id="start" class="overlay">
+  <div id="viewmode" class="viewmode">
+    <div class="vm-row" role="group" aria-label="開始畫面用立體還是平面"><span class="vm-lab">開始畫面</span><button id="vm-3d" title="立體的長鏡頭（three.js）">立體</button><button id="vm-2d" title="平面的長鏡頭">平面</button></div>
+    <div id="vm-note" class="vm-note" aria-live="polite"></div>
+  </div>
   <div class="panel startpanel">
     <div class="titlerow">
       <div class="titleseal"><span>燈</span><span>下</span><span>無</span><span>明</span></div>
@@ -1642,10 +1659,11 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     cam.s = s;
     // 開始畫面：鏡頭跟得慢一點、往燈要去的方向多看一點，選單在左時燈放在右半邊；一路平順，不像剪接
     const k = 1 - Math.pow(w.attract ? 0.12 : 0.0005, dt);
-    const offX = w.attract && cv.clientWidth > 980 ? -0.2 * W / s : 0;
+    // 窄螢幕選單在下面：燈放在畫面上面五分之一
+    const wide = cv.clientWidth > 980, offX = w.attract && wide ? -0.2 * W / s : 0, offY = w.attract && !wide ? 0.29 * H / s : 0;
     const lx = w.attract && w.lead ? w.lead.dx * 1.4 : 0, ly = w.attract && w.lead ? w.lead.dy * 1.4 : 0;
-    cam.x += (p.x + lx + offX - cam.x) * k; cam.y += (p.y + ly - cam.y) * k;
-    if (w.snap) { cam.x = p.x + lx + offX; cam.y = p.y + ly; }
+    cam.x += (p.x + lx + offX - cam.x) * k; cam.y += (p.y + ly + offY - cam.y) * k;
+    if (w.snap) { cam.x = p.x + lx + offX; cam.y = p.y + ly + offY; }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = C.ink; ctx.fillRect(0, 0, W, H);
     const v = g.view(13);
@@ -2178,13 +2196,22 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   let THREE, renderer, scene, camera, cv, g = null, t = 0;
   let lantern, lanternLight, lanternGlow, candles = [], poSprites = [], screens = [], doors = null, motes, moteData = [];
   let cam = null;   // 鏡頭的位置、看的點、朝向（平滑跟著燈）
-  // 畫質：0 全開（燈投影子）、1 關影子降解析度、2 太慢就回 2D（ui 看 failed）。網址 ?keep3d=1 不自動降（測試用）
-  const perf = { q: 0, avg: 1 / 60, last: 0, since: 0, failed: false, keep: /[?&]keep3d=1/.test(root.location ? location.search : '') };
+  // 畫質：0 全開（燈投影子）、1 關影子降解析度、2 太慢就回 2D（ui 看 failed）。
+  // keep：不自動降（玩家在開始畫面按了「立體」，或網址 ?keep3d=1）。
+  const perf = { q: 0, ft: [], sum: 0, last: 0, warm: 0, slow: 0, slowSum: 0, fps: 0, failed: false, keep: /[?&]keep3d=1/.test(root.location ? location.search : '') };
   const CAM = { back: 4.8, up: 7.0, ahead: 1.6 };
 
+  // 能不能跑 3D：只試一次（每試一次就多開一個 WebGL，開太多瀏覽器會把舊的關掉），試完就放掉
+  let okCache = null;
   function ok() {
     if (!root.THREE) return false;
-    try { const c = document.createElement('canvas'); return !!(c.getContext('webgl') || c.getContext('experimental-webgl')); } catch (e) { return false; }
+    if (okCache !== null) return okCache;
+    try {
+      const c = document.createElement('canvas'), gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+      okCache = !!gl;
+      const lose = gl && gl.getExtension('WEBGL_lose_context'); if (lose) lose.loseContext();
+    } catch (e) { okCache = false; }
+    return okCache;
   }
 
   // ---------- 字與紙的貼圖 ----------
@@ -2223,7 +2250,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   function init(canvas) {
     THREE = root.THREE; cv = canvas;
     renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
-    renderer.setPixelRatio(Math.min(1.75, root.devicePixelRatio || 1));
+    renderer.setPixelRatio(Math.min(1.5, root.devicePixelRatio || 1));
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputEncoding = THREE.sRGBEncoding;
     camera = new THREE.PerspectiveCamera(42, 1, 0.1, 90);
@@ -2234,8 +2261,8 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     const w = cv.clientWidth || innerWidth, h = cv.clientHeight || innerHeight;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
-    // 選單在左時，把燈放在右半邊（和 2D 的開始畫面一樣）
-    if (w > 980) camera.setViewOffset(w, h, -w * 0.18, 0, w, h); else camera.clearViewOffset();
+    // 選單在左時，把燈放在右半邊；窄螢幕選單在下面，把燈放在上面五分之一（和 2D 的開始畫面一樣）
+    if (w > 980) camera.setViewOffset(w, h, -w * 0.18, 0, w, h); else camera.setViewOffset(w, h, 0, h * 0.29, w, h);
     camera.updateProjectionMatrix();
   }
 
@@ -2253,7 +2280,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   }
   function setGame(game) {
     if (scene) drop(scene);
-    perf.last = 0;   // 玩的時候 3D 沒有在畫：回來的第一幀不要算成一幀很慢
+    restartPerf();   // 玩的時候 3D 沒有在畫：幀率從頭量
     g = game; candles = []; poSprites = []; screens = []; doors = null; cam = null;
     const m = g.m, W = m.W, H = m.H;
     scene = new THREE.Scene();
@@ -2409,18 +2436,43 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     renderer.render(scene, camera);
     watchPerf();
   }
-  // 太慢就降：先關影子、降解析度；還是太慢就請 ui 換回 2D，免得一頓一頓的又像剪接
+  // 太慢就降：先關影子、降解析度；還是太慢就請 ui 換回 2D，免得一頓一頓的又像剪接。
+  // 量法（2026-11-05 改，擁有者在自己的電腦上沒看到 3D）：
+  // - 先熱身一秒半不算（載貼圖、編譯著色器時會卡幾幀）；
+  // - 視窗在背景、或某一幀超過四分之一秒（卡一下、分頁被暫停），那一幀不算；連續十二幀都這樣，才算真的跑不動；
+  // - 收滿兩秒（至少十幀）才判斷一次，看的是中位數，偶爾卡一下不會被當成慢。
+  function restartPerf(warm) { perf.ft = []; perf.sum = 0; perf.slow = 0; perf.slowSum = 0; perf.last = 0; perf.warm = warm || 0; }
+  function downgrade() {
+    if (perf.q === 0) { perf.q = 1; if (lanternLight) lanternLight.castShadow = false; renderer.setPixelRatio(1); resize(); restartPerf(1.0); }
+    else { perf.q = 2; perf.failed = true; }
+  }
   function watchPerf() {
-    const now = performance.now();
-    if (perf.last) { const d = Math.min(0.5, (now - perf.last) / 1000); perf.avg += (d - perf.avg) * 0.05; perf.since += d; }
+    const now = performance.now(), d = perf.last ? (now - perf.last) / 1000 : 0;
     perf.last = now;
-    if (perf.keep || perf.since < 2.5) return;
-    const fps = 1 / perf.avg;
-    if (perf.q === 0 && fps < 30) { perf.q = 1; lanternLight.castShadow = false; renderer.setPixelRatio(1); resize(); perf.since = 0; }
-    else if (perf.q === 1 && fps < 20) { perf.q = 2; perf.failed = true; }
+    if (!d || perf.keep || perf.failed) return;
+    if (root.document && document.hidden) return;
+    if (perf.warm < 1.5) { perf.warm += Math.min(d, 0.1); return; }
+    if (d > 0.25) {
+      perf.slow++; perf.slowSum += d;
+      if (perf.slow >= 12) { perf.fps = perf.slow / perf.slowSum; downgrade(); }
+      return;
+    }
+    perf.slow = 0; perf.slowSum = 0;
+    perf.ft.push(d); perf.sum += d;
+    if (perf.ft.length < 10 || (perf.sum < 2 && perf.ft.length < 120)) return;
+    const sorted = perf.ft.slice().sort((a, b) => a - b);
+    perf.fps = 1 / sorted[sorted.length >> 1];
+    perf.ft = []; perf.sum = 0;
+    if ((perf.q === 0 && perf.fps < 30) || (perf.q === 1 && perf.fps < 20)) downgrade();
+  }
+  // 玩家按了「立體」：不再自動降；之前降到回 2D 的，改用關影子的那一級再試
+  function force() {
+    perf.keep = true;
+    if (perf.failed) { perf.failed = false; perf.q = 1; if (lanternLight) lanternLight.castShadow = false; if (renderer) { renderer.setPixelRatio(1); resize(); } }
+    restartPerf();
   }
 
-  root.RENDER3D = { ok, init, setGame, frame, resize, get cam() { return cam; }, get quality() { return perf.q; }, get failed() { return perf.failed; } };
+  root.RENDER3D = { ok, init, setGame, frame, resize, force, get cam() { return cam; }, get quality() { return perf.q; }, get failed() { return perf.failed; }, get fps() { return perf.fps; }, get keep() { return perf.keep; } };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
 </script>
@@ -2813,7 +2865,43 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     g = E.create({ seed: seedFromUrl() }); g.attract = true;
     const q = window.TOUR.at(tour.s); g.tp(q.x, q.y); tourDir = { dx: q.dx, dy: q.dy };
     window.DENG.g = g; RD.setGame(g); g.drain(); snap = true;
-    if (use3d && !RENDER3D.failed) { RENDER3D.setGame(g); $('world3d').classList.remove('hidden'); cv.classList.add('hidden'); }
+    if (use3d && !RENDER3D.failed) { RENDER3D.setGame(g); r3game = g; $('world3d').classList.remove('hidden'); cv.classList.add('hidden'); }
+  }
+
+  // ---------- 開始畫面用立體還是平面（擁有者 2026-11-05：「我沒看到3d版的呢」） ----------
+  // 右上角「立體｜平面」：看得到現在用哪一種；自己換成平面時說原因；按「立體」再試就不再自動換。
+  // 玩家按過的選擇記在 xieyi.deng.view（'3d'／'2d'）。網址 ?flat=1 只管這一次。
+  const FLAT_URL = /[?&]flat=1/.test(location.search);
+  let r3ready = false, r3game = null, viewWhy = FLAT_URL || lsGet('xieyi.deng.view') === '2d' ? '' : 'loading';
+  const can3d = () => !!(RENDER3D && RENDER3D.ok());
+  function set3d(on, save, force) {
+    if (on) {
+      if (!can3d()) { renderView(); return false; }
+      try {
+        if (!r3ready) { RENDER3D.init($('world3d')); r3ready = true; }
+        if (force) RENDER3D.force();
+        if (r3game !== g && g.attract) { RENDER3D.setGame(g); r3game = g; }
+      } catch (e) { use3d = false; viewWhy = 'broken'; renderView(); return false; }
+      use3d = true; viewWhy = '';
+      if (!running) { $('world3d').classList.remove('hidden'); cv.classList.add('hidden'); RENDER3D.resize(); }
+    } else {
+      use3d = false;
+      $('world3d').classList.add('hidden'); cv.classList.remove('hidden'); snap = true;
+    }
+    if (save) lsSet('xieyi.deng.view', on ? '3d' : '2d');
+    renderView();
+    return true;
+  }
+  function renderView() {
+    const can = can3d();
+    $('vm-3d').classList.toggle('on', use3d); $('vm-2d').classList.toggle('on', !use3d);
+    $('vm-3d').disabled = !can;
+    const fps = RENDER3D && RENDER3D.fps ? Math.round(RENDER3D.fps) : 0;
+    $('vm-note').textContent = viewWhy === 'loading' && can ? '立體的宅子載入中……'
+      : !window.THREE ? '立體要用的 three.js 沒載到，先用平面。'
+      : !can || viewWhy === 'broken' ? '這個瀏覽器跑不了立體（WebGL 沒開），先用平面。'
+      : viewWhy === 'slow' ? `這台跑立體太慢${fps ? `（每秒約 ${fps} 幀）` : ''}，自動換成平面。按「立體」再試，就不會再自動換。`
+      : '';
   }
   // 路線在 src/tour.js：一條平滑閉合的曲線，等速走，不停不頓，看起來是一個長鏡頭
   const tour = { s: 0 };
@@ -2838,7 +2926,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
         handle(g.drain());
         mood(dt);
       } else if (onStart) { tourStep(dt); g.advance(dt, {}); g.drain(); }
-      if (onStart && use3d && RENDER3D.failed) { use3d = false; $('world3d').classList.add('hidden'); cv.classList.remove('hidden'); snap = true; }   // 這台跑不動 3D：回 2D
+      if (onStart && use3d && RENDER3D.failed) { set3d(false); viewWhy = 'slow'; renderView(); }   // 這台跑不動 3D：回 2D，右上角說原因
       if (onStart && use3d) RENDER3D.frame(dt, { lead: tourDir, snap });
       else RD.frame(running && !paused || onStart ? dt : 0, { snap, attract: onStart, lead: onStart ? tourDir : null, autoAim: aimAuto });
       snap = false;
@@ -2869,21 +2957,22 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   const muteBtns = () => ['btn-mute', 'btn-mute2'].forEach((id) => { $(id).classList.toggle('off', SFX.muted); $(id).textContent = SFX.muted ? '音效關' : '音效'; });
   ['btn-mute', 'btn-mute2'].forEach((id) => $(id).addEventListener('click', (ev) => { SFX.unlock(); SFX.toggle(); muteBtns(); ev.currentTarget.blur(); }));
   muteBtns(); showBest();
+  ['vm-3d', 'vm-2d'].forEach((id) => $(id).addEventListener('click', (ev) => { ev.currentTarget.blur(); if (id === 'vm-3d') set3d(true, true, true); else { viewWhy = ''; set3d(false, true); } }));
   if (window.matchMedia && matchMedia('(pointer: coarse)').matches && !matchMedia('(pointer: fine)').matches) $('touchnote').textContent = '這一版是試做，只做了鍵盤與滑鼠；手機上還不能玩。';
 
   // 先在背景擺好宅子（開始畫面後面看得到一點點）
-  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, continueGame, setPause, toTitle, saveAs, readSlot, canSave, snap() { snap = true; }, tour, get use3d() { return use3d; }, get slot() { return slot; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
+  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, continueGame, setPause, toTitle, saveAs, readSlot, canSave, snap() { snap = true; }, tour, get use3d() { return use3d; }, set3d, get slot() { return slot; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
   showcase();
-  renderSlots();
+  renderSlots(); renderView();
   if (!canSave) $('slot-msg').textContent = '這個瀏覽器存不了檔（例如無痕視窗）：照樣能玩，只是關掉就沒了。';
   const fontReady = document.fonts && document.fonts.load ? document.fonts.load('32px "LXGW WenKai TC"', '燈下無明魄噬人火封') : Promise.resolve();
   fontReady.catch(() => {}).then(() => {
     RD.rebuild();
-    // 開始畫面的 3D 長鏡頭：three.js 載到了、瀏覽器能 3D、網址沒有 ?flat=1 才用；不然照舊 2D
-    if (!/[?&]flat=1/.test(location.search) && RENDER3D && RENDER3D.ok() && !running) {
-      try { RENDER3D.init($('world3d')); RENDER3D.setGame(g); use3d = true; $('world3d').classList.remove('hidden'); cv.classList.add('hidden'); snap = true; }
-      catch (e) { use3d = false; $('world3d').classList.add('hidden'); cv.classList.remove('hidden'); }
-    }
+    // 開始畫面的 3D 長鏡頭：three.js 載到了、瀏覽器能 3D、網址沒有 ?flat=1、玩家沒選平面才用；不然照舊 2D
+    const pref = lsGet('xieyi.deng.view');
+    if (!FLAT_URL && pref !== '2d' && !running) set3d(true, false, pref === '3d');
+    if (viewWhy === 'loading') viewWhy = '';
+    renderView();
     window.DENG.ready = true;
   });
   requestAnimationFrame(loop);

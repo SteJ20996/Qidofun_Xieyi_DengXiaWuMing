@@ -10,13 +10,22 @@
   let THREE, renderer, scene, camera, cv, g = null, t = 0;
   let lantern, lanternLight, lanternGlow, candles = [], poSprites = [], screens = [], doors = null, motes, moteData = [];
   let cam = null;   // 鏡頭的位置、看的點、朝向（平滑跟著燈）
-  // 畫質：0 全開（燈投影子）、1 關影子降解析度、2 太慢就回 2D（ui 看 failed）。網址 ?keep3d=1 不自動降（測試用）
-  const perf = { q: 0, avg: 1 / 60, last: 0, since: 0, failed: false, keep: /[?&]keep3d=1/.test(root.location ? location.search : '') };
+  // 畫質：0 全開（燈投影子）、1 關影子降解析度、2 太慢就回 2D（ui 看 failed）。
+  // keep：不自動降（玩家在開始畫面按了「立體」，或網址 ?keep3d=1）。
+  const perf = { q: 0, ft: [], sum: 0, last: 0, warm: 0, slow: 0, slowSum: 0, fps: 0, failed: false, keep: /[?&]keep3d=1/.test(root.location ? location.search : '') };
   const CAM = { back: 4.8, up: 7.0, ahead: 1.6 };
 
+  // 能不能跑 3D：只試一次（每試一次就多開一個 WebGL，開太多瀏覽器會把舊的關掉），試完就放掉
+  let okCache = null;
   function ok() {
     if (!root.THREE) return false;
-    try { const c = document.createElement('canvas'); return !!(c.getContext('webgl') || c.getContext('experimental-webgl')); } catch (e) { return false; }
+    if (okCache !== null) return okCache;
+    try {
+      const c = document.createElement('canvas'), gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+      okCache = !!gl;
+      const lose = gl && gl.getExtension('WEBGL_lose_context'); if (lose) lose.loseContext();
+    } catch (e) { okCache = false; }
+    return okCache;
   }
 
   // ---------- 字與紙的貼圖 ----------
@@ -55,7 +64,7 @@
   function init(canvas) {
     THREE = root.THREE; cv = canvas;
     renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
-    renderer.setPixelRatio(Math.min(1.75, root.devicePixelRatio || 1));
+    renderer.setPixelRatio(Math.min(1.5, root.devicePixelRatio || 1));
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputEncoding = THREE.sRGBEncoding;
     camera = new THREE.PerspectiveCamera(42, 1, 0.1, 90);
@@ -66,8 +75,8 @@
     const w = cv.clientWidth || innerWidth, h = cv.clientHeight || innerHeight;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
-    // 選單在左時，把燈放在右半邊（和 2D 的開始畫面一樣）
-    if (w > 980) camera.setViewOffset(w, h, -w * 0.18, 0, w, h); else camera.clearViewOffset();
+    // 選單在左時，把燈放在右半邊；窄螢幕選單在下面，把燈放在上面五分之一（和 2D 的開始畫面一樣）
+    if (w > 980) camera.setViewOffset(w, h, -w * 0.18, 0, w, h); else camera.setViewOffset(w, h, 0, h * 0.29, w, h);
     camera.updateProjectionMatrix();
   }
 
@@ -85,7 +94,7 @@
   }
   function setGame(game) {
     if (scene) drop(scene);
-    perf.last = 0;   // 玩的時候 3D 沒有在畫：回來的第一幀不要算成一幀很慢
+    restartPerf();   // 玩的時候 3D 沒有在畫：幀率從頭量
     g = game; candles = []; poSprites = []; screens = []; doors = null; cam = null;
     const m = g.m, W = m.W, H = m.H;
     scene = new THREE.Scene();
@@ -241,16 +250,41 @@
     renderer.render(scene, camera);
     watchPerf();
   }
-  // 太慢就降：先關影子、降解析度；還是太慢就請 ui 換回 2D，免得一頓一頓的又像剪接
+  // 太慢就降：先關影子、降解析度；還是太慢就請 ui 換回 2D，免得一頓一頓的又像剪接。
+  // 量法（2026-11-05 改，擁有者在自己的電腦上沒看到 3D）：
+  // - 先熱身一秒半不算（載貼圖、編譯著色器時會卡幾幀）；
+  // - 視窗在背景、或某一幀超過四分之一秒（卡一下、分頁被暫停），那一幀不算；連續十二幀都這樣，才算真的跑不動；
+  // - 收滿兩秒（至少十幀）才判斷一次，看的是中位數，偶爾卡一下不會被當成慢。
+  function restartPerf(warm) { perf.ft = []; perf.sum = 0; perf.slow = 0; perf.slowSum = 0; perf.last = 0; perf.warm = warm || 0; }
+  function downgrade() {
+    if (perf.q === 0) { perf.q = 1; if (lanternLight) lanternLight.castShadow = false; renderer.setPixelRatio(1); resize(); restartPerf(1.0); }
+    else { perf.q = 2; perf.failed = true; }
+  }
   function watchPerf() {
-    const now = performance.now();
-    if (perf.last) { const d = Math.min(0.5, (now - perf.last) / 1000); perf.avg += (d - perf.avg) * 0.05; perf.since += d; }
+    const now = performance.now(), d = perf.last ? (now - perf.last) / 1000 : 0;
     perf.last = now;
-    if (perf.keep || perf.since < 2.5) return;
-    const fps = 1 / perf.avg;
-    if (perf.q === 0 && fps < 30) { perf.q = 1; lanternLight.castShadow = false; renderer.setPixelRatio(1); resize(); perf.since = 0; }
-    else if (perf.q === 1 && fps < 20) { perf.q = 2; perf.failed = true; }
+    if (!d || perf.keep || perf.failed) return;
+    if (root.document && document.hidden) return;
+    if (perf.warm < 1.5) { perf.warm += Math.min(d, 0.1); return; }
+    if (d > 0.25) {
+      perf.slow++; perf.slowSum += d;
+      if (perf.slow >= 12) { perf.fps = perf.slow / perf.slowSum; downgrade(); }
+      return;
+    }
+    perf.slow = 0; perf.slowSum = 0;
+    perf.ft.push(d); perf.sum += d;
+    if (perf.ft.length < 10 || (perf.sum < 2 && perf.ft.length < 120)) return;
+    const sorted = perf.ft.slice().sort((a, b) => a - b);
+    perf.fps = 1 / sorted[sorted.length >> 1];
+    perf.ft = []; perf.sum = 0;
+    if ((perf.q === 0 && perf.fps < 30) || (perf.q === 1 && perf.fps < 20)) downgrade();
+  }
+  // 玩家按了「立體」：不再自動降；之前降到回 2D 的，改用關影子的那一級再試
+  function force() {
+    perf.keep = true;
+    if (perf.failed) { perf.failed = false; perf.q = 1; if (lanternLight) lanternLight.castShadow = false; if (renderer) { renderer.setPixelRatio(1); resize(); } }
+    restartPerf();
   }
 
-  root.RENDER3D = { ok, init, setGame, frame, resize, get cam() { return cam; }, get quality() { return perf.q; }, get failed() { return perf.failed; } };
+  root.RENDER3D = { ok, init, setGame, frame, resize, force, get cam() { return cam; }, get quality() { return perf.q; }, get failed() { return perf.failed; }, get fps() { return perf.fps; }, get keep() { return perf.keep; } };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

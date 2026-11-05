@@ -151,10 +151,11 @@
     cam.s = s;
     // 開始畫面：鏡頭跟得慢一點、往燈要去的方向多看一點，選單在左時燈放在右半邊；一路平順，不像剪接
     const k = 1 - Math.pow(w.attract ? 0.12 : 0.0005, dt);
-    const offX = w.attract && cv.clientWidth > 980 ? -0.2 * W / s : 0;
+    // 窄螢幕選單在下面：燈放在畫面上面五分之一
+    const wide = cv.clientWidth > 980, offX = w.attract && wide ? -0.2 * W / s : 0, offY = w.attract && !wide ? 0.29 * H / s : 0;
     const lx = w.attract && w.lead ? w.lead.dx * 1.4 : 0, ly = w.attract && w.lead ? w.lead.dy * 1.4 : 0;
-    cam.x += (p.x + lx + offX - cam.x) * k; cam.y += (p.y + ly - cam.y) * k;
-    if (w.snap) { cam.x = p.x + lx + offX; cam.y = p.y + ly; }
+    cam.x += (p.x + lx + offX - cam.x) * k; cam.y += (p.y + ly + offY - cam.y) * k;
+    if (w.snap) { cam.x = p.x + lx + offX; cam.y = p.y + ly + offY; }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = C.ink; ctx.fillRect(0, 0, W, H);
     const v = g.view(13);

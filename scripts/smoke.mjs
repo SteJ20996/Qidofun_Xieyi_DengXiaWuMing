@@ -350,7 +350,7 @@ try {
   tp.on('console', (m) => { if (m.type() === 'error' && !/fonts\.g/.test(m.text())) errs3.push('console: ' + m.text()); });
   await tp.goto(base + Q + 'seed=7&keep3d=1');
   await tp.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 40000 });
-  const info = await tp.evaluate(() => ({ use3d: DENG.use3d, shown: !document.getElementById('world3d').classList.contains('hidden'), flatHidden: document.getElementById('world').classList.contains('hidden') }));
+  const info = await tp.evaluate(() => ({ use3d: DENG.use3d, shown: !document.getElementById('world3d').classList.contains('hidden'), flatHidden: document.getElementById('world').classList.contains('hidden'), btn: document.getElementById('vm-3d').classList.contains('on'), note: document.getElementById('vm-note').textContent }));
   // 燈照路線等速走：用「走過的距離 ÷ 經過的時間」量（無頭瀏覽器是軟體算圖，一秒只有幾幀）
   const s0 = await tp.evaluate(() => ({ t: performance.now(), x: DENG.g.p.x, y: DENG.g.p.y, s: DENG.tour.s }));
   await tp.waitForTimeout(3000);
@@ -359,7 +359,7 @@ try {
   await tp.screenshot({ path: path.join(out, '21-start-3d.png') });
   // 無頭瀏覽器一秒只有四幀，每幀超過 0.25 秒的上限，所以量到的比 1.15 慢；真機要 20 幀以上才留在 3D，不會碰到上限
   const onRoute = await tp.evaluate(() => { const q = TOUR.at(DENG.tour.s); return Math.hypot(q.x - DENG.g.p.x, q.y - DENG.g.p.y); });
-  ok('3D 開始畫面：用 3D 畫、燈沿著路線走、沒有報錯', info.use3d && info.shown && info.flatHidden && speed > 0.5 && speed < 1.3 && onRoute < 0.01 && s1.cam && errs3.length === 0, { info, speed: +speed.toFixed(2), onRoute, errs: errs3.slice(0, 3) });
+  ok('3D 開始畫面：用 3D 畫、右上角亮「立體」、燈沿著路線走、沒有報錯', info.use3d && info.shown && info.flatHidden && info.btn && info.note === '' && speed > 0.5 && speed < 1.3 && onRoute < 0.01 && s1.cam && errs3.length === 0, { info, speed: +speed.toFixed(2), onRoute, errs: errs3.slice(0, 3) });
   // 入宅（2D）再回主頁：開始畫面換回 3D，燈從剛才的地方接著走
   await tp.keyboard.press('Enter'); await tp.waitForTimeout(500);
   const in2d = await tp.evaluate(() => ({ running: DENG.running, flat: !document.getElementById('world').classList.contains('hidden'), d3: document.getElementById('world3d').classList.contains('hidden') }));
@@ -376,11 +376,23 @@ try {
   await sp2.goto(base + Q + 'seed=7');
   await sp2.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 40000 });
   const first = await sp2.evaluate(() => DENG.use3d);
-  await sp2.waitForFunction(() => !DENG.use3d, null, { timeout: 20000 }).catch(() => {});
-  const fb = await sp2.evaluate(() => ({ use3d: DENG.use3d, flatShown: !document.getElementById('world').classList.contains('hidden'), q: window.RENDER3D.quality }));
+  await sp2.waitForFunction(() => !DENG.use3d, null, { timeout: 40000 }).catch(() => {});
+  const fb = await sp2.evaluate(() => ({ use3d: DENG.use3d, flatShown: !document.getElementById('world').classList.contains('hidden'), q: window.RENDER3D.quality, note: document.getElementById('vm-note').textContent, flatOn: document.getElementById('vm-2d').classList.contains('on') }));
+  await sp2.screenshot({ path: path.join(out, '24-fallback-note.png') });
+  ok('跑不動 3D 的機器：自己換回 2D，右上角說「太慢」', first && !fb.use3d && fb.flatShown && fb.flatOn && fb.note.includes('太慢'), { first, fb });
+  // 按「立體」再試：換回 3D，不再自動換；記住這個選擇
+  await sp2.click('#vm-3d'); await sp2.waitForTimeout(6000);
+  const forced = await sp2.evaluate(() => ({ use3d: DENG.use3d, shown: !document.getElementById('world3d').classList.contains('hidden'), keep: window.RENDER3D.keep, failed: window.RENDER3D.failed, pref: localStorage.getItem('xieyi.deng.view'), note: document.getElementById('vm-note').textContent }));
+  ok('按「立體」：換回 3D、六秒後還是 3D、記住選擇', forced.use3d && forced.shown && forced.keep && !forced.failed && forced.pref === '3d' && forced.note === '', forced);
+  await sp2.reload(); await sp2.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 40000 });
+  const again3 = await sp2.evaluate(() => ({ use3d: DENG.use3d, keep: window.RENDER3D.keep }));
+  // 按「平面」：換成 2D，重新整理後還是 2D、不出原因
+  await sp2.click('#vm-2d'); await sp2.waitForTimeout(300);
+  await sp2.reload(); await sp2.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 40000 });
+  const flat = await sp2.evaluate(() => ({ use3d: DENG.use3d, flatShown: !document.getElementById('world').classList.contains('hidden'), note: document.getElementById('vm-note').textContent, pref: localStorage.getItem('xieyi.deng.view') }));
   await sp2.keyboard.press('Enter'); await sp2.waitForTimeout(300);
   const started = await sp2.evaluate(() => DENG.running && DENG.g.state === 'play');
-  ok('跑不動 3D 的機器：自己換回 2D，照樣能入宅', first && !fb.use3d && fb.flatShown && started, { first, fb, started });
+  ok('重新整理照記住的選：立體就立體、平面就平面；照樣能入宅', again3.use3d && again3.keep && !flat.use3d && flat.flatShown && flat.note === '' && flat.pref === '2d' && started, { again3, flat, started });
   await sctx2.close();
   // three.js 載不到：直接用 2D，不報錯
   const bctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
@@ -389,9 +401,18 @@ try {
   const errsB = []; bp.on('pageerror', (e) => errsB.push(e.message));
   await bp.goto(base + Q + 'seed=7');
   await bp.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 40000 });
-  const nb = await bp.evaluate(() => ({ use3d: DENG.use3d, flatShown: !document.getElementById('world').classList.contains('hidden') }));
-  ok('three.js 載不到：直接用 2D、頁面不出錯', !nb.use3d && nb.flatShown && errsB.length === 0, { nb, errsB });
+  const nb = await bp.evaluate(() => ({ use3d: DENG.use3d, flatShown: !document.getElementById('world').classList.contains('hidden'), note: document.getElementById('vm-note').textContent, dis: document.getElementById('vm-3d').disabled }));
+  ok('three.js 載不到：直接用 2D、右上角說原因、頁面不出錯', !nb.use3d && nb.flatShown && nb.dis && nb.note.includes('three.js') && errsB.length === 0, { nb, errsB });
   await bctx.close();
+  // 窄螢幕（claude.ai 側欄、手機）：選單從四成高開始，上面看得到 3D 的宅子
+  const nctx3 = await browser.newContext({ viewport: { width: 760, height: 820 } });
+  const np3 = await nctx3.newPage();
+  await np3.goto(base + Q + 'seed=7&keep3d=1');
+  await np3.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 40000 }); await np3.waitForTimeout(2500);
+  const nar = await np3.evaluate(() => ({ use3d: DENG.use3d, top: Math.round(document.querySelector('#start .startpanel').getBoundingClientRect().top), h: innerHeight, vm: !!document.getElementById('viewmode').getBoundingClientRect().width }));
+  await np3.screenshot({ path: path.join(out, '25-narrow-3d.png') });
+  ok('窄螢幕：選單在下面，上面看得到 3D 的宅子', nar.use3d && nar.top > nar.h * 0.35 && nar.vm, nar);
+  await nctx3.close();
 } catch (e) { ok('3D 開始畫面', false, String(e && e.message || e)); }
 
 // 減少動態：照樣能玩、不報錯
