@@ -713,9 +713,9 @@
     else { p.adapt = Math.min(1, p.adapt + dt / R.LAMP.adaptT); if (p.adapt >= 1) hint(g, 'adapted'); }
     // 魄
     for (const e of g.pos) updatePo(g, e, dt);
-    // 人與魄不重疊：先推魄，推不動再推人
+    // 人與魄不重疊：先推魄，推不動再推人（開始畫面那盞燈不是人，不推、也不會撞醒睡著的魄）
     for (const e of g.pos) {
-      if (!tangible(e)) continue;
+      if (!tangible(e) || g.attract) continue;
       const d = dist(p, e), min = p.r + e.r;
       if (d >= min) continue;
       if (e.state === 'dormant') wake(g, e, p, 'touch');   // 撞到睡著的魄，它就醒了

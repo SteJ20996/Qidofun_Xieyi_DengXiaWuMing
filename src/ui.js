@@ -364,17 +364,15 @@
   }
 
   // ---------- 開始畫面的展示：一盞燈在宅子裡飄，魄照常巡行 ----------
-  const TOUR = [[19.5, 24.2], [19.5, 20.5], [19.5, 18.5], [19.5, 15.2], [17.2, 11.5], [14.5, 9.6], [14.5, 8.5], [14.5, 5.2], [11.0, 4.5], [9.5, 4.5], [5.5, 4.0], [4.5, 6.8], [4.5, 8.5], [4.5, 11.0], [7.0, 12.4], [7.0, 15.6], [4.5, 17.2], [4.5, 18.5], [4.5, 21.0], [7.5, 22.5], [9.5, 22.5], [13.0, 22.5]];
-  const tour = { seg: 0, f: 0 };
+  // 路線在 src/tour.js：一條平滑閉合的曲線，等速走，不停不頓，看起來是一個長鏡頭
+  const tour = { s: 0 };
+  let tourDir = { dx: 1, dy: 0 };
   function tourStep(dt) {
-    const a = TOUR[tour.seg], b = TOUR[(tour.seg + 1) % TOUR.length], L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
-    tour.f += (RD_SPEED * dt) / L;
-    if (tour.f >= 1) { tour.f = 0; tour.seg = (tour.seg + 1) % TOUR.length; }
-    const e = tour.f * tour.f * (3 - 2 * tour.f);   // 每段起止慢一點
-    g.tp(a[0] + (b[0] - a[0]) * e, a[1] + (b[1] - a[1]) * e);
+    tour.s += window.TOUR.SPEED * dt;
+    const q = window.TOUR.at(tour.s);
+    g.tp(q.x, q.y); tourDir = { dx: q.dx, dy: q.dy };
     g.p.lampOn = true;
   }
-  const RD_SPEED = 1.4;
 
   // ---------- 主迴圈 ----------
   let heartT = 0, creakT = 8;
@@ -389,7 +387,7 @@
         handle(g.drain());
         mood(dt);
       } else if (onStart) { tourStep(dt); g.advance(dt, {}); g.drain(); }
-      RD.frame(running && !paused || onStart ? dt : 0, { snap, attract: onStart, autoAim: aimAuto });
+      RD.frame(running && !paused || onStart ? dt : 0, { snap, attract: onStart, lead: onStart ? tourDir : null, autoAim: aimAuto });
       snap = false;
       if (!onStart) hud();
     }
@@ -420,8 +418,8 @@
   if (window.matchMedia && matchMedia('(pointer: coarse)').matches && !matchMedia('(pointer: fine)').matches) $('touchnote').textContent = '這一版是試做，只做了鍵盤與滑鼠；手機上還不能玩。';
 
   // 先在背景擺好宅子（開始畫面後面看得到一點點）
-  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, continueGame, setPause, saveAs, readSlot, canSave, snap() { snap = true; }, get slot() { return slot; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
-  g = E.create({ seed: seedFromUrl() }); g.attract = true; g.tp(TOUR[0][0], TOUR[0][1]); window.DENG.g = g; RD.setGame(g); g.drain();
+  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, continueGame, setPause, saveAs, readSlot, canSave, snap() { snap = true; }, tour, get slot() { return slot; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
+  g = E.create({ seed: seedFromUrl() }); g.attract = true; { const q = window.TOUR.at(0); g.tp(q.x, q.y); tourDir = { dx: q.dx, dy: q.dy }; } window.DENG.g = g; RD.setGame(g); g.drain(); snap = true;
   renderSlots();
   if (!canSave) $('slot-msg').textContent = '這個瀏覽器存不了檔（例如無痕視窗）：照樣能玩，只是關掉就沒了。';
   const fontReady = document.fonts && document.fonts.load ? document.fonts.load('32px "LXGW WenKai TC"', '燈下無明魄噬人火封') : Promise.resolve();

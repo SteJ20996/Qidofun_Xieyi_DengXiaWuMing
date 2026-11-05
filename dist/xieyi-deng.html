@@ -1224,9 +1224,9 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     else { p.adapt = Math.min(1, p.adapt + dt / R.LAMP.adaptT); if (p.adapt >= 1) hint(g, 'adapted'); }
     // 魄
     for (const e of g.pos) updatePo(g, e, dt);
-    // 人與魄不重疊：先推魄，推不動再推人
+    // 人與魄不重疊：先推魄，推不動再推人（開始畫面那盞燈不是人，不推、也不會撞醒睡著的魄）
     for (const e of g.pos) {
-      if (!tangible(e)) continue;
+      if (!tangible(e) || g.attract) continue;
       const d = dist(p, e), min = p.r + e.r;
       if (d >= min) continue;
       if (e.state === 'dormant') wake(g, e, p, 'touch');   // 撞到睡著的魄，它就醒了
@@ -1589,10 +1589,12 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     // 鏡頭：每格大小跟著螢幕；跟著人走，稍微平滑
     const s = Math.max(26, Math.min(76, Math.min(W / 21, H / 12.5)));
     cam.s = s;
-    const k = 1 - Math.pow(0.0005, dt);
-    const offX = w.attract && cv.clientWidth > 980 ? -0.2 * W / s : 0;   // 開始畫面：選單在左，燈放在右半邊
-    cam.x += (p.x + offX - cam.x) * k; cam.y += (p.y - cam.y) * k;
-    if (w.snap) { cam.x = p.x + offX; cam.y = p.y; }
+    // 開始畫面：鏡頭跟得慢一點、往燈要去的方向多看一點，選單在左時燈放在右半邊；一路平順，不像剪接
+    const k = 1 - Math.pow(w.attract ? 0.12 : 0.0005, dt);
+    const offX = w.attract && cv.clientWidth > 980 ? -0.2 * W / s : 0;
+    const lx = w.attract && w.lead ? w.lead.dx * 1.4 : 0, ly = w.attract && w.lead ? w.lead.dy * 1.4 : 0;
+    cam.x += (p.x + lx + offX - cam.x) * k; cam.y += (p.y + ly - cam.y) * k;
+    if (w.snap) { cam.x = p.x + lx + offX; cam.y = p.y + ly; }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = C.ink; ctx.fillRect(0, 0, W, H);
     const v = g.view(13);
@@ -2052,6 +2054,65 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
 
 </script>
 <script>
+// 燈下無明 —— 開始畫面那盞燈的路線。
+// 一條平滑、閉合的曲線，一路等速走，不停、不頓，所以看起來是一個長鏡頭，不像幾段短片接起來。
+// 路線只走地板與廊口，不穿牆、不穿紙屏（穿紙屏時光會一下被擋、一下又亮，看起來就像剪接）。
+// 繞一圈：玄關（經過大門）→ 天井的井 → 正廳 → 祠堂的燭與息印 → 東廂 → 偏房睡著的魄 → 回玄關。
+// 穿過廊口時一律順著廊口直直走。測試會檢查不碰牆屏、每半格轉彎不超過 40 度、頭尾接得上。
+(function (root) {
+  const WAY = [
+    [27.0, 24.6], [21.5, 25.3], [15.5, 24.8], [14.3, 22.4], [16.3, 21.2], [18.3, 20.6], [19.4, 19.7],  // 玄關：沿南邊經過大門，從照壁西頭繞上來
+    [19.5, 18.5], [19.5, 17.2], [17.3, 14.9], [16.9, 12.4], [18.0, 10.3], [21.0, 10.0], // 直直穿過廊口進天井，繞著井
+    [24.0, 10.5], [25.5, 9.5], [25.5, 8.5], [25.5, 7.2], [27.6, 5.6], [29.4, 4.6],       // 直直進正廳，往東
+    [30.5, 4.5], [32.2, 4.5], [34.2, 3.4], [36.0, 4.4], [35.8, 6.6], [35.5, 7.6],         // 祠堂：經過燭與息印
+    [35.5, 8.5], [35.5, 10.2], [34.2, 11.3], [32.8, 12.6], [32.7, 13.6], [33.8, 15.0], [35.3, 16.4], [35.5, 17.4],   // 東廂：從紙屏的缺口繞過去
+    [35.5, 18.5], [35.5, 20.2], [34.5, 21.6], [32.5, 22.3], [30.5, 22.5], [28.6, 23.4]   // 偏房（照得到睡著的魄，不碰它），回玄關
+  ];
+  const SPEED = 1.15;   // 每秒幾格
+  const STEP = 0.05;    // 重新取樣的間距（格）
+
+  const d2 = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+  // 向心 Catmull-Rom：過每一個點、轉彎圓順、不會打結
+  function cr(p0, p1, p2, p3, u) {
+    const t0 = 0, t1 = t0 + Math.sqrt(d2(p0, p1)) || 1e-6, t2 = t1 + Math.sqrt(d2(p1, p2)) || t1 + 1e-6, t3 = t2 + Math.sqrt(d2(p2, p3)) || t2 + 1e-6;
+    const t = t1 + (t2 - t1) * u;
+    const mix = (a, b, ta, tb) => [((tb - t) * a[0] + (t - ta) * b[0]) / (tb - ta), ((tb - t) * a[1] + (t - ta) * b[1]) / (tb - ta)];
+    const A1 = mix(p0, p1, t0, t1), A2 = mix(p1, p2, t1, t2), A3 = mix(p2, p3, t2, t3);
+    const B1 = mix(A1, A2, t0, t2), B2 = mix(A2, A3, t1, t3);
+    return mix(B1, B2, t1, t2);
+  }
+  // 先密密取點，再照弧長等距重取，走起來才會等速
+  function build(way) {
+    const n = way.length, dense = [];
+    for (let i = 0; i < n; i++) {
+      const p0 = way[(i - 1 + n) % n], p1 = way[i], p2 = way[(i + 1) % n], p3 = way[(i + 2) % n];
+      for (let k = 0; k < 40; k++) dense.push(cr(p0, p1, p2, p3, k / 40));
+    }
+    dense.push(dense[0]);
+    const pts = [dense[0]];
+    let carry = 0;
+    for (let i = 1; i < dense.length; i++) {
+      const a = dense[i - 1], b = dense[i], L = d2(a, b);
+      let s = STEP - carry;
+      while (s <= L) { const f = s / L; pts.push([a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]); s += STEP; }
+      carry = L - (s - STEP);
+    }
+    if (d2(pts[pts.length - 1], pts[0]) < STEP * 0.5) pts.pop();   // 頭尾接起來
+    return pts;
+  }
+  const PTS = build(WAY), LEN = PTS.length * STEP;
+  // 走了 s 格時燈在哪裡、往哪個方向
+  function at(s) {
+    const f = (((s % LEN) + LEN) % LEN) / STEP, i = Math.floor(f), u = f - i;
+    const a = PTS[i % PTS.length], b = PTS[(i + 1) % PTS.length];
+    const x = a[0] + (b[0] - a[0]) * u, y = a[1] + (b[1] - a[1]) * u, L = d2(a, b) || 1;
+    return { x, y, dx: (b[0] - a[0]) / L, dy: (b[1] - a[1]) / L };
+  }
+  root.TOUR = { WAY, SPEED, STEP, PTS, LEN, at };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+</script>
+<script>
 // 燈下無明 —— 介面：按鍵、滑鼠、HUD、提示、旁側文字、暫停與結束畫面、主迴圈。
 // 失去焦點（切分頁、切視窗）就自動暫停，並放開所有按著的鍵，免得回來時人自己一直走。
 (function () {
@@ -2418,17 +2479,15 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   }
 
   // ---------- 開始畫面的展示：一盞燈在宅子裡飄，魄照常巡行 ----------
-  const TOUR = [[19.5, 24.2], [19.5, 20.5], [19.5, 18.5], [19.5, 15.2], [17.2, 11.5], [14.5, 9.6], [14.5, 8.5], [14.5, 5.2], [11.0, 4.5], [9.5, 4.5], [5.5, 4.0], [4.5, 6.8], [4.5, 8.5], [4.5, 11.0], [7.0, 12.4], [7.0, 15.6], [4.5, 17.2], [4.5, 18.5], [4.5, 21.0], [7.5, 22.5], [9.5, 22.5], [13.0, 22.5]];
-  const tour = { seg: 0, f: 0 };
+  // 路線在 src/tour.js：一條平滑閉合的曲線，等速走，不停不頓，看起來是一個長鏡頭
+  const tour = { s: 0 };
+  let tourDir = { dx: 1, dy: 0 };
   function tourStep(dt) {
-    const a = TOUR[tour.seg], b = TOUR[(tour.seg + 1) % TOUR.length], L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
-    tour.f += (RD_SPEED * dt) / L;
-    if (tour.f >= 1) { tour.f = 0; tour.seg = (tour.seg + 1) % TOUR.length; }
-    const e = tour.f * tour.f * (3 - 2 * tour.f);   // 每段起止慢一點
-    g.tp(a[0] + (b[0] - a[0]) * e, a[1] + (b[1] - a[1]) * e);
+    tour.s += window.TOUR.SPEED * dt;
+    const q = window.TOUR.at(tour.s);
+    g.tp(q.x, q.y); tourDir = { dx: q.dx, dy: q.dy };
     g.p.lampOn = true;
   }
-  const RD_SPEED = 1.4;
 
   // ---------- 主迴圈 ----------
   let heartT = 0, creakT = 8;
@@ -2443,7 +2502,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
         handle(g.drain());
         mood(dt);
       } else if (onStart) { tourStep(dt); g.advance(dt, {}); g.drain(); }
-      RD.frame(running && !paused || onStart ? dt : 0, { snap, attract: onStart, autoAim: aimAuto });
+      RD.frame(running && !paused || onStart ? dt : 0, { snap, attract: onStart, lead: onStart ? tourDir : null, autoAim: aimAuto });
       snap = false;
       if (!onStart) hud();
     }
@@ -2474,8 +2533,8 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   if (window.matchMedia && matchMedia('(pointer: coarse)').matches && !matchMedia('(pointer: fine)').matches) $('touchnote').textContent = '這一版是試做，只做了鍵盤與滑鼠；手機上還不能玩。';
 
   // 先在背景擺好宅子（開始畫面後面看得到一點點）
-  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, continueGame, setPause, saveAs, readSlot, canSave, snap() { snap = true; }, get slot() { return slot; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
-  g = E.create({ seed: seedFromUrl() }); g.attract = true; g.tp(TOUR[0][0], TOUR[0][1]); window.DENG.g = g; RD.setGame(g); g.drain();
+  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, continueGame, setPause, saveAs, readSlot, canSave, snap() { snap = true; }, tour, get slot() { return slot; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
+  g = E.create({ seed: seedFromUrl() }); g.attract = true; { const q = window.TOUR.at(0); g.tp(q.x, q.y); tourDir = { dx: q.dx, dy: q.dy }; } window.DENG.g = g; RD.setGame(g); g.drain(); snap = true;
   renderSlots();
   if (!canSave) $('slot-msg').textContent = '這個瀏覽器存不了檔（例如無痕視窗）：照樣能玩，只是關掉就沒了。';
   const fontReady = document.fonts && document.fonts.load ? document.fonts.load('32px "LXGW WenKai TC"', '燈下無明魄噬人火封') : Promise.resolve();

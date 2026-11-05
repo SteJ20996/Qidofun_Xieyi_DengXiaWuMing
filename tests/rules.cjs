@@ -344,6 +344,10 @@ const doorRoom = (set) => { for (let y = 1; y < 15; y++) set(5, y, '#'); set(5, 
   const e = g.pos[0]; g.tp(e.x + 1.0, e.y);
   run(g, 4, {});
   ok('開始畫面展示：魄看不見那盞燈、不咬、不冷', g.stats.bites === 0 && g.p.chill === 0 && !['chase', 'windup'].includes(e.state), { state: e.state, chill: g.p.chill });
+  // 魄飄到燈身上：燈不被推開，睡著的也不會被撞醒（燈不是人）
+  const e2 = g.pos[1]; g.tp(e2.x + 0.2, e2.y); const before = { x: g.p.x, y: g.p.y };
+  run(g, 0.2, {});
+  ok('開始畫面展示：燈不會被魄推開、不會撞醒睡著的魄', g.p.x === before.x && g.p.y === before.y && e2.state === 'dormant', { p: [g.p.x, g.p.y], e2: e2.state });
 }
 
 // ---------- 腳印：魄循著腳印追 ----------
@@ -411,6 +415,32 @@ const wallRoom = (set) => { for (let y = 1; y <= 7; y++) set(10, y, '#'); };
   const g = mk({ seed: 3 }); g.attract = true;
   for (let i = 0; i < 240; i++) { g.tp(19.5, 25.5 - i * 0.02); g.step(R.STEP, {}); }
   ok('開始畫面的燈不留腳印', g.prints.length === 0);
+}
+
+// ---------- 開始畫面那盞燈的路線：一個長鏡頭，不像短片接起來 ----------
+{
+  const TOUR = globalThis.TOUR, g = mk(), m = g.m, T = MAP.T, P = TOUR.PTS, C = 0.25;
+  const bad = [];
+  for (const [x, y] of P) for (const [ox, oy] of [[0, 0], [C, 0], [-C, 0], [0, C], [0, -C], [C * 0.7, C * 0.7], [-C * 0.7, C * 0.7], [C * 0.7, -C * 0.7], [-C * 0.7, -C * 0.7]]) {
+    const k = m.at(Math.floor(x + ox), Math.floor(y + oy));
+    if (k === T.WALL || k === T.SCREEN || k === T.LOW || k === T.EXIT) { bad.push([+x.toFixed(2), +y.toFixed(2)]); break; }
+  }
+  ok('開始畫面的路線：不碰牆、紙屏、井、大門（留 0.25 格）', bad.length === 0, bad.slice(0, 5));
+  // 每走半格，方向最多轉多少：轉得急就像剪接
+  let maxTurn = 0;
+  const k5 = Math.round(0.5 / TOUR.STEP);
+  for (let i = 0; i < P.length; i++) {
+    const a = P[i], b = P[(i + k5) % P.length], c = P[(i + 2 * k5) % P.length];
+    const t1 = Math.atan2(b[1] - a[1], b[0] - a[0]), t2 = Math.atan2(c[1] - b[1], c[0] - b[0]);
+    let d = Math.abs(t2 - t1); if (d > Math.PI) d = 2 * Math.PI - d;
+    maxTurn = Math.max(maxTurn, d * 180 / Math.PI);
+  }
+  const gaps = P.map((q, i) => Math.hypot(P[(i + 1) % P.length][0] - q[0], P[(i + 1) % P.length][1] - q[1]));
+  const gMin = Math.min(...gaps), gMax = Math.max(...gaps);
+  ok('開始畫面的路線：每半格轉彎不超過 40 度、等距（等速）、頭尾接得上', maxTurn < 40 && gMin > TOUR.STEP * 0.6 && gMax < TOUR.STEP * 1.4, { maxTurn: +maxTurn.toFixed(1), gMin: +gMin.toFixed(3), gMax: +gMax.toFixed(3), len: +TOUR.LEN.toFixed(1), loopSec: +(TOUR.LEN / TOUR.SPEED).toFixed(0) });
+  const sleeper = g.pos.find((e) => e.state === 'dormant');
+  const closest = Math.min(...P.map(([x, y]) => Math.hypot(x - sleeper.x, y - sleeper.y)));
+  ok('開始畫面的路線：不碰到睡著的魄（照得到它，但不吵醒）', closest > 1.5 && closest < R.LAMP.r, +closest.toFixed(2));
 }
 
 // ---------- 存檔 ----------

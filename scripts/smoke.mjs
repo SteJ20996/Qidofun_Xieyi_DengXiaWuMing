@@ -38,6 +38,16 @@ try {
   await wait(1200);
   const a1 = await ev(() => ({ x: DENG.g.p.x, y: DENG.g.p.y, bites: DENG.g.stats.bites, chill: DENG.g.p.chill }));
   ok('開始畫面：燈在宅子裡飄、魄不理它', a0.attract && Math.hypot(a1.x - a0.x, a1.y - a0.y) > 0.5 && a1.bites === 0 && a1.chill === 0, { a0, a1 });
+  // 一個長鏡頭，不像短片接起來：四秒內每一幀記燈與鏡頭的位置，看有沒有停頓、跳動
+  const samp = await ev(() => new Promise((res) => { const out = []; let t0 = null; const f = (ts) => { if (t0 == null) t0 = ts; out.push([ts, DENG.g.p.x, DENG.g.p.y, DENG.RENDER.cam.x, DENG.RENDER.cam.y]); if (ts - t0 < 4000) requestAnimationFrame(f); else res(out); }; requestAnimationFrame(f); }));
+  const win = (i0, i1) => { let L = 0, C = 0; for (let i = i0 + 1; i <= i1; i++) { L += Math.hypot(samp[i][1] - samp[i - 1][1], samp[i][2] - samp[i - 1][2]); C += Math.hypot(samp[i][3] - samp[i - 1][3], samp[i][4] - samp[i - 1][4]); } const T = (samp[i1][0] - samp[i0][0]) / 1000; return [L / T, C / T]; };
+  const speeds = [];
+  for (let i = 0, j = 0; i < samp.length; i++) { while (j < samp.length - 1 && samp[j][0] - samp[i][0] < 500) j++; if (samp[j][0] - samp[i][0] >= 500) speeds.push(win(i, j)); }
+  const lv = speeds.map((q) => q[0]), cv2 = speeds.map((q) => q[1]), mean = (a) => a.reduce((x, y) => x + y, 0) / a.length;
+  let jump = 0, camJump = 0;
+  for (let i = 1; i < samp.length; i++) { jump = Math.max(jump, Math.hypot(samp[i][1] - samp[i - 1][1], samp[i][2] - samp[i - 1][2])); camJump = Math.max(camJump, Math.hypot(samp[i][3] - samp[i - 1][3], samp[i][4] - samp[i - 1][4])); }
+  const flow = { frames: samp.length, lampMean: +mean(lv).toFixed(2), lampMinOverMean: +(Math.min(...lv) / mean(lv)).toFixed(2), camMinOverMean: +(Math.min(...cv2) / mean(cv2)).toFixed(2), jump: +jump.toFixed(3), camJump: +camJump.toFixed(3) };
+  ok('開始畫面是一個長鏡頭：燈等速不停、鏡頭不跳', flow.frames > 100 && flow.lampMinOverMean > 0.7 && flow.camMinOverMean > 0.4 && jump < 0.15 && camJump < 0.15, flow);
   await page.keyboard.press('Enter'); await wait(400);
   ok('Enter 入宅、HUD 出現', await ev(() => DENG.running && !document.getElementById('hud').classList.contains('hidden')));
   // 測試裡先把魄放遠，免得亂入

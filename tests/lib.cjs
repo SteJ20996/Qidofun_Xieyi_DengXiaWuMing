@@ -1,7 +1,7 @@
 // 測試共用：在 Node 裡載入規則、地圖、引擎（不碰畫面），加上幾個小工具。
 const vm = require('vm'), fs = require('fs'), path = require('path');
 const root = path.resolve(__dirname, '..');
-for (const f of ['rules', 'map', 'engine']) vm.runInThisContext(fs.readFileSync(path.join(root, 'src', f + '.js'), 'utf8'), { filename: f + '.js' });
+for (const f of ['rules', 'map', 'engine', 'tour']) vm.runInThisContext(fs.readFileSync(path.join(root, 'src', f + '.js'), 'utf8'), { filename: f + '.js' });
 const R = globalThis.R, MAP = globalThis.MAP, ENGINE = globalThis.ENGINE;
 
 // 空場地：16×16，中間起點，一隻魄
