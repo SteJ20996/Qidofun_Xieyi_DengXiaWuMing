@@ -95,16 +95,18 @@
   const sx = (x) => (x - cam.x) * cam.s + cv.width / 2 + cam.ox;
   const sy = (y) => (y - cam.y) * cam.s + cv.height / 2 + cam.oy;
 
-  function glyph(ch, x, y, size, color, o) {
+  function glyph(ch, x, y, size, color, o) { glyphPx(ch, sx(x), sy(y), size * cam.s, color, o); }
+  // 照像素畫字：2D 從 glyph() 來；立體版的疊層（字浮在人、魄頭上）也用它
+  function glyphPx(ch, X, Y, px, color, o) {
     o = o || {};
     ctx.save();
-    ctx.translate(sx(x), sy(y));
+    ctx.translate(X, Y);
     if (o.rot) ctx.rotate(o.rot);
     if (o.scale) ctx.scale(o.scale, o.scale);
     ctx.globalAlpha = o.a == null ? 1 : o.a;
     if (o.glow) { ctx.shadowColor = o.glow; ctx.shadowBlur = o.blur || 12; }
     if (o.filter) ctx.filter = o.filter;
-    ctx.font = `${Math.round(size * cam.s)}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = `${Math.max(1, Math.round(px))}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     if (o.stroke) { ctx.lineWidth = o.stroke; ctx.strokeStyle = o.strokeColor || C.paper; ctx.lineJoin = 'round'; ctx.strokeText(ch, 0, 0); }
     ctx.fillStyle = color; ctx.fillText(ch, 0, 0);
     ctx.restore();
@@ -117,24 +119,24 @@
   }
 
   // ---------- 事件變成畫面上的效果 ----------
-  function float(text, x, y, color, o) { floats.push(Object.assign({ text, x, y, color: color || C.ink, t: 0, life: 1.1, size: 0.55 }, o || {})); }
+  function float(text, x, y, color, o) { floats.push(Object.assign({ text, x, y, oy: 0, color: color || C.ink, t: 0, life: 1.1, size: 0.55 }, o || {})); }
   function event(e) {
     const p = g.p;
     switch (e.type) {
       case 'swing': fx.push({ k: 'swing', x: e.x, y: e.y, dir: e.dir, t: 0, life: 0.2 }); break;
       case 'swordHit': fx.push({ k: 'splash', x: e.x, y: e.y, t: 0, life: 0.35, c: '20,18,16' }); break;
       case 'swordMiss': float(e.why === 'dir' ? '空 · 偏了' : e.why === 'far' ? '空 · 差一步' : e.why === 'wall' ? '空 · 隔著' : '空', e.x, e.y, '#6b5a48', { size: 0.42 }); break;
-      case 'bell': fx.push({ k: 'ring', x: e.x, y: e.y, t: 0, life: 0.45, r: R.BELL.r }); fx.push({ k: 'hear', x: e.x, y: e.y, t: 0, life: 1.4, r: R.BELL.hear }); float('鈴', e.x, e.y - 0.9, '#8a6a1c'); break;
+      case 'bell': fx.push({ k: 'ring', x: e.x, y: e.y, t: 0, life: 0.45, r: R.BELL.r }); fx.push({ k: 'hear', x: e.x, y: e.y, t: 0, life: 1.4, r: R.BELL.hear }); float('鈴', e.x, e.y, '#8a6a1c', { oy: -0.9 }); break;
       case 'fireBoom': fx.push({ k: 'boom', x: e.x, y: e.y, t: 0, life: 0.5 }); break;
-      case 'bite': fx.push({ k: 'bite', t: 0, life: 0.45 }); fx.push({ k: 'splat', t: 0, life: 1.1, seed: Math.random() * 1e6 }); shake = 0.3; float('噬', p.x, p.y - 0.8, C.red, { size: 0.7 }); float(e.absorbed ? (e.chill ? `護 −${e.absorbed}　寒 +${e.chill}` : `護 −${e.absorbed}`) : `寒 +${e.chill}`, p.x, p.y + 0.8, e.absorbed ? '#5b4a8a' : '#3f6f8a', { size: 0.36 }); break;
-      case 'whiff': { const po = g.pos.find((q) => q.id === e.id); if (po && po.vis) float('撲空', e.x, e.y - 0.8, '#6b5a48', { size: 0.4 }); break; }
-      case 'interrupt': { const po = g.pos.find((q) => q.id === e.id); if (po) float('斷', po.x, po.y - 0.9, C.red, { size: 0.5 }); break; }
-      case 'disperse': fx.push({ k: 'disperse', x: e.x, y: e.y, t: 0, life: 1.0, seed: Math.random() * 1e6 }); if (g.poVis({ state: 'patrol', x: e.x, y: e.y }) || hyp(e.x - p.x, e.y - p.y) < 4.5) float('散', e.x, e.y - 0.6, '#4a4540', { size: 0.6 }); break;
-      case 'wake': { const po = g.pos.find((q) => q.id === e.id); if (po && po.vis) float('醒', e.x, e.y - 0.9, C.red, { size: 0.5 }); break; }
+      case 'bite': fx.push({ k: 'bite', t: 0, life: 0.45 }); fx.push({ k: 'splat', t: 0, life: 1.1, seed: Math.random() * 1e6 }); shake = 0.3; float('噬', p.x, p.y, C.red, { size: 0.7, oy: -0.8 }); float(e.absorbed ? (e.chill ? `護 −${e.absorbed}　寒 +${e.chill}` : `護 −${e.absorbed}`) : `寒 +${e.chill}`, p.x, p.y, e.absorbed ? '#5b4a8a' : '#3f6f8a', { size: 0.36, oy: 0.8 }); break;
+      case 'whiff': { const po = g.pos.find((q) => q.id === e.id); if (po && po.vis) float('撲空', e.x, e.y, '#6b5a48', { size: 0.4, oy: -0.8 }); break; }
+      case 'interrupt': { const po = g.pos.find((q) => q.id === e.id); if (po) float('斷', po.x, po.y, C.red, { size: 0.5, oy: -0.9 }); break; }
+      case 'disperse': fx.push({ k: 'disperse', x: e.x, y: e.y, t: 0, life: 1.0, seed: Math.random() * 1e6 }); if (g.poVis({ state: 'patrol', x: e.x, y: e.y }) || hyp(e.x - p.x, e.y - p.y) < 4.5) float('散', e.x, e.y, '#4a4540', { size: 0.6, oy: -0.6 }); break;
+      case 'wake': { const po = g.pos.find((q) => q.id === e.id); if (po && po.vis) float('醒', e.x, e.y, C.red, { size: 0.5, oy: -0.9 }); break; }
       case 'seal': fx.push({ k: 'stamp', x: p.x, y: p.y, t: 0, life: 0.8, glyph: e.glyph }); break;
       case 'sealDone': fx.push({ k: 'sealIn', x: e.x + 0.5, y: e.y + 0.5, t: 0, life: 0.4 }); break;
       case 'borrowDone': fx.push({ k: 'ignite', x: e.x, y: e.y, t: 0, life: 0.5 }); break;
-      case 'pickup': float('+符', p.x, p.y - 0.8, C.red, { size: 0.42 }); break;
+      case 'pickup': float('+符', p.x, p.y, C.red, { size: 0.42, oy: -0.8 }); break;
     }
   }
 
@@ -165,8 +167,23 @@
     const flick = RM || !p.lampOn ? 1 : 0.9 + 0.1 * Math.sin(t * 13) * Math.sin(t * 7.3 + 1);   // 燈火微微跳動（只動暖色那層，不動看得見的範圍）
     drawFloorThings(v);
     drawPrints(v);
-    // 墨：看不見的地方蓋起來；走過的地方留一點點牆影
-    const md = mask.data;
+    drawMask(v, flick);
+    drawLights(v);
+    drawGate();
+    drawWisps(v, dt);
+    drawPos(v);
+    if (w.attract) drawLantern(); else drawPlayer();
+    if (w.autoAim && !w.attract) drawAim();
+    drawMotes(v, dt);
+    drawShots();
+    drawFx(dt);
+    drawFloats(dt);
+    drawScreenFx(dt);
+  }
+
+  // 墨：看不見的地方蓋起來；走過的地方留一點點牆影
+  function drawMask(v, flick) {
+    const m = g.m, md = mask.data, s = cam.s;
     for (let i = 0; i < m.W * m.H; i++) {
       const b = Math.min(1, v.vis[i] * 1.3);
       let a = 1 - b;
@@ -180,17 +197,6 @@
     ctx.globalCompositeOperation = 'soft-light';
     ctx.drawImage(wctx.canvas, sx(0), sy(0), m.W * s, m.H * s);
     ctx.globalCompositeOperation = 'source-over';
-    drawLights(v);
-    drawGate();
-    drawWisps(v, dt);
-    drawPos(v);
-    if (w.attract) drawLantern(); else drawPlayer();
-    if (w.autoAim && !w.attract) drawAim();
-    drawMotes(v, dt);
-    drawShots();
-    drawFx(dt);
-    drawFloats(dt);
-    drawScreenFx(dt);
   }
 
   function visAt(v, x, y) { const i = Math.floor(y) * g.m.W + Math.floor(x); return v.vis[i] || 0; }
@@ -230,13 +236,13 @@
   }
 
   // 光源本身：火苗看得見就畫（隔著紙屏只看到一團暈）
-  function drawLights(v) {
+  function drawLights(v, floor) {   // floor：立體版的地板，只畫光暈；火苗、燭煙、借火的「火」是立起來的東西
     for (const c of g.m.candles) {
       const b = visAt(v, c.x, c.y), line = g.sightLine(g.p.x, g.p.y, c.x, c.y);
       if (line === 'blocked' || hyp(c.x - g.p.x, c.y - g.p.y) > 14) continue;
       const fl = 0.85 + 0.15 * Math.sin(t * 11 + c.x * 3) * Math.sin(t * 7 + c.y);
       glow(c.x, c.y - 0.1, line === 'paper' ? 0.9 : 0.6, 'rgba(255,170,70,A)', line === 'paper' ? 0.25 : 0.55 * fl);
-      if (line === 'clear') {
+      if (line === 'clear' && !floor) {
         ctx.fillStyle = '#efe6d2'; ctx.fillRect(sx(c.x - 0.06), sy(c.y - 0.05), 0.12 * cam.s, 0.32 * cam.s);
         ctx.fillStyle = `rgba(255,${190 + 30 * fl | 0},90,.95)`; ctx.beginPath(); ctx.ellipse(sx(c.x), sy(c.y - 0.16), 0.07 * cam.s, 0.13 * cam.s * fl, 0, 0, Math.PI * 2); ctx.fill();
         if (!RM) for (let k = 0; k < 3; k++) {   // 燭煙
@@ -252,20 +258,22 @@
       if (line === 'blocked') continue;
       const fade = Math.min(1, l.t / 2), fl = 0.85 + 0.15 * Math.sin(t * 13 + l.id);
       glow(l.x, l.y, 1.1, 'rgba(255,150,60,A)', (line === 'paper' ? 0.25 : 0.6) * fade);
-      if (line === 'clear') glyph('火', l.x, l.y - 0.05 * Math.sin(t * 5), 0.55, '#c8461f', { a: fade * fl, glow: 'rgba(255,150,60,.9)', blur: 16 });
+      if (line === 'clear' && !floor) glyph('火', l.x, l.y - 0.05 * Math.sin(t * 5), 0.55, '#c8461f', { a: fade * fl, glow: 'rgba(255,150,60,.9)', blur: 16 });
     }
     // 黑暗中，印還有一點紅光（眼睛習慣後看得到）
     if (!g.p.lampOn && g.p.adapt > 0.3) for (const a of g.altars) if (!a.taken && hyp(a.x - g.p.x, a.y - g.p.y) <= g.p.adapt * R.LAMP.adaptR + 1 && g.sightLine(g.p.x, g.p.y, a.x, a.y) === 'clear') glow(a.x, a.y, 0.5, 'rgba(200,60,40,A)', 0.35 * g.p.adapt);
   }
 
   // 魄：照見是灰墨；黑暗裡是微光；隔紙屏是剪影
-  function drawPos(v) {
+  // floor：立體版的地板，只畫地上的東西（凝回的墨點、蓄撲的紅圈、嗅的墨點）；字與魄本身在立體那層
+  function drawPos(v, floor) {
     const P = R.PO;
     for (const e of g.pos) {
       if (e.state === 'gone') {
         if (e.formSpot && e.goneT <= P.formT && g.spotVisible(e.formSpot)) {
           const f = 1 - Math.max(0, e.goneT) / P.formT, s = e.formSpot;
           for (let k = 0; k < 14; k++) { const a = k * 2.4 + t * 2, r = (1 - f) * 1.4 + 0.15; ctx.fillStyle = `rgba(40,44,48,${0.25 + 0.5 * f})`; ctx.beginPath(); ctx.arc(sx(s.x + Math.cos(a) * r), sy(s.y + Math.sin(a) * r), 0.05 * cam.s, 0, Math.PI * 2); ctx.fill(); }
+          if (floor) continue;
           glyph('魄', s.x, s.y, 0.8, C.po, { a: 0.15 + 0.35 * f });
           glyph('凝', s.x, s.y - 0.9, 0.4, C.red, { a: 0.55 + 0.45 * f, stroke: 3, strokeColor: 'rgba(236,226,200,.8)' });
         }
@@ -279,6 +287,12 @@
       if (!RM && e.state === 'windup') { ox = (Math.random() - 0.5) * 0.05; }
       const wob = RM ? 1 : 1 + 0.05 * Math.sin(t * 3 + e.id), x = e.x + ox, y = e.y + oy;
       const dorm = e.state === 'dormant';
+      if (floor) {
+        if (vis.mode === 'silhouette') continue;
+        if (e.state === 'windup' && e.windVisible) windRing(e);
+        if (e.state === 'track') sniffDots(e);
+        continue;
+      }
       if (vis.mode === 'silhouette') {   // 剪影：影子落在視線穿過的那片紙屏上，像皮影戲
         let hit = null;
         MAP.walk(g.p.x, g.p.y, x, y, (tx, ty) => { if (g.m.at(tx, ty) === T.SCREEN) { hit = [tx + 0.5, ty + 0.5]; return true; } return false; });
@@ -298,18 +312,25 @@
       if (e.burnT > 0) for (let k = 0; k < 3; k++) glyph('火', x + Math.sin(t * 6 + k * 2) * 0.35, y + 0.35 - ((t * 1.5 + k / 3) % 1) * 0.8, 0.22, '#d2552a', { a: 0.8 });
       // 蓄撲：「噬」字與撲擊範圍圈（看得見才有；黑暗裡只有聲音）
       if (e.state === 'windup' && e.windVisible) {
-        const f = 1 - e.windT / P.windT;
-        ctx.save(); ctx.setLineDash([6, 5]); ctx.strokeStyle = `rgba(180,57,42,${0.5 + 0.4 * f})`; ctx.lineWidth = 2.5;
-        ctx.beginPath(); ctx.arc(sx(e.x), sy(e.y), P.biteR * cam.s, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
-        ctx.fillStyle = `rgba(180,57,42,${0.08 + 0.12 * f})`; ctx.beginPath(); ctx.arc(sx(e.x), sy(e.y), P.biteR * cam.s, -Math.PI / 2, -Math.PI / 2 + f * Math.PI * 2); ctx.lineTo(sx(e.x), sy(e.y)); ctx.fill();
-        glyph('噬', e.x, e.y - 0.95, 0.55 + 0.15 * f, C.red, { stroke: 4, strokeColor: 'rgba(240,230,210,.85)' });
+        windRing(e);
+        glyph('噬', e.x, e.y - 0.95, 0.55 + 0.15 * (1 - e.windT / P.windT), C.red, { stroke: 4, strokeColor: 'rgba(240,230,210,.85)' });
       }
       if (e.state === 'recover' && vis) glyph('…', e.x, e.y - 0.8, 0.4, '#6b5a48', { a: 0.7 });
       if (e.state === 'track') {   // 循著腳印：頭上一個「嗅」，前面幾點墨點往地上探
         glyph('嗅', e.x, e.y - 0.9, 0.36, '#7a4a20', { a: 0.75 + 0.25 * Math.sin(t * 8), stroke: 3, strokeColor: 'rgba(236,226,200,.8)' });
-        for (let k = 0; k < 3; k++) { const f = (t * 1.6 + k / 3) % 1; ctx.fillStyle = `rgba(90,60,30,${0.5 * (1 - f)})`; ctx.beginPath(); ctx.arc(sx(e.x + Math.sin(t * 3 + k) * 0.2), sy(e.y + 0.35 + f * 0.3), 0.04 * cam.s, 0, Math.PI * 2); ctx.fill(); }
+        sniffDots(e);
       }
     }
+  }
+  // 蓄撲的撲擊範圍：虛線紅圈，裡面一圈紅慢慢填滿（填滿就撲）
+  function windRing(e) {
+    const P = R.PO, f = 1 - e.windT / P.windT;
+    ctx.save(); ctx.setLineDash([6, 5]); ctx.strokeStyle = `rgba(180,57,42,${0.5 + 0.4 * f})`; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(sx(e.x), sy(e.y), P.biteR * cam.s, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+    ctx.fillStyle = `rgba(180,57,42,${0.08 + 0.12 * f})`; ctx.beginPath(); ctx.arc(sx(e.x), sy(e.y), P.biteR * cam.s, -Math.PI / 2, -Math.PI / 2 + f * Math.PI * 2); ctx.lineTo(sx(e.x), sy(e.y)); ctx.fill();
+  }
+  function sniffDots(e) {
+    for (let k = 0; k < 3; k++) { const f = (t * 1.6 + k / 3) % 1; ctx.fillStyle = `rgba(90,60,30,${0.5 * (1 - f)})`; ctx.beginPath(); ctx.arc(sx(e.x + Math.sin(t * 3 + k) * 0.2), sy(e.y + 0.35 + f * 0.3), 0.04 * cam.s, 0, Math.PI * 2); ctx.fill(); }
   }
 
   // ---------- 生動的小東西 ----------
@@ -393,14 +414,20 @@
     glyph('燈', p.x, p.y + bob + 0.01, 0.22, '#7a3a14', { a: 0.85 });
   }
 
-  function drawPlayer() {
+  const progLabel = (p) => p.reading ? (p.reading.spell === 'seal' ? '封戶' : '借火') : p.taking ? (p.taking.gate ? '推門' : '取印') : '';
+  function drawPlayer(floor) {   // floor：立體版的地板，只畫腳下的進度圈與對準的那一撇；人與手燈是立起來的
     const p = g.p, x = p.x, y = p.y;
     // 讀咒與取印的進度圈
     const prog = p.reading ? p.reading.t / p.reading.dur : p.taking ? p.taking.t / p.taking.dur : 0;
     if (prog > 0) {
       ctx.strokeStyle = p.reading ? 'rgba(150,40,30,.85)' : 'rgba(180,57,42,.9)'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.arc(sx(x), sy(y), 0.55 * cam.s, -Math.PI / 2, -Math.PI / 2 + prog * Math.PI * 2); ctx.stroke();
-      glyph(p.reading ? (p.reading.spell === 'seal' ? '封戶' : '借火') : p.taking.gate ? '推門' : '取印', x, y - 0.85, 0.3, '#7a2a1e', { stroke: 3 });
+      if (!floor) glyph(progLabel(p), x, y - 0.85, 0.3, '#7a2a1e', { stroke: 3 });
+    }
+    if (floor) {
+      ctx.strokeStyle = 'rgba(180,57,42,.9)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(sx(x + Math.cos(p.aim) * 0.38), sy(y + Math.sin(p.aim) * 0.38)); ctx.lineTo(sx(x + Math.cos(p.aim) * 0.62), sy(y + Math.sin(p.aim) * 0.62)); ctx.stroke();
+      return;
     }
     ctx.fillStyle = C.paper; ctx.strokeStyle = '#1c1a17'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(sx(x), sy(y), p.r * cam.s, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
@@ -417,14 +444,14 @@
     ctx.strokeStyle = '#5a3a1e'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(sx(lx), sy(ly), 0.11 * cam.s, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
   }
 
-  function drawShots() {
+  function drawShots(floor) {
     for (const s of g.shots) {
       glow(s.x, s.y, 0.5, 'rgba(255,140,50,A)', 0.7);
-      glyph('火', s.x, s.y, 0.32, '#b8361c');
+      if (!floor) glyph('火', s.x, s.y, 0.32, '#b8361c');
     }
   }
 
-  function drawFx(dt) {
+  function drawFx(dt, floor) {
     for (const f of fx) {
       f.t += dt;
       const q = f.t / f.life;
@@ -447,7 +474,7 @@
       } else if (f.k === 'disperse') {
         const r2 = rnd(f.seed | 0);
         for (let k = 0; k < 18; k++) { const a = r2() * 6.28, d = q * (0.6 + r2() * 1.2); ctx.fillStyle = `rgba(45,48,52,${0.6 * (1 - q)})`; ctx.beginPath(); ctx.arc(sx(f.x + Math.cos(a) * d), sy(f.y + Math.sin(a) * d), 0.05 * cam.s, 0, Math.PI * 2); ctx.fill(); }
-      } else if (f.k === 'stamp') {
+      } else if (f.k === 'stamp' && !floor) {
         const sc = 1.6 - Math.min(1, q * 3) * 0.6;
         ctx.save(); ctx.globalAlpha = 1 - Math.max(0, q - 0.6) / 0.4; ctx.translate(sx(f.x), sy(f.y - 1)); ctx.scale(sc, sc);
         ctx.fillStyle = C.red; ctx.fillRect(-0.3 * cam.s, -0.3 * cam.s, 0.6 * cam.s, 0.6 * cam.s); ctx.restore();
@@ -463,7 +490,7 @@
     for (const f of floats) {
       f.t += dt;
       const q = f.t / f.life;
-      glyph(f.text, f.x, f.y - q * 0.5, f.size, f.color, { a: q < 0.7 ? 1 : 1 - (q - 0.7) / 0.3, stroke: 3, strokeColor: 'rgba(236,226,200,.8)' });
+      glyph(f.text, f.x, f.y + f.oy - q * 0.5, f.size, f.color, { a: q < 0.7 ? 1 : 1 - (q - 0.7) / 0.3, stroke: 3, strokeColor: 'rgba(236,226,200,.8)' });
     }
     floats = floats.filter((f) => f.t < f.life);
   }
@@ -514,6 +541,79 @@
     x.beginPath(); x.arc(g.p.x * k, g.p.y * k, 2.6, 0, Math.PI * 2); x.fill(); x.stroke();
   }
 
+  // ---------- 立體版用的兩層（2026-11-22） ----------
+  // 地板：把 2D 地上那一層（紙、墨、光、腳印、蓄撲的紅圈、劍弧、火光……）畫進一張固定在世界上的畫布，
+  // 立體版拿去當地板。看得見什麼照舊由引擎決定，所以立體與平面的規則一模一樣。S 是一格幾像素。
+  function floorFrame(dt, off, S, w) {
+    w = w || {};
+    const keep = { cv, ctx, cam };
+    cv = off; ctx = off.getContext('2d'); cam = { x: g.m.W / 2, y: g.m.H / 2, s: S, ox: 0, oy: 0 };
+    let v = null;
+    try {
+      t += dt; shake = Math.max(0, shake - dt);
+      const m = g.m, p = g.p;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.fillStyle = C.ink; ctx.fillRect(0, 0, cv.width, cv.height);
+      v = g.view(13);
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(floorArt || (floorArt = buildArt(m, true)), 0, 0, m.W * S, m.H * S);
+      const flick = RM || !p.lampOn ? 1 : 0.9 + 0.1 * Math.sin(t * 13) * Math.sin(t * 7.3 + 1);
+      drawFloorThings(v);
+      drawPrints(v);
+      drawMask(v, flick);
+      drawLights(v, true);
+      drawGate();
+      drawWisps(v, dt);
+      drawPos(v, true);
+      drawPlayer(true);
+      if (w.autoAim) drawAim();
+      drawShots(true);
+      drawFx(dt, true);
+    } finally { cv = keep.cv; ctx = keep.ctx; cam = keep.cam; }
+    return v;
+  }
+  // 疊層：立起來的字（魄頭上的「噬」「嗅」「凝」「眠」、飄出來的字、「取印」、蓋印）與整個畫面的結霜、被咬一閃。
+  // proj(x, h, y) → { X, Y, k }：世界上 (x, y)、高 h 的點在畫面上哪裡，k 是那裡一格幾像素；在鏡頭後面就回 null。
+  function overlayFrame(dt, oc, proj) {
+    const keep = { cv, ctx };
+    cv = oc; ctx = oc.getContext('2d');
+    try {
+      ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
+      const s2 = Math.max(26, Math.min(76, Math.min(cv.width / 21, cv.height / 12.5))) * 1.25;   // 字不要比平面版大太多
+      const at = (ch, x, y, h, size, color, o) => { const q = proj(x, h, y); if (q) glyphPx(ch, q.X, q.Y, size * Math.min(q.k, s2), color, o); };
+      const P = R.PO, p = g.p, halo = 'rgba(236,226,200,.8)';
+      for (const e of g.pos) {
+        if (e.state === 'gone') {
+          if (e.formSpot && e.goneT <= P.formT && g.spotVisible(e.formSpot)) at('凝', e.formSpot.x, e.formSpot.y, 1.45, 0.4, C.red, { a: 0.55 + 0.45 * (1 - Math.max(0, e.goneT) / P.formT), stroke: 3, strokeColor: halo });
+          continue;
+        }
+        const vis = e.vis;
+        if (!vis || vis.mode === 'silhouette') continue;
+        if (e.state === 'dormant') at('眠', e.x, e.y, 0.9, 0.26, '#6e7378', { a: 0.7 * vis.a, stroke: 3, strokeColor: halo });
+        if (e.burnT > 0) for (let k = 0; k < 3; k++) at('火', e.x + Math.sin(t * 6 + k * 2) * 0.3, e.y, 0.35 + ((t * 1.5 + k / 3) % 1) * 0.8, 0.22, '#d2552a', { a: 0.8 });
+        if (e.state === 'windup' && e.windVisible) at('噬', e.x, e.y, 1.55, 0.55 + 0.15 * (1 - e.windT / P.windT), C.red, { stroke: 4, strokeColor: 'rgba(240,230,210,.85)' });
+        if (e.state === 'recover') at('…', e.x, e.y, 1.4, 0.4, '#6b5a48', { a: 0.7 });
+        if (e.state === 'track') at('嗅', e.x, e.y, 1.45, 0.36, '#7a4a20', { a: 0.75 + 0.25 * Math.sin(t * 8), stroke: 3, strokeColor: halo });
+      }
+      const lab = progLabel(p);
+      if (lab) at(lab, p.x, p.y, 1.75, 0.3, '#7a2a1e', { stroke: 3 });
+      for (const f of fx) if (f.k === 'stamp') {   // 取印：印在頭上蓋下來
+        const q = f.t / f.life, sc = 1.6 - Math.min(1, q * 3) * 0.6, a = 1 - Math.max(0, q - 0.6) / 0.4, pt = proj(f.x, 2.0, f.y);
+        if (!pt) continue;
+        const k = Math.min(pt.k, s2) * sc;
+        ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = C.red; ctx.fillRect(pt.X - 0.3 * k, pt.Y - 0.3 * k, 0.6 * k, 0.6 * k); ctx.restore();
+        glyphPx(f.glyph, pt.X, pt.Y, 0.42 * k, '#f6ecd8', { a });
+      }
+      for (const f of floats) {   // 飄出來的字：從頭上（或腳邊）往上飄
+        f.t += dt;
+        const q = f.t / f.life;
+        at(f.text, f.x, f.y, 1.25 - f.oy * 0.6 + q * 0.45, f.size, f.color, { a: q < 0.7 ? 1 : 1 - (q - 0.7) / 0.3, stroke: 3, strokeColor: halo });
+      }
+      floats = floats.filter((f) => f.t < f.life);
+      drawScreenFx();
+    } finally { cv = keep.cv; ctx = keep.ctx; }
+  }
+
   function init(canvas) {
     cv = canvas; ctx = cv.getContext('2d');
   }
@@ -527,5 +627,5 @@
   }
   function toWorld(px, py) { return { x: (px - cv.width / 2) / cam.s + cam.x, y: (py - cv.height / 2) / cam.s + cam.y }; }
   let floorArt = null;
-  root.RENDER = { init, setGame, frame, event, minimap, toWorld, FONT, cam, rebuild() { art = null; floorArt = null; if (g) art = buildArt(g.m); }, floorCanvas(m) { return floorArt || (floorArt = buildArt(m, true)); } };
+  root.RENDER = { init, setGame, frame, floorFrame, overlayFrame, event, minimap, toWorld, FONT, cam, get shake() { return RM ? 0 : shake; }, rebuild() { art = null; floorArt = null; if (g) art = buildArt(g.m); }, floorCanvas(m) { return floorArt || (floorArt = buildArt(m, true)); } };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

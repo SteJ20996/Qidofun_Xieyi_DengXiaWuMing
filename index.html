@@ -13,6 +13,7 @@
 <body>
 <canvas id="world"></canvas>
 <canvas id="world3d" class="hidden"></canvas>
+<canvas id="world3dfx" class="hidden"></canvas>
 
 <div id="hud" class="hidden">
   <div id="seal" title="燈下無明"><span>燈</span><span>下</span><span>無</span><span>明</span></div>
@@ -24,7 +25,7 @@
   <div id="expose"></div>
   <div id="topright">
     <div id="goal"></div>
-    <div class="hudbtns"><button id="btn-mute" title="音效開關">音效</button><button id="btn-pause" title="暫停（P 或 Esc）">暫停</button></div>
+    <div class="hudbtns"><button id="btn-view" title="立體（鏡頭在你背後）與平面（從上往下看）互換">換成立體</button><button id="btn-mute" title="音效開關">音效</button><button id="btn-pause" title="暫停（P 或 Esc）">暫停</button></div>
   </div>
   <div id="log" aria-live="polite"></div>
   <div id="hint" class="hidden"></div>
@@ -48,11 +49,10 @@
 </div>
 
 <div id="start" class="overlay">
-  <div id="viewmode" class="viewmode">
-    <div class="vm-row" role="group" aria-label="開始畫面用立體還是平面"><span class="vm-lab">開始畫面</span><button id="vm-3d" title="立體的長鏡頭（three.js）">立體</button><button id="vm-2d" title="平面的長鏡頭">平面</button></div>
-    <div id="vm-note" class="vm-note" aria-live="polite"></div>
-  </div>
   <div class="panel startpanel">
+    <div id="viewmode" class="viewmode">
+      <div class="vm-row" role="group" aria-label="畫面用立體還是平面"><span class="vm-lab">畫面</span><button id="vm-3d" title="立體：開始畫面是長鏡頭，進宅後鏡頭在你背後（three.js）">立體</button><button id="vm-2d" title="平面：從上往下看">平面</button></div>
+    </div>
     <div class="titlerow">
       <div class="titleseal"><span>燈</span><span>下</span><span>無</span><span>明</span></div>
       <div class="titletext">
@@ -87,9 +87,10 @@
       <div><span><kbd>U</kbd></span><b>按住：取印、推門閂</b></div>
       <div><span><kbd>P</kbd><kbd>Esc</kbd></span><b>暫停，可回主頁</b></div>
     </div>
-    <div class="dim small">點燈、借火、封戶用分號、逗號、句號鍵（畫面寫成：《》），不必按 Shift；方向鍵也能走。滑鼠左鍵是劍、右鍵是火符，跟著滑鼠對準；不用滑鼠時，劍與火符自動對準看得見的魄。</div>
+    <div class="dim small">分號、逗號、句號鍵就是畫面上的：《》，不必按 Shift；方向鍵也能走。滑鼠左鍵劍、右鍵火符；不用滑鼠時自動對準看得見的魄。立體時 W 往鏡頭前方走，I、O 轉鏡頭。</div>
     <div id="slots" class="slots"></div>
     <div class="dim small warn" id="slot-msg"></div>
+    <div class="small warn" id="vm-note" aria-live="polite"></div>
     <div class="dim small">三格存檔：U、I、O 選一格，Enter 開始或繼續；滑鼠點也可以<span id="best"></span></div>
     <div class="dim small" id="touchnote">這一版是試做：一個關卡，只做了鍵盤與滑鼠。</div>
   </div>
@@ -100,9 +101,11 @@
     <h2>暫停</h2>
     <p class="dim small" id="pause-why"></p>
     <div class="row"><button id="btn-resume" class="big">繼續</button><button id="btn-title" title="先把這一局存在自己那格，再回到開始畫面">回主頁（M）</button><button id="btn-restart">重來</button><button id="btn-mute2">音效</button></div>
+    <div class="viewrow"><span class="dim small">畫面</span><span class="vm-row"><button id="pv-3d" title="立體：鏡頭在你背後">立體</button><button id="pv-2d" title="平面：從上往下看">平面</button></span><span class="small warn" id="pv-note"></span></div>
     <div class="savebox"><div class="dim small">存到（U、I、O）：這一局自動存在自己那格；也可以把這一刻抄進別格，當作存檔點。</div><div id="saverow" class="saverow"></div><div class="small" id="save-msg"></div></div>
     <ul class="rules">
       <li><b>目標</b>：書房取名印、祠堂取息印（按住 U），回玄關按住 U 推開門閂，走出大門就出宅。寒意滿一百就失魂。</li>
+      <li><b>立體</b>：鏡頭在你背後，W 往鏡頭前方走，I、O 轉鏡頭；上面「畫面」可以換回平面。</li>
       <li><b>燈</b>：點著看得清，但魄從九格外就看得見你；隔著紙屏也看得到你的燈光。掩燈時，魄要靠到兩格左右才察覺。</li>
       <li><b>噬</b>：魄撲之前會停下來蓄力（約半秒）。看得見時頭上有「噬」字與紅圈；黑暗裡只有一聲嘶。退出紅圈，它就撲空，會愣一下。</li>
       <li><b>寒</b>：被咬時護心衣先擋；久留在魄身邊會直接加寒意。只有在燭火、借火旁邊才會退，但站在火光裡，魄看得見你。</li>

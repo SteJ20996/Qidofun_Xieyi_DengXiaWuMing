@@ -16,7 +16,8 @@
 html, body { margin: 0; height: 100%; overflow: hidden; background: var(--night); color: var(--ink); font-family: var(--ui); }
 body { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 canvas#world { position: fixed; inset: 0; display: block; cursor: crosshair; touch-action: none; }
-canvas#world3d { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+canvas#world3d { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; touch-action: none; }
+canvas#world3dfx { position: fixed; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
 .hidden { display: none !important; }
 kbd { display: inline-block; min-width: 1.3em; padding: 0 .3em; border: 1px solid var(--ink-2); border-radius: 3px; font: 12px/1.5 var(--ui); text-align: center; background: rgba(255,255,255,.4); margin: 0 1px; color: var(--ink); }
 .dim { color: var(--dim); }
@@ -73,7 +74,7 @@ button:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 @keyframes logfade { 0% { opacity: 0; transform: translateX(-8px); } 6% { opacity: 1; transform: none; } 80% { opacity: 1; } 100% { opacity: 0; } }
 
 /* 提示（教學） */
-#hint { position: absolute; left: 50%; top: calc(12px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); max-width: min(560px, calc(100vw - 760px), 86vw); min-width: min(320px, 86vw); font: 16px/1.55 var(--font); color: var(--ink); background: rgba(239,229,207,.95); border: 1.5px solid var(--ink); border-radius: 4px; padding: 8px 16px 8px 40px; box-shadow: 0 3px 12px rgba(0,0,0,.4); cursor: pointer; }
+#hint { position: absolute; left: 50%; top: calc(12px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); max-width: min(560px, calc(100vw - 760px), 86vw); min-width: min(320px, 86vw); font: 16px/1.55 var(--font); color: var(--ink); background: rgba(239,229,207,.95); border: 1.5px solid var(--ink); border-radius: 4px; padding: 8px 16px 8px 40px; box-shadow: 0 3px 12px rgba(0,0,0,.4); cursor: pointer; white-space: pre-line; }
 #hint::before { content: '提'; position: absolute; left: 9px; top: 9px; width: 22px; height: 22px; background: var(--red); color: #f7efe0; display: grid; place-items: center; font-size: 14px; border-radius: 3px; }
 
 /* 五件裝備與燈 */
@@ -196,15 +197,20 @@ table.stats td:first-child { text-align: right; color: var(--ink-2); }
   #start.overlay { background: linear-gradient(180deg, rgba(8,7,6,0) 0, rgba(8,7,6,0) 30vh, rgba(8,7,6,.66) 44vh); justify-items: center; align-items: start; padding-top: 40vh; }
   #start .startpanel { margin-left: 0; }
 }
-/* 右上角：開始畫面用立體還是平面 */
-.viewmode { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; align-items: flex-end; gap: 6px; z-index: 6; font-family: var(--font); }
-.vm-row { display: flex; align-items: stretch; background: rgba(239,229,207,.92); border: 1.5px solid var(--ink); border-radius: 4px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.35); }
-.vm-lab { font-size: 13px; color: var(--ink-2); padding: 5px 8px 0; }
-.vm-row button { font: 15px var(--font); padding: 4px 13px; border: 0; border-left: 1px solid rgba(28,26,23,.35); background: transparent; color: var(--ink); cursor: pointer; }
+/* 畫面用立體還是平面：開始畫面在選單的右上角，暫停面板一列 */
+.viewmode { position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; z-index: 1; font-family: var(--font); }
+@media (max-width: 640px) { .viewmode { position: static; align-items: center; margin-bottom: 8px; } }
+.vm-row { display: inline-flex; align-items: stretch; background: rgba(239,229,207,.92); border: 1.5px solid var(--ink); border-radius: 4px; overflow: hidden; }
+.viewrow { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 4px 0 2px; }
+.viewrow .vm-row button { font: 15px var(--font); padding: 4px 13px; border: 0; border-left: 1px solid rgba(28,26,23,.35); background: transparent; color: var(--ink); cursor: pointer; margin: 0; }
+.viewrow .vm-row button:first-child { border-left: 0; }
+.viewrow .vm-row button.on { background: var(--ink); color: var(--paper); }
+#vm-note:empty, #pv-note:empty { display: none; }
+.vm-lab { font-size: 12px; color: var(--ink-2); padding: 5px 7px 0; }
+.vm-row button { font: 14px var(--font); padding: 3px 11px; border: 0; border-left: 1px solid rgba(28,26,23,.35); background: transparent; color: var(--ink); cursor: pointer; }
 .vm-row button.on { background: var(--ink); color: var(--paper); }
 .vm-row button:disabled { opacity: .4; cursor: not-allowed; }
-.vm-note { max-width: 300px; font-size: 13px; line-height: 1.5; background: rgba(239,229,207,.94); color: var(--red-2); padding: 4px 9px; border-radius: 4px; text-align: left; box-shadow: 0 2px 10px rgba(0,0,0,.35); }
-.vm-note:empty { display: none; }
+.hudbtns button:disabled { opacity: .45; cursor: not-allowed; }
 h1 span { display: inline-block; animation: inkin 1.1s cubic-bezier(.2,.7,.3,1) both; }
 h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-delay: .28s; } h1 span:nth-child(3) { animation-delay: .46s; } h1 span:nth-child(4) { animation-delay: .64s; }
 @keyframes inkin { from { opacity: 0; filter: blur(9px); transform: translateY(8px) scale(1.12); } 60% { opacity: 1; } to { opacity: 1; filter: none; transform: none; } }
@@ -286,6 +292,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
 </style>
 <canvas id="world"></canvas>
 <canvas id="world3d" class="hidden"></canvas>
+<canvas id="world3dfx" class="hidden"></canvas>
 
 <div id="hud" class="hidden">
   <div id="seal" title="燈下無明"><span>燈</span><span>下</span><span>無</span><span>明</span></div>
@@ -297,7 +304,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   <div id="expose"></div>
   <div id="topright">
     <div id="goal"></div>
-    <div class="hudbtns"><button id="btn-mute" title="音效開關">音效</button><button id="btn-pause" title="暫停（P 或 Esc）">暫停</button></div>
+    <div class="hudbtns"><button id="btn-view" title="立體（鏡頭在你背後）與平面（從上往下看）互換">換成立體</button><button id="btn-mute" title="音效開關">音效</button><button id="btn-pause" title="暫停（P 或 Esc）">暫停</button></div>
   </div>
   <div id="log" aria-live="polite"></div>
   <div id="hint" class="hidden"></div>
@@ -321,11 +328,10 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
 </div>
 
 <div id="start" class="overlay">
-  <div id="viewmode" class="viewmode">
-    <div class="vm-row" role="group" aria-label="開始畫面用立體還是平面"><span class="vm-lab">開始畫面</span><button id="vm-3d" title="立體的長鏡頭（three.js）">立體</button><button id="vm-2d" title="平面的長鏡頭">平面</button></div>
-    <div id="vm-note" class="vm-note" aria-live="polite"></div>
-  </div>
   <div class="panel startpanel">
+    <div id="viewmode" class="viewmode">
+      <div class="vm-row" role="group" aria-label="畫面用立體還是平面"><span class="vm-lab">畫面</span><button id="vm-3d" title="立體：開始畫面是長鏡頭，進宅後鏡頭在你背後（three.js）">立體</button><button id="vm-2d" title="平面：從上往下看">平面</button></div>
+    </div>
     <div class="titlerow">
       <div class="titleseal"><span>燈</span><span>下</span><span>無</span><span>明</span></div>
       <div class="titletext">
@@ -360,9 +366,10 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
       <div><span><kbd>U</kbd></span><b>按住：取印、推門閂</b></div>
       <div><span><kbd>P</kbd><kbd>Esc</kbd></span><b>暫停，可回主頁</b></div>
     </div>
-    <div class="dim small">點燈、借火、封戶用分號、逗號、句號鍵（畫面寫成：《》），不必按 Shift；方向鍵也能走。滑鼠左鍵是劍、右鍵是火符，跟著滑鼠對準；不用滑鼠時，劍與火符自動對準看得見的魄。</div>
+    <div class="dim small">分號、逗號、句號鍵就是畫面上的：《》，不必按 Shift；方向鍵也能走。滑鼠左鍵劍、右鍵火符；不用滑鼠時自動對準看得見的魄。立體時 W 往鏡頭前方走，I、O 轉鏡頭。</div>
     <div id="slots" class="slots"></div>
     <div class="dim small warn" id="slot-msg"></div>
+    <div class="small warn" id="vm-note" aria-live="polite"></div>
     <div class="dim small">三格存檔：U、I、O 選一格，Enter 開始或繼續；滑鼠點也可以<span id="best"></span></div>
     <div class="dim small" id="touchnote">這一版是試做：一個關卡，只做了鍵盤與滑鼠。</div>
   </div>
@@ -373,9 +380,11 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     <h2>暫停</h2>
     <p class="dim small" id="pause-why"></p>
     <div class="row"><button id="btn-resume" class="big">繼續</button><button id="btn-title" title="先把這一局存在自己那格，再回到開始畫面">回主頁（M）</button><button id="btn-restart">重來</button><button id="btn-mute2">音效</button></div>
+    <div class="viewrow"><span class="dim small">畫面</span><span class="vm-row"><button id="pv-3d" title="立體：鏡頭在你背後">立體</button><button id="pv-2d" title="平面：從上往下看">平面</button></span><span class="small warn" id="pv-note"></span></div>
     <div class="savebox"><div class="dim small">存到（U、I、O）：這一局自動存在自己那格；也可以把這一刻抄進別格，當作存檔點。</div><div id="saverow" class="saverow"></div><div class="small" id="save-msg"></div></div>
     <ul class="rules">
       <li><b>目標</b>：書房取名印、祠堂取息印（按住 U），回玄關按住 U 推開門閂，走出大門就出宅。寒意滿一百就失魂。</li>
+      <li><b>立體</b>：鏡頭在你背後，W 往鏡頭前方走，I、O 轉鏡頭；上面「畫面」可以換回平面。</li>
       <li><b>燈</b>：點著看得清，但魄從九格外就看得見你；隔著紙屏也看得到你的燈光。掩燈時，魄要靠到兩格左右才察覺。</li>
       <li><b>噬</b>：魄撲之前會停下來蓄力（約半秒）。看得見時頭上有「噬」字與紅圈；黑暗裡只有一聲嘶。退出紅圈，它就撲空，會愣一下。</li>
       <li><b>寒</b>：被咬時護心衣先擋；久留在魄身邊會直接加寒意。只有在燭火、借火旁邊才會退，但站在火光裡，魄看得見你。</li>
@@ -1603,16 +1612,18 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   const sx = (x) => (x - cam.x) * cam.s + cv.width / 2 + cam.ox;
   const sy = (y) => (y - cam.y) * cam.s + cv.height / 2 + cam.oy;
 
-  function glyph(ch, x, y, size, color, o) {
+  function glyph(ch, x, y, size, color, o) { glyphPx(ch, sx(x), sy(y), size * cam.s, color, o); }
+  // 照像素畫字：2D 從 glyph() 來；立體版的疊層（字浮在人、魄頭上）也用它
+  function glyphPx(ch, X, Y, px, color, o) {
     o = o || {};
     ctx.save();
-    ctx.translate(sx(x), sy(y));
+    ctx.translate(X, Y);
     if (o.rot) ctx.rotate(o.rot);
     if (o.scale) ctx.scale(o.scale, o.scale);
     ctx.globalAlpha = o.a == null ? 1 : o.a;
     if (o.glow) { ctx.shadowColor = o.glow; ctx.shadowBlur = o.blur || 12; }
     if (o.filter) ctx.filter = o.filter;
-    ctx.font = `${Math.round(size * cam.s)}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = `${Math.max(1, Math.round(px))}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     if (o.stroke) { ctx.lineWidth = o.stroke; ctx.strokeStyle = o.strokeColor || C.paper; ctx.lineJoin = 'round'; ctx.strokeText(ch, 0, 0); }
     ctx.fillStyle = color; ctx.fillText(ch, 0, 0);
     ctx.restore();
@@ -1625,24 +1636,24 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   }
 
   // ---------- 事件變成畫面上的效果 ----------
-  function float(text, x, y, color, o) { floats.push(Object.assign({ text, x, y, color: color || C.ink, t: 0, life: 1.1, size: 0.55 }, o || {})); }
+  function float(text, x, y, color, o) { floats.push(Object.assign({ text, x, y, oy: 0, color: color || C.ink, t: 0, life: 1.1, size: 0.55 }, o || {})); }
   function event(e) {
     const p = g.p;
     switch (e.type) {
       case 'swing': fx.push({ k: 'swing', x: e.x, y: e.y, dir: e.dir, t: 0, life: 0.2 }); break;
       case 'swordHit': fx.push({ k: 'splash', x: e.x, y: e.y, t: 0, life: 0.35, c: '20,18,16' }); break;
       case 'swordMiss': float(e.why === 'dir' ? '空 · 偏了' : e.why === 'far' ? '空 · 差一步' : e.why === 'wall' ? '空 · 隔著' : '空', e.x, e.y, '#6b5a48', { size: 0.42 }); break;
-      case 'bell': fx.push({ k: 'ring', x: e.x, y: e.y, t: 0, life: 0.45, r: R.BELL.r }); fx.push({ k: 'hear', x: e.x, y: e.y, t: 0, life: 1.4, r: R.BELL.hear }); float('鈴', e.x, e.y - 0.9, '#8a6a1c'); break;
+      case 'bell': fx.push({ k: 'ring', x: e.x, y: e.y, t: 0, life: 0.45, r: R.BELL.r }); fx.push({ k: 'hear', x: e.x, y: e.y, t: 0, life: 1.4, r: R.BELL.hear }); float('鈴', e.x, e.y, '#8a6a1c', { oy: -0.9 }); break;
       case 'fireBoom': fx.push({ k: 'boom', x: e.x, y: e.y, t: 0, life: 0.5 }); break;
-      case 'bite': fx.push({ k: 'bite', t: 0, life: 0.45 }); fx.push({ k: 'splat', t: 0, life: 1.1, seed: Math.random() * 1e6 }); shake = 0.3; float('噬', p.x, p.y - 0.8, C.red, { size: 0.7 }); float(e.absorbed ? (e.chill ? `護 −${e.absorbed}　寒 +${e.chill}` : `護 −${e.absorbed}`) : `寒 +${e.chill}`, p.x, p.y + 0.8, e.absorbed ? '#5b4a8a' : '#3f6f8a', { size: 0.36 }); break;
-      case 'whiff': { const po = g.pos.find((q) => q.id === e.id); if (po && po.vis) float('撲空', e.x, e.y - 0.8, '#6b5a48', { size: 0.4 }); break; }
-      case 'interrupt': { const po = g.pos.find((q) => q.id === e.id); if (po) float('斷', po.x, po.y - 0.9, C.red, { size: 0.5 }); break; }
-      case 'disperse': fx.push({ k: 'disperse', x: e.x, y: e.y, t: 0, life: 1.0, seed: Math.random() * 1e6 }); if (g.poVis({ state: 'patrol', x: e.x, y: e.y }) || hyp(e.x - p.x, e.y - p.y) < 4.5) float('散', e.x, e.y - 0.6, '#4a4540', { size: 0.6 }); break;
-      case 'wake': { const po = g.pos.find((q) => q.id === e.id); if (po && po.vis) float('醒', e.x, e.y - 0.9, C.red, { size: 0.5 }); break; }
+      case 'bite': fx.push({ k: 'bite', t: 0, life: 0.45 }); fx.push({ k: 'splat', t: 0, life: 1.1, seed: Math.random() * 1e6 }); shake = 0.3; float('噬', p.x, p.y, C.red, { size: 0.7, oy: -0.8 }); float(e.absorbed ? (e.chill ? `護 −${e.absorbed}　寒 +${e.chill}` : `護 −${e.absorbed}`) : `寒 +${e.chill}`, p.x, p.y, e.absorbed ? '#5b4a8a' : '#3f6f8a', { size: 0.36, oy: 0.8 }); break;
+      case 'whiff': { const po = g.pos.find((q) => q.id === e.id); if (po && po.vis) float('撲空', e.x, e.y, '#6b5a48', { size: 0.4, oy: -0.8 }); break; }
+      case 'interrupt': { const po = g.pos.find((q) => q.id === e.id); if (po) float('斷', po.x, po.y, C.red, { size: 0.5, oy: -0.9 }); break; }
+      case 'disperse': fx.push({ k: 'disperse', x: e.x, y: e.y, t: 0, life: 1.0, seed: Math.random() * 1e6 }); if (g.poVis({ state: 'patrol', x: e.x, y: e.y }) || hyp(e.x - p.x, e.y - p.y) < 4.5) float('散', e.x, e.y, '#4a4540', { size: 0.6, oy: -0.6 }); break;
+      case 'wake': { const po = g.pos.find((q) => q.id === e.id); if (po && po.vis) float('醒', e.x, e.y, C.red, { size: 0.5, oy: -0.9 }); break; }
       case 'seal': fx.push({ k: 'stamp', x: p.x, y: p.y, t: 0, life: 0.8, glyph: e.glyph }); break;
       case 'sealDone': fx.push({ k: 'sealIn', x: e.x + 0.5, y: e.y + 0.5, t: 0, life: 0.4 }); break;
       case 'borrowDone': fx.push({ k: 'ignite', x: e.x, y: e.y, t: 0, life: 0.5 }); break;
-      case 'pickup': float('+符', p.x, p.y - 0.8, C.red, { size: 0.42 }); break;
+      case 'pickup': float('+符', p.x, p.y, C.red, { size: 0.42, oy: -0.8 }); break;
     }
   }
 
@@ -1673,8 +1684,23 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     const flick = RM || !p.lampOn ? 1 : 0.9 + 0.1 * Math.sin(t * 13) * Math.sin(t * 7.3 + 1);   // 燈火微微跳動（只動暖色那層，不動看得見的範圍）
     drawFloorThings(v);
     drawPrints(v);
-    // 墨：看不見的地方蓋起來；走過的地方留一點點牆影
-    const md = mask.data;
+    drawMask(v, flick);
+    drawLights(v);
+    drawGate();
+    drawWisps(v, dt);
+    drawPos(v);
+    if (w.attract) drawLantern(); else drawPlayer();
+    if (w.autoAim && !w.attract) drawAim();
+    drawMotes(v, dt);
+    drawShots();
+    drawFx(dt);
+    drawFloats(dt);
+    drawScreenFx(dt);
+  }
+
+  // 墨：看不見的地方蓋起來；走過的地方留一點點牆影
+  function drawMask(v, flick) {
+    const m = g.m, md = mask.data, s = cam.s;
     for (let i = 0; i < m.W * m.H; i++) {
       const b = Math.min(1, v.vis[i] * 1.3);
       let a = 1 - b;
@@ -1688,17 +1714,6 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     ctx.globalCompositeOperation = 'soft-light';
     ctx.drawImage(wctx.canvas, sx(0), sy(0), m.W * s, m.H * s);
     ctx.globalCompositeOperation = 'source-over';
-    drawLights(v);
-    drawGate();
-    drawWisps(v, dt);
-    drawPos(v);
-    if (w.attract) drawLantern(); else drawPlayer();
-    if (w.autoAim && !w.attract) drawAim();
-    drawMotes(v, dt);
-    drawShots();
-    drawFx(dt);
-    drawFloats(dt);
-    drawScreenFx(dt);
   }
 
   function visAt(v, x, y) { const i = Math.floor(y) * g.m.W + Math.floor(x); return v.vis[i] || 0; }
@@ -1738,13 +1753,13 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   }
 
   // 光源本身：火苗看得見就畫（隔著紙屏只看到一團暈）
-  function drawLights(v) {
+  function drawLights(v, floor) {   // floor：立體版的地板，只畫光暈；火苗、燭煙、借火的「火」是立起來的東西
     for (const c of g.m.candles) {
       const b = visAt(v, c.x, c.y), line = g.sightLine(g.p.x, g.p.y, c.x, c.y);
       if (line === 'blocked' || hyp(c.x - g.p.x, c.y - g.p.y) > 14) continue;
       const fl = 0.85 + 0.15 * Math.sin(t * 11 + c.x * 3) * Math.sin(t * 7 + c.y);
       glow(c.x, c.y - 0.1, line === 'paper' ? 0.9 : 0.6, 'rgba(255,170,70,A)', line === 'paper' ? 0.25 : 0.55 * fl);
-      if (line === 'clear') {
+      if (line === 'clear' && !floor) {
         ctx.fillStyle = '#efe6d2'; ctx.fillRect(sx(c.x - 0.06), sy(c.y - 0.05), 0.12 * cam.s, 0.32 * cam.s);
         ctx.fillStyle = `rgba(255,${190 + 30 * fl | 0},90,.95)`; ctx.beginPath(); ctx.ellipse(sx(c.x), sy(c.y - 0.16), 0.07 * cam.s, 0.13 * cam.s * fl, 0, 0, Math.PI * 2); ctx.fill();
         if (!RM) for (let k = 0; k < 3; k++) {   // 燭煙
@@ -1760,20 +1775,22 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
       if (line === 'blocked') continue;
       const fade = Math.min(1, l.t / 2), fl = 0.85 + 0.15 * Math.sin(t * 13 + l.id);
       glow(l.x, l.y, 1.1, 'rgba(255,150,60,A)', (line === 'paper' ? 0.25 : 0.6) * fade);
-      if (line === 'clear') glyph('火', l.x, l.y - 0.05 * Math.sin(t * 5), 0.55, '#c8461f', { a: fade * fl, glow: 'rgba(255,150,60,.9)', blur: 16 });
+      if (line === 'clear' && !floor) glyph('火', l.x, l.y - 0.05 * Math.sin(t * 5), 0.55, '#c8461f', { a: fade * fl, glow: 'rgba(255,150,60,.9)', blur: 16 });
     }
     // 黑暗中，印還有一點紅光（眼睛習慣後看得到）
     if (!g.p.lampOn && g.p.adapt > 0.3) for (const a of g.altars) if (!a.taken && hyp(a.x - g.p.x, a.y - g.p.y) <= g.p.adapt * R.LAMP.adaptR + 1 && g.sightLine(g.p.x, g.p.y, a.x, a.y) === 'clear') glow(a.x, a.y, 0.5, 'rgba(200,60,40,A)', 0.35 * g.p.adapt);
   }
 
   // 魄：照見是灰墨；黑暗裡是微光；隔紙屏是剪影
-  function drawPos(v) {
+  // floor：立體版的地板，只畫地上的東西（凝回的墨點、蓄撲的紅圈、嗅的墨點）；字與魄本身在立體那層
+  function drawPos(v, floor) {
     const P = R.PO;
     for (const e of g.pos) {
       if (e.state === 'gone') {
         if (e.formSpot && e.goneT <= P.formT && g.spotVisible(e.formSpot)) {
           const f = 1 - Math.max(0, e.goneT) / P.formT, s = e.formSpot;
           for (let k = 0; k < 14; k++) { const a = k * 2.4 + t * 2, r = (1 - f) * 1.4 + 0.15; ctx.fillStyle = `rgba(40,44,48,${0.25 + 0.5 * f})`; ctx.beginPath(); ctx.arc(sx(s.x + Math.cos(a) * r), sy(s.y + Math.sin(a) * r), 0.05 * cam.s, 0, Math.PI * 2); ctx.fill(); }
+          if (floor) continue;
           glyph('魄', s.x, s.y, 0.8, C.po, { a: 0.15 + 0.35 * f });
           glyph('凝', s.x, s.y - 0.9, 0.4, C.red, { a: 0.55 + 0.45 * f, stroke: 3, strokeColor: 'rgba(236,226,200,.8)' });
         }
@@ -1787,6 +1804,12 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
       if (!RM && e.state === 'windup') { ox = (Math.random() - 0.5) * 0.05; }
       const wob = RM ? 1 : 1 + 0.05 * Math.sin(t * 3 + e.id), x = e.x + ox, y = e.y + oy;
       const dorm = e.state === 'dormant';
+      if (floor) {
+        if (vis.mode === 'silhouette') continue;
+        if (e.state === 'windup' && e.windVisible) windRing(e);
+        if (e.state === 'track') sniffDots(e);
+        continue;
+      }
       if (vis.mode === 'silhouette') {   // 剪影：影子落在視線穿過的那片紙屏上，像皮影戲
         let hit = null;
         MAP.walk(g.p.x, g.p.y, x, y, (tx, ty) => { if (g.m.at(tx, ty) === T.SCREEN) { hit = [tx + 0.5, ty + 0.5]; return true; } return false; });
@@ -1806,18 +1829,25 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
       if (e.burnT > 0) for (let k = 0; k < 3; k++) glyph('火', x + Math.sin(t * 6 + k * 2) * 0.35, y + 0.35 - ((t * 1.5 + k / 3) % 1) * 0.8, 0.22, '#d2552a', { a: 0.8 });
       // 蓄撲：「噬」字與撲擊範圍圈（看得見才有；黑暗裡只有聲音）
       if (e.state === 'windup' && e.windVisible) {
-        const f = 1 - e.windT / P.windT;
-        ctx.save(); ctx.setLineDash([6, 5]); ctx.strokeStyle = `rgba(180,57,42,${0.5 + 0.4 * f})`; ctx.lineWidth = 2.5;
-        ctx.beginPath(); ctx.arc(sx(e.x), sy(e.y), P.biteR * cam.s, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
-        ctx.fillStyle = `rgba(180,57,42,${0.08 + 0.12 * f})`; ctx.beginPath(); ctx.arc(sx(e.x), sy(e.y), P.biteR * cam.s, -Math.PI / 2, -Math.PI / 2 + f * Math.PI * 2); ctx.lineTo(sx(e.x), sy(e.y)); ctx.fill();
-        glyph('噬', e.x, e.y - 0.95, 0.55 + 0.15 * f, C.red, { stroke: 4, strokeColor: 'rgba(240,230,210,.85)' });
+        windRing(e);
+        glyph('噬', e.x, e.y - 0.95, 0.55 + 0.15 * (1 - e.windT / P.windT), C.red, { stroke: 4, strokeColor: 'rgba(240,230,210,.85)' });
       }
       if (e.state === 'recover' && vis) glyph('…', e.x, e.y - 0.8, 0.4, '#6b5a48', { a: 0.7 });
       if (e.state === 'track') {   // 循著腳印：頭上一個「嗅」，前面幾點墨點往地上探
         glyph('嗅', e.x, e.y - 0.9, 0.36, '#7a4a20', { a: 0.75 + 0.25 * Math.sin(t * 8), stroke: 3, strokeColor: 'rgba(236,226,200,.8)' });
-        for (let k = 0; k < 3; k++) { const f = (t * 1.6 + k / 3) % 1; ctx.fillStyle = `rgba(90,60,30,${0.5 * (1 - f)})`; ctx.beginPath(); ctx.arc(sx(e.x + Math.sin(t * 3 + k) * 0.2), sy(e.y + 0.35 + f * 0.3), 0.04 * cam.s, 0, Math.PI * 2); ctx.fill(); }
+        sniffDots(e);
       }
     }
+  }
+  // 蓄撲的撲擊範圍：虛線紅圈，裡面一圈紅慢慢填滿（填滿就撲）
+  function windRing(e) {
+    const P = R.PO, f = 1 - e.windT / P.windT;
+    ctx.save(); ctx.setLineDash([6, 5]); ctx.strokeStyle = `rgba(180,57,42,${0.5 + 0.4 * f})`; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(sx(e.x), sy(e.y), P.biteR * cam.s, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+    ctx.fillStyle = `rgba(180,57,42,${0.08 + 0.12 * f})`; ctx.beginPath(); ctx.arc(sx(e.x), sy(e.y), P.biteR * cam.s, -Math.PI / 2, -Math.PI / 2 + f * Math.PI * 2); ctx.lineTo(sx(e.x), sy(e.y)); ctx.fill();
+  }
+  function sniffDots(e) {
+    for (let k = 0; k < 3; k++) { const f = (t * 1.6 + k / 3) % 1; ctx.fillStyle = `rgba(90,60,30,${0.5 * (1 - f)})`; ctx.beginPath(); ctx.arc(sx(e.x + Math.sin(t * 3 + k) * 0.2), sy(e.y + 0.35 + f * 0.3), 0.04 * cam.s, 0, Math.PI * 2); ctx.fill(); }
   }
 
   // ---------- 生動的小東西 ----------
@@ -1901,14 +1931,20 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     glyph('燈', p.x, p.y + bob + 0.01, 0.22, '#7a3a14', { a: 0.85 });
   }
 
-  function drawPlayer() {
+  const progLabel = (p) => p.reading ? (p.reading.spell === 'seal' ? '封戶' : '借火') : p.taking ? (p.taking.gate ? '推門' : '取印') : '';
+  function drawPlayer(floor) {   // floor：立體版的地板，只畫腳下的進度圈與對準的那一撇；人與手燈是立起來的
     const p = g.p, x = p.x, y = p.y;
     // 讀咒與取印的進度圈
     const prog = p.reading ? p.reading.t / p.reading.dur : p.taking ? p.taking.t / p.taking.dur : 0;
     if (prog > 0) {
       ctx.strokeStyle = p.reading ? 'rgba(150,40,30,.85)' : 'rgba(180,57,42,.9)'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.arc(sx(x), sy(y), 0.55 * cam.s, -Math.PI / 2, -Math.PI / 2 + prog * Math.PI * 2); ctx.stroke();
-      glyph(p.reading ? (p.reading.spell === 'seal' ? '封戶' : '借火') : p.taking.gate ? '推門' : '取印', x, y - 0.85, 0.3, '#7a2a1e', { stroke: 3 });
+      if (!floor) glyph(progLabel(p), x, y - 0.85, 0.3, '#7a2a1e', { stroke: 3 });
+    }
+    if (floor) {
+      ctx.strokeStyle = 'rgba(180,57,42,.9)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(sx(x + Math.cos(p.aim) * 0.38), sy(y + Math.sin(p.aim) * 0.38)); ctx.lineTo(sx(x + Math.cos(p.aim) * 0.62), sy(y + Math.sin(p.aim) * 0.62)); ctx.stroke();
+      return;
     }
     ctx.fillStyle = C.paper; ctx.strokeStyle = '#1c1a17'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(sx(x), sy(y), p.r * cam.s, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
@@ -1925,14 +1961,14 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     ctx.strokeStyle = '#5a3a1e'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(sx(lx), sy(ly), 0.11 * cam.s, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
   }
 
-  function drawShots() {
+  function drawShots(floor) {
     for (const s of g.shots) {
       glow(s.x, s.y, 0.5, 'rgba(255,140,50,A)', 0.7);
-      glyph('火', s.x, s.y, 0.32, '#b8361c');
+      if (!floor) glyph('火', s.x, s.y, 0.32, '#b8361c');
     }
   }
 
-  function drawFx(dt) {
+  function drawFx(dt, floor) {
     for (const f of fx) {
       f.t += dt;
       const q = f.t / f.life;
@@ -1955,7 +1991,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
       } else if (f.k === 'disperse') {
         const r2 = rnd(f.seed | 0);
         for (let k = 0; k < 18; k++) { const a = r2() * 6.28, d = q * (0.6 + r2() * 1.2); ctx.fillStyle = `rgba(45,48,52,${0.6 * (1 - q)})`; ctx.beginPath(); ctx.arc(sx(f.x + Math.cos(a) * d), sy(f.y + Math.sin(a) * d), 0.05 * cam.s, 0, Math.PI * 2); ctx.fill(); }
-      } else if (f.k === 'stamp') {
+      } else if (f.k === 'stamp' && !floor) {
         const sc = 1.6 - Math.min(1, q * 3) * 0.6;
         ctx.save(); ctx.globalAlpha = 1 - Math.max(0, q - 0.6) / 0.4; ctx.translate(sx(f.x), sy(f.y - 1)); ctx.scale(sc, sc);
         ctx.fillStyle = C.red; ctx.fillRect(-0.3 * cam.s, -0.3 * cam.s, 0.6 * cam.s, 0.6 * cam.s); ctx.restore();
@@ -1971,7 +2007,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     for (const f of floats) {
       f.t += dt;
       const q = f.t / f.life;
-      glyph(f.text, f.x, f.y - q * 0.5, f.size, f.color, { a: q < 0.7 ? 1 : 1 - (q - 0.7) / 0.3, stroke: 3, strokeColor: 'rgba(236,226,200,.8)' });
+      glyph(f.text, f.x, f.y + f.oy - q * 0.5, f.size, f.color, { a: q < 0.7 ? 1 : 1 - (q - 0.7) / 0.3, stroke: 3, strokeColor: 'rgba(236,226,200,.8)' });
     }
     floats = floats.filter((f) => f.t < f.life);
   }
@@ -2022,6 +2058,79 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     x.beginPath(); x.arc(g.p.x * k, g.p.y * k, 2.6, 0, Math.PI * 2); x.fill(); x.stroke();
   }
 
+  // ---------- 立體版用的兩層（2026-11-22） ----------
+  // 地板：把 2D 地上那一層（紙、墨、光、腳印、蓄撲的紅圈、劍弧、火光……）畫進一張固定在世界上的畫布，
+  // 立體版拿去當地板。看得見什麼照舊由引擎決定，所以立體與平面的規則一模一樣。S 是一格幾像素。
+  function floorFrame(dt, off, S, w) {
+    w = w || {};
+    const keep = { cv, ctx, cam };
+    cv = off; ctx = off.getContext('2d'); cam = { x: g.m.W / 2, y: g.m.H / 2, s: S, ox: 0, oy: 0 };
+    let v = null;
+    try {
+      t += dt; shake = Math.max(0, shake - dt);
+      const m = g.m, p = g.p;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.fillStyle = C.ink; ctx.fillRect(0, 0, cv.width, cv.height);
+      v = g.view(13);
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(floorArt || (floorArt = buildArt(m, true)), 0, 0, m.W * S, m.H * S);
+      const flick = RM || !p.lampOn ? 1 : 0.9 + 0.1 * Math.sin(t * 13) * Math.sin(t * 7.3 + 1);
+      drawFloorThings(v);
+      drawPrints(v);
+      drawMask(v, flick);
+      drawLights(v, true);
+      drawGate();
+      drawWisps(v, dt);
+      drawPos(v, true);
+      drawPlayer(true);
+      if (w.autoAim) drawAim();
+      drawShots(true);
+      drawFx(dt, true);
+    } finally { cv = keep.cv; ctx = keep.ctx; cam = keep.cam; }
+    return v;
+  }
+  // 疊層：立起來的字（魄頭上的「噬」「嗅」「凝」「眠」、飄出來的字、「取印」、蓋印）與整個畫面的結霜、被咬一閃。
+  // proj(x, h, y) → { X, Y, k }：世界上 (x, y)、高 h 的點在畫面上哪裡，k 是那裡一格幾像素；在鏡頭後面就回 null。
+  function overlayFrame(dt, oc, proj) {
+    const keep = { cv, ctx };
+    cv = oc; ctx = oc.getContext('2d');
+    try {
+      ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
+      const s2 = Math.max(26, Math.min(76, Math.min(cv.width / 21, cv.height / 12.5))) * 1.25;   // 字不要比平面版大太多
+      const at = (ch, x, y, h, size, color, o) => { const q = proj(x, h, y); if (q) glyphPx(ch, q.X, q.Y, size * Math.min(q.k, s2), color, o); };
+      const P = R.PO, p = g.p, halo = 'rgba(236,226,200,.8)';
+      for (const e of g.pos) {
+        if (e.state === 'gone') {
+          if (e.formSpot && e.goneT <= P.formT && g.spotVisible(e.formSpot)) at('凝', e.formSpot.x, e.formSpot.y, 1.45, 0.4, C.red, { a: 0.55 + 0.45 * (1 - Math.max(0, e.goneT) / P.formT), stroke: 3, strokeColor: halo });
+          continue;
+        }
+        const vis = e.vis;
+        if (!vis || vis.mode === 'silhouette') continue;
+        if (e.state === 'dormant') at('眠', e.x, e.y, 0.9, 0.26, '#6e7378', { a: 0.7 * vis.a, stroke: 3, strokeColor: halo });
+        if (e.burnT > 0) for (let k = 0; k < 3; k++) at('火', e.x + Math.sin(t * 6 + k * 2) * 0.3, e.y, 0.35 + ((t * 1.5 + k / 3) % 1) * 0.8, 0.22, '#d2552a', { a: 0.8 });
+        if (e.state === 'windup' && e.windVisible) at('噬', e.x, e.y, 1.55, 0.55 + 0.15 * (1 - e.windT / P.windT), C.red, { stroke: 4, strokeColor: 'rgba(240,230,210,.85)' });
+        if (e.state === 'recover') at('…', e.x, e.y, 1.4, 0.4, '#6b5a48', { a: 0.7 });
+        if (e.state === 'track') at('嗅', e.x, e.y, 1.45, 0.36, '#7a4a20', { a: 0.75 + 0.25 * Math.sin(t * 8), stroke: 3, strokeColor: halo });
+      }
+      const lab = progLabel(p);
+      if (lab) at(lab, p.x, p.y, 1.75, 0.3, '#7a2a1e', { stroke: 3 });
+      for (const f of fx) if (f.k === 'stamp') {   // 取印：印在頭上蓋下來
+        const q = f.t / f.life, sc = 1.6 - Math.min(1, q * 3) * 0.6, a = 1 - Math.max(0, q - 0.6) / 0.4, pt = proj(f.x, 2.0, f.y);
+        if (!pt) continue;
+        const k = Math.min(pt.k, s2) * sc;
+        ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = C.red; ctx.fillRect(pt.X - 0.3 * k, pt.Y - 0.3 * k, 0.6 * k, 0.6 * k); ctx.restore();
+        glyphPx(f.glyph, pt.X, pt.Y, 0.42 * k, '#f6ecd8', { a });
+      }
+      for (const f of floats) {   // 飄出來的字：從頭上（或腳邊）往上飄
+        f.t += dt;
+        const q = f.t / f.life;
+        at(f.text, f.x, f.y, 1.25 - f.oy * 0.6 + q * 0.45, f.size, f.color, { a: q < 0.7 ? 1 : 1 - (q - 0.7) / 0.3, stroke: 3, strokeColor: halo });
+      }
+      floats = floats.filter((f) => f.t < f.life);
+      drawScreenFx();
+    } finally { cv = keep.cv; ctx = keep.ctx; }
+  }
+
   function init(canvas) {
     cv = canvas; ctx = cv.getContext('2d');
   }
@@ -2035,7 +2144,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   }
   function toWorld(px, py) { return { x: (px - cv.width / 2) / cam.s + cam.x, y: (py - cv.height / 2) / cam.s + cam.y }; }
   let floorArt = null;
-  root.RENDER = { init, setGame, frame, event, minimap, toWorld, FONT, cam, rebuild() { art = null; floorArt = null; if (g) art = buildArt(g.m); }, floorCanvas(m) { return floorArt || (floorArt = buildArt(m, true)); } };
+  root.RENDER = { init, setGame, frame, floorFrame, overlayFrame, event, minimap, toWorld, FONT, cam, get shake() { return RM ? 0 : shake; }, rebuild() { art = null; floorArt = null; if (g) art = buildArt(g.m); }, floorCanvas(m) { return floorArt || (floorArt = buildArt(m, true)); } };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
 </script>
@@ -2184,22 +2293,31 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-// 燈下無明 —— 3D 的開始畫面（長鏡頭）：同一個引擎、同一張地圖、同一條路線（src/tour.js），只換成立體的紙宅。
-// 第一步只用在開始畫面；可玩的 3D 版（鏡頭在人背後）下一步再做。
-// three.js r128（cdnjs 的全域版 THREE）。載不到或瀏覽器不能 3D，就回到 2D 的開始畫面。
+// 燈下無明 —— 立體版：同一個引擎、同一張地圖，只換成立體的紙宅。
+// 兩種用法：
+// - 開始畫面的長鏡頭（attract）：一盞紙燈籠照路線（src/tour.js）飄過宅子，鏡頭在後上方。
+// - 可玩的立體版（play，2026-11-22，擁有者：「遊戲內部沒有3d這個選項呀」）：鏡頭在人的背後。
+//   地板就是 2D 地上那一層（RENDER.floorFrame：紙、墨、光、腳印、蓄撲的紅圈、劍弧……），
+//   牆、紙屏、人、魄站在上面；牆與紙屏的明暗也照引擎算的「看得見多少」，所以看得見什麼和平面版一模一樣。
+//   立起來的字（噬、嗅、凝、飄出來的字）與結霜、被咬一閃畫在上面一層透明畫布（RENDER.overlayFrame）。
+// three.js r128（cdnjs 的全域版 THREE）。載不到或瀏覽器不能 3D，就用 2D。
 // 座標：引擎的 (x, y) 是 three 的 (x, 高度, y)；一格一單位。
 (function (root) {
   const R = root.R, MAP = root.MAP, T = MAP.T;
   const FONT = '"LXGW WenKai TC", "Kaiti TC", "BiauKai", "DFKai-SB", "Noto Serif TC", serif';
   const WALL_H = 1.5, SCREEN_H = 1.3, LANTERN_Y = 1.0;
+  const FS = 32;   // 立體版地板：一格幾像素
   const RM = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let THREE, renderer, scene, camera, cv, g = null, t = 0;
+  let THREE, renderer, scene, camera, cv, fxCv = null, g = null, t = 0, mode = 'attract';
   let lantern, lanternLight, lanternGlow, candles = [], poSprites = [], screens = [], doors = null, motes, moteData = [];
-  let cam = null;   // 鏡頭的位置、看的點、朝向（平滑跟著燈）
+  let walls = [], wallMesh = null, altars3 = [], wellMats = [], lureSprites = [], shotSprites = [], player = null, floorCv = null, floorTex = null, shadowPlane = null, flameTex = null, fireGlyph = null;
+  let cam = null;   // 開始畫面的鏡頭：位置、看的點、朝向（平滑跟著燈）
+  const view = { yaw: -Math.PI / 2, x: 0, y: 0, z: 0, lx: 0, lz: 0, ready: false };   // 立體版的鏡頭：yaw 是人的背後朝哪個方向看
   // 畫質：0 全開（燈投影子）、1 關影子降解析度、2 太慢就回 2D（ui 看 failed）。
-  // keep：不自動降（玩家在開始畫面按了「立體」，或網址 ?keep3d=1）。
+  // keep：不自動降（玩家按了「立體」，或網址 ?keep3d=1）。
   const perf = { q: 0, ft: [], sum: 0, last: 0, warm: 0, slow: 0, slowSum: 0, fps: 0, failed: false, keep: /[?&]keep3d=1/.test(root.location ? location.search : '') };
-  const CAM = { back: 4.8, up: 7.0, ahead: 1.6 };
+  const CAM = { back: 4.8, up: 7.0, ahead: 1.6 };          // 開始畫面
+  const PCAM = { back: 4.3, up: 4.4, ahead: 2.6, fov: 55 }; // 立體版：人的背後、高過牆頭，往前多看一點（人在畫面下方三分之一）
 
   // 能不能跑 3D：只試一次（每試一次就多開一個 WebGL，開太多瀏覽器會把舊的關掉），試完就放掉
   let okCache = null;
@@ -2227,7 +2345,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     if (o.glow) x.fillText(ch, size / 2, size / 2 + size * 0.03);
     return c;
   }
-  let texs = [];   // 這一座宅子用到的貼圖；回主頁重蓋時一起放掉
+  let texs = [];   // 這一座宅子用到的貼圖；重蓋時一起放掉
   function tex(canvas) { const t2 = new THREE.CanvasTexture(canvas); t2.encoding = THREE.sRGBEncoding; t2.anisotropy = 4; texs.push(t2); return t2; }
   function latticeCanvas() {
     const c = document.createElement('canvas'); c.width = c.height = 128;
@@ -2247,8 +2365,8 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     return c;
   }
 
-  function init(canvas) {
-    THREE = root.THREE; cv = canvas;
+  function init(canvas, overlay) {
+    THREE = root.THREE; cv = canvas; fxCv = overlay || null;
     renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
     renderer.setPixelRatio(Math.min(1.5, root.devicePixelRatio || 1));
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -2261,13 +2379,15 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     const w = cv.clientWidth || innerWidth, h = cv.clientHeight || innerHeight;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
-    // 選單在左時，把燈放在右半邊；窄螢幕選單在下面，把燈放在上面五分之一（和 2D 的開始畫面一樣）
-    if (w > 980) camera.setViewOffset(w, h, -w * 0.18, 0, w, h); else camera.setViewOffset(w, h, 0, h * 0.29, w, h);
+    // 開始畫面：選單在左時，把燈放在右半邊；窄螢幕選單在下面，把燈放在上面五分之一（和 2D 的開始畫面一樣）
+    if (mode === 'play') camera.clearViewOffset();
+    else if (w > 980) camera.setViewOffset(w, h, -w * 0.18, 0, w, h); else camera.setViewOffset(w, h, 0, h * 0.29, w, h);
     camera.updateProjectionMatrix();
+    if (fxCv) { const d = Math.min(2, root.devicePixelRatio || 1); fxCv.width = Math.round(w * d); fxCv.height = Math.round(h * d); }
   }
 
   // ---------- 照地圖蓋宅子 ----------
-  // 放掉舊宅子的形狀、材質、貼圖、影子圖（回主頁會再蓋一座，不放掉會一直佔著顯示記憶體）
+  // 放掉舊宅子的形狀、材質、貼圖、影子圖（回主頁、換成立體時會再蓋一座，不放掉會一直佔著顯示記憶體）
   function drop(s) {
     const mats = new Set();
     s.traverse((o) => {
@@ -2278,27 +2398,41 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     mats.forEach((mt) => mt.dispose());
     texs.forEach((t2) => t2.dispose()); texs = [];
   }
-  function setGame(game) {
+  function setGame(game, md) {
     if (scene) drop(scene);
-    restartPerf();   // 玩的時候 3D 沒有在畫：幀率從頭量
-    g = game; candles = []; poSprites = []; screens = []; doors = null; cam = null;
-    const m = g.m, W = m.W, H = m.H;
+    restartPerf();   // 前一陣子 3D 沒有在畫：幀率從頭量
+    g = game; mode = md === 'play' ? 'play' : 'attract';
+    candles = []; poSprites = []; screens = []; doors = null; cam = null; walls = []; altars3 = []; wellMats = []; lureSprites = []; shotSprites = []; player = null; shadowPlane = null;
+    view.ready = false; view.yaw = g.p.aim;
+    const play = mode === 'play', m = g.m, W = m.W, H = m.H;
+    camera.fov = play ? PCAM.fov : 42; resize();
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0b0a09);
-    scene.fog = new THREE.FogExp2(0x0b0a09, 0.065);
-    scene.add(new THREE.AmbientLight(0x1c2232, 0.3));
-    // 地板：2D 的宣紙底圖（只有地板、房名、廊口）
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshStandardMaterial({ map: tex(root.RENDER.floorCanvas(m)), roughness: 0.96, metalness: 0 }));
-    floor.rotation.x = -Math.PI / 2; floor.position.set(W / 2, 0, H / 2); floor.receiveShadow = true;
-    scene.add(floor);
+    scene.fog = new THREE.FogExp2(0x0b0a09, play ? 0.03 : 0.065);
+    scene.add(new THREE.AmbientLight(play ? 0xc8c0b0 : 0x1c2232, play ? 0.75 : 0.3));
+    // 地板。開始畫面：2D 的宣紙底圖，照燈光亮。立體版：每一幀由 2D 畫地上那一層（墨、光、腳印、紅圈……），不再受燈光影響
+    if (play) {
+      floorCv = document.createElement('canvas'); floorCv.width = W * FS; floorCv.height = H * FS;
+      floorTex = tex(floorCv);
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshBasicMaterial({ map: floorTex }));
+      floor.rotation.x = -Math.PI / 2; floor.position.set(W / 2, 0, H / 2);
+      scene.add(floor);
+      // 手燈讓牆投在地上的影子（關影子那一級就不畫）
+      shadowPlane = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.ShadowMaterial({ opacity: 0.4 }));
+      shadowPlane.rotation.x = -Math.PI / 2; shadowPlane.position.set(W / 2, 0.004, H / 2); shadowPlane.receiveShadow = true;
+      scene.add(shadowPlane);
+    } else {
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshStandardMaterial({ map: tex(root.RENDER.floorCanvas(m)), roughness: 0.96, metalness: 0 }));
+      floor.rotation.x = -Math.PI / 2; floor.position.set(W / 2, 0, H / 2); floor.receiveShadow = true;
+      scene.add(floor);
+    }
     // 牆：墨色的塊，深淺稍微不一，像墨暈
-    const walls = [];
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (m.at(x, y) === T.WALL) walls.push([x, y]);
-    const wm = new THREE.InstancedMesh(new THREE.BoxGeometry(1, WALL_H, 1), new THREE.MeshStandardMaterial({ color: 0x2b241d, roughness: 0.92 }), walls.length);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (m.at(x, y) === T.WALL) walls.push({ x, y, i: y * W + x, k: 0.78 + Math.random() * 0.3 });
+    wallMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, WALL_H, 1), new THREE.MeshStandardMaterial({ color: 0x2b241d, roughness: 0.92 }), walls.length);
     const o = new THREE.Object3D(), col = new THREE.Color();
-    walls.forEach(([x, y], i) => { o.position.set(x + 0.5, WALL_H / 2, y + 0.5); o.updateMatrix(); wm.setMatrixAt(i, o.matrix); const k = 0.78 + Math.random() * 0.3; wm.setColorAt(i, col.setRGB(k, k * 0.96, k * 0.9)); });
-    wm.castShadow = true; wm.receiveShadow = true;
-    scene.add(wm);
+    walls.forEach((q, i) => { o.position.set(q.x + 0.5, WALL_H / 2, q.y + 0.5); o.updateMatrix(); wallMesh.setMatrixAt(i, o.matrix); wallMesh.setColorAt(i, col.setRGB(q.k, q.k * 0.96, q.k * 0.9)); });
+    wallMesh.castShadow = true; wallMesh.receiveShadow = true;
+    scene.add(wallMesh);
     // 紙屏：格子紙，半透；被哪一邊的光照到都會亮（亮度照引擎的光），後面的魄看得到影子
     const lat = tex(latticeCanvas());
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
@@ -2310,45 +2444,49 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
       scene.add(mesh); screens.push({ mesh, i: y * W + x });
     }
     // 井
-    const wells = [];
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (m.at(x, y) === T.LOW) wells.push([x, y]);
-    if (wells.length) {
-      const cx = wells.reduce((a, q) => a + q[0], 0) / wells.length + 0.5, cz = wells.reduce((a, q) => a + q[1], 0) / wells.length + 0.5;
-      const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 1.0, 0.45, 28, 1, true), new THREE.MeshStandardMaterial({ color: 0x3a332c, roughness: 0.95, side: THREE.DoubleSide }));
+    const wl = [];
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (m.at(x, y) === T.LOW) wl.push([x, y]);
+    if (wl.length) {
+      const cx = wl.reduce((a, q) => a + q[0], 0) / wl.length + 0.5, cz = wl.reduce((a, q) => a + q[1], 0) / wl.length + 0.5;
+      const rimM = new THREE.MeshStandardMaterial({ color: 0x3a332c, roughness: 0.95, side: THREE.DoubleSide }), topM = new THREE.MeshStandardMaterial({ color: 0x4a423a, roughness: 0.9 });
+      const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 1.0, 0.45, 28, 1, true), rimM);
       rim.position.set(cx, 0.225, cz); rim.castShadow = true; rim.receiveShadow = true; scene.add(rim);
-      const top = new THREE.Mesh(new THREE.RingGeometry(0.62, 0.98, 28), new THREE.MeshStandardMaterial({ color: 0x4a423a, roughness: 0.9 }));
+      const top = new THREE.Mesh(new THREE.RingGeometry(0.62, 0.98, 28), topM);
       top.rotation.x = -Math.PI / 2; top.position.set(cx, 0.451, cz); scene.add(top);
       const hole = new THREE.Mesh(new THREE.CircleGeometry(0.62, 28), new THREE.MeshBasicMaterial({ color: 0x050404 }));
       hole.rotation.x = -Math.PI / 2; hole.position.set(cx, 0.44, cz); scene.add(hole);
+      wellMats = [{ mat: rimM, base: new THREE.Color(0x3a332c), i: Math.floor(cz) * W + Math.floor(cx) }, { mat: topM, base: new THREE.Color(0x4a423a), i: Math.floor(cz) * W + Math.floor(cx) }];
     }
-    // 燭：一根蠟燭、一朵火、一盞會跳的光
-    const flameTex = tex(radial('rgba(255,190,90,A)'));
+    // 燭：一根蠟燭、一朵火；開始畫面還有一盞會跳的光（立體版的燭光已經畫在地板上）
+    flameTex = tex(radial('rgba(255,190,90,A)'));
     for (const c of m.candles) {
       const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.38, 10), new THREE.MeshStandardMaterial({ color: 0xefe6d2, roughness: 0.8, emissive: 0x3a2a10, emissiveIntensity: 0.4 }));
       stick.position.set(c.x, 0.19, c.y); scene.add(stick);
       const flame = new THREE.Sprite(new THREE.SpriteMaterial({ map: flameTex, color: 0xffc070, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
       flame.position.set(c.x, 0.47, c.y); flame.scale.set(0.32, 0.42, 1); scene.add(flame);
-      const light = new THREE.PointLight(0xffa04a, 1.0, 5.0, 2); light.position.set(c.x, 0.6, c.y); scene.add(light);
-      candles.push({ flame, light, ph: Math.random() * 6 });
+      let light = null;
+      if (!play) { light = new THREE.PointLight(0xffa04a, 1.0, 5.0, 2); light.position.set(c.x, 0.6, c.y); scene.add(light); }
+      candles.push({ c, stick, flame, light, ph: Math.random() * 6 });
     }
-    // 印臺
+    // 印臺：取走了印就不見
     for (const a of g.altars) {
-      const table = new THREE.Mesh(new THREE.BoxGeometry(0.84, 0.5, 0.6), new THREE.MeshStandardMaterial({ color: 0x3b2a1e, roughness: 0.85 }));
+      const tableM = new THREE.MeshStandardMaterial({ color: 0x3b2a1e, roughness: 0.85 });
+      const table = new THREE.Mesh(new THREE.BoxGeometry(0.84, 0.5, 0.6), tableM);
       table.position.set(a.x, 0.25, a.y); table.castShadow = true; table.receiveShadow = true; scene.add(table);
-      const seal = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.14, 0.42), [0, 0, 1, 0, 0, 0].map((k) => new THREE.MeshStandardMaterial(k ? { map: tex(glyphCanvas(a.glyph, 128, '#f6ecd8', { bg: '#b4392a' })), roughness: 0.6 } : { color: 0xb4392a, roughness: 0.6 })));
+      const sealMs = [0, 0, 1, 0, 0, 0].map((k) => new THREE.MeshStandardMaterial(k ? { map: tex(glyphCanvas(a.glyph, 128, '#f6ecd8', { bg: '#b4392a' })), roughness: 0.6 } : { color: 0xb4392a, roughness: 0.6 }));
+      const seal = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.14, 0.42), sealMs);
       seal.position.set(a.x, 0.57, a.y); seal.castShadow = true; scene.add(seal);
+      altars3.push({ a, table, seal, mats: [{ mat: tableM, base: new THREE.Color(0x3b2a1e) }].concat(sealMs.map((mt) => ({ mat: mt, base: mt.color.clone() }))), i: Math.floor(a.y) * W + Math.floor(a.x) });
     }
-    // 大門：兩扇門板，裡面那一面寫「門」
+    // 大門：兩扇門板繞著門軸往外開，裡面那一面寫「門」
     if (m.exits.length) {
-      const ex = m.exits, x0 = ex[0].x, x1 = ex[ex.length - 1].x + 1, z = ex[0].y + 0.2;
+      const ex = m.exits, x0 = ex[0].x, x1 = ex[ex.length - 1].x + 1, z = ex[0].y + 0.2, dw = (x1 - x0) / 2;
       const doorMat = new THREE.MeshStandardMaterial({ color: 0x4a2618, roughness: 0.8 });
-      const left = new THREE.Mesh(new THREE.BoxGeometry((x1 - x0) / 2, WALL_H * 0.95, 0.14), doorMat), right = left.clone();
-      left.position.set(x0 + (x1 - x0) / 4, WALL_H * 0.475, z); right.position.set(x1 - (x1 - x0) / 4, WALL_H * 0.475, z);
-      left.castShadow = right.castShadow = true;
-      scene.add(left, right);
+      const mk = (hx, off) => { const pv = new THREE.Group(); pv.position.set(hx, 0, z); const d = new THREE.Mesh(new THREE.BoxGeometry(dw, WALL_H * 0.95, 0.14), doorMat); d.position.set(off, WALL_H * 0.475, 0); d.castShadow = true; pv.add(d); scene.add(pv); return pv; };
+      const left = mk(x0, dw / 2), right = mk(x1, -dw / 2);
       const sign = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.9), new THREE.MeshStandardMaterial({ map: tex(glyphCanvas('門', 128, '#e8d9b8')), transparent: true, roughness: 0.9 }));
       sign.position.set((x0 + x1) / 2, WALL_H * 0.55, z - 0.08); sign.rotation.y = Math.PI; scene.add(sign);
-      doors = { left, right };
+      doors = { left, right, sign, mat: doorMat, open: 0, idx: ex.map((e) => e.y * W + e.x) };
     }
     // 魄：字的貼圖；照見是墨，黑暗裡是微光，隔紙屏是影子（從半透的紙屏後面看得到）
     const looks = {
@@ -2361,38 +2499,107 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
       sp.scale.set(1.0, 1.0, 1); sp.visible = false; scene.add(sp);
       poSprites.push({ e, sp, looks });
     }
-    // 那盞燈：紙燈籠、裡面的火、會投影子的光
-    lantern = new THREE.Group();   // 圓的紙燈籠：幾道竹骨、上下木蓋、提把，正面一個「燈」
+    // 光裡的灰塵
+    const geo = new THREE.BufferGeometry(), pos = new Float32Array(60 * 3);
+    moteData = [];
+    for (let k = 0; k < 60; k++) moteData.push({ ox: (Math.random() - 0.5) * 6, oy: Math.random() * 1.6, oz: (Math.random() - 0.5) * 6, ph: Math.random() * 6 });
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    motes = new THREE.Points(geo, new THREE.PointsMaterial({ map: flameTex, color: 0xffe2b0, size: play ? 0.05 : 0.06, transparent: true, opacity: play ? 0.5 : 0.65, depthWrite: false, blending: THREE.AdditiveBlending }));
+    scene.add(motes);
+    if (play) buildPlayer(); else buildLantern();
+  }
+
+  // 開始畫面那盞燈：圓的紙燈籠，幾道竹骨、上下木蓋、提把，正面一個「燈」；會投影子的光
+  function lanternModel(scale) {
+    const grp = new THREE.Group();
     const shade = new THREE.Mesh(new THREE.SphereGeometry(0.17, 24, 16), new THREE.MeshStandardMaterial({ color: 0xffe6b8, emissive: 0xffa848, emissiveIntensity: 1.25, roughness: 0.7 }));
     shade.scale.set(1, 1.22, 1);
     const ribMat = new THREE.MeshStandardMaterial({ color: 0x6a3e1c, roughness: 0.8, emissive: 0x2a1406, emissiveIntensity: 0.6 });
-    for (const yy of [-0.12, -0.04, 0.04, 0.12]) { const r = 0.17 * Math.sqrt(1 - Math.pow(yy / (0.17 * 1.22), 2)); const rib = new THREE.Mesh(new THREE.TorusGeometry(r, 0.006, 6, 28), ribMat); rib.rotation.x = Math.PI / 2; rib.position.y = yy; lantern.add(rib); }
+    for (const yy of [-0.12, -0.04, 0.04, 0.12]) { const r = 0.17 * Math.sqrt(1 - Math.pow(yy / (0.17 * 1.22), 2)); const rib = new THREE.Mesh(new THREE.TorusGeometry(r, 0.006, 6, 28), ribMat); rib.rotation.x = Math.PI / 2; rib.position.y = yy; grp.add(rib); }
     const capMat = new THREE.MeshStandardMaterial({ color: 0x3a2412, roughness: 0.7 });
     const capT = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 0.05, 14), capMat), capB = capT.clone();
     capT.position.y = 0.215; capB.position.y = -0.215;
     const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.32, 6), capMat); handle.position.y = 0.39;
     const word = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex(glyphCanvas('燈', 128, '#8a3a12')), transparent: true, depthTest: false, opacity: 0.85 }));
     word.scale.set(0.17, 0.17, 1); word.renderOrder = 2;
-    lantern.add(shade, capT, capB, handle, word);
-    lanternGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: flameTex, color: 0xffb060, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.8 }));
-    lanternGlow.scale.set(1.2, 1.2, 1); lantern.add(lanternGlow);
-    lanternLight = new THREE.PointLight(0xffc27a, 1.9, 8.5, 1.6);
-    lanternLight.castShadow = perf.q === 0; lanternLight.shadow.mapSize.set(512, 512); lanternLight.shadow.bias = -0.004; lanternLight.shadow.camera.near = 0.1; lanternLight.shadow.camera.far = 9;
+    grp.add(shade, capT, capB, handle, word);
+    const glowS = new THREE.Sprite(new THREE.SpriteMaterial({ map: flameTex, color: 0xffb060, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.8 }));
+    glowS.scale.set(1.2, 1.2, 1); grp.add(glowS);
+    grp.scale.setScalar(scale || 1);
+    return { grp, shade, glow: glowS, word };
+  }
+  function lampLight(power, dist) {
+    const l = new THREE.PointLight(0xffc27a, power, dist, 1.6);
+    l.castShadow = perf.q === 0; l.shadow.mapSize.set(512, 512); l.shadow.bias = -0.004; l.shadow.camera.near = 0.1; l.shadow.camera.far = 9;
+    return l;
+  }
+  function buildLantern() {
+    const L = lanternModel(1);
+    lantern = L.grp; lanternGlow = L.glow;
+    lanternLight = lampLight(1.9, 8.5);
     lantern.add(lanternLight);
     scene.add(lantern);
-    // 光裡的灰塵
-    const geo = new THREE.BufferGeometry(), pos = new Float32Array(60 * 3);
-    moteData = [];
-    for (let k = 0; k < 60; k++) moteData.push({ ox: (Math.random() - 0.5) * 6, oy: Math.random() * 1.6, oz: (Math.random() - 0.5) * 6, ph: Math.random() * 6 });
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    motes = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffe2b0, size: 0.035, transparent: true, opacity: 0.65, depthWrite: false, blending: THREE.AdditiveBlending }));
-    scene.add(motes);
   }
+  // 立體版的人：墨色長衫、紙色的臉、斗笠，右手提一盞小燈籠（點著時發光、投影子；掩著時是暗的）
+  function buildPlayer() {
+    const grp = new THREE.Group();
+    const robeM = new THREE.MeshStandardMaterial({ color: 0x1e1b18, roughness: 1, emissive: 0x0e0c0a, emissiveIntensity: 1 });
+    const robe = new THREE.Mesh(new THREE.ConeGeometry(0.27, 0.9, 20), robeM); robe.position.y = 0.45;
+    const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.1, 0.08, 16), new THREE.MeshStandardMaterial({ color: 0xe8dcc0, roughness: 0.9 })); collar.position.y = 0.88;
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.13, 18, 14), new THREE.MeshStandardMaterial({ color: 0xefe3c8, roughness: 0.85, emissive: 0x2a2418, emissiveIntensity: 0.5 })); head.position.y = 1.0;
+    const hat = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.14, 24), new THREE.MeshStandardMaterial({ color: 0x5a4630, roughness: 0.95 })); hat.position.y = 1.13;
+    const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.04, 0.42, 8), robeM); arm.position.set(0.04, 0.72, 0.24); arm.rotation.x = -0.5;
+    grp.add(robe, collar, head, hat, arm);
+    const L = lanternModel(0.62);   // 手燈：提在右手前方
+    L.grp.position.set(0.16, 0.55, 0.34);
+    grp.add(L.grp);
+    const light = lampLight(1.5, 7.5); light.position.set(0.16, 0.6, 0.34);
+    grp.add(light);
+    scene.add(grp);
+    lanternLight = light; lanternGlow = L.glow; lantern = null;
+    player = { grp, lamp: L, light, robe };
+    // 借火的火、飛出去的火符：立起來的一團火（字在地板那層也有光）
+    fireGlyph = tex(glyphCanvas('火', 128, '#c8461f', { glow: 'rgba(255,150,60,.95)' }));
+  }
+  function spritePool(list, n, make) { while (list.length < n) { const s = make(); scene.add(s); list.push(s); } list.forEach((s, k) => { s.visible = k < n; }); return list; }
 
   // ---------- 一幀 ----------
   function frame(dt, w) {
     if (!renderer || !g) return;
-    w = w || {};
+    if (mode === 'play') framePlay(dt, w || {}); else frameAttract(dt, w || {});
+    watchPerf();
+  }
+  function moteStep(px, py) {
+    const arr = motes.geometry.attributes.position.array;
+    moteData.forEach((q, k) => {
+      const a = q.ph + t * 0.25;
+      arr[k * 3] = px + q.ox + Math.cos(a) * 0.4; arr[k * 3 + 1] = 0.2 + ((q.oy + t * 0.05) % 1.6); arr[k * 3 + 2] = py + q.oz + Math.sin(a * 0.8) * 0.4;
+    });
+    motes.geometry.attributes.position.needsUpdate = true;
+  }
+  function poStep(lift) {   // 魄：引擎說看得見才畫
+    for (const q of poSprites) {
+      const e = q.e, vis = e.vis, P = R.PO;
+      if (e.state === 'gone') {   // 凝回：看得見那個地方時，慢慢浮出來
+        const f = e.formSpot && e.goneT <= P.formT && g.spotVisible(e.formSpot) ? 1 - Math.max(0, e.goneT) / P.formT : 0;
+        q.sp.visible = mode === 'play' && f > 0;
+        if (q.sp.visible) { q.sp.material.map = q.looks.lit; q.sp.material.opacity = 0.15 + 0.35 * f; q.sp.material.rotation = 0; q.sp.position.set(e.formSpot.x, 0.7 * lift, e.formSpot.y); q.sp.scale.setScalar(0.9); }
+        continue;
+      }
+      if (!vis) { q.sp.visible = false; continue; }
+      q.sp.visible = true;
+      if (q.sp.material.map !== q.looks[vis.mode]) { q.sp.material.map = q.looks[vis.mode]; q.sp.material.needsUpdate = true; }
+      const hpF = mode === 'play' ? 0.5 + 0.5 * Math.max(0.25, e.hp / P.hp) : 1;
+      q.sp.material.opacity = vis.mode === 'silhouette' ? 0.85 : Math.min(1, vis.a * (vis.mode === 'dark' ? 1.4 : 1.1)) * hpF;
+      const dorm = e.state === 'dormant';
+      q.sp.material.rotation = dorm ? -0.5 : 0;
+      const wob = RM ? 1 : 1 + 0.05 * Math.sin(t * 3 + e.id);
+      const jit = RM ? 0 : e.state === 'windup' ? (Math.random() - 0.5) * 0.05 : e.state === 'stagger' ? (Math.random() - 0.5) * 0.08 : 0;
+      q.sp.scale.set((dorm ? 0.8 : 1.0) * wob * lift, (dorm ? 0.8 : 1.0) * wob * lift, 1);
+      q.sp.position.set(e.x + jit, dorm ? 0.35 : 0.7 * lift + (RM ? 0 : Math.sin(t * 1.7 + e.id) * 0.05), e.y);
+    }
+  }
+  function frameAttract(dt, w) {
     t += dt;
     const p = g.p, v = g.view(13);
     // 燈：在路線上飄，微微上下
@@ -2403,26 +2610,8 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     for (const c of candles) { const f = RM ? 1 : 0.85 + 0.15 * Math.sin(t * 11 + c.ph) * Math.sin(t * 7 + c.ph * 2); c.light.intensity = 1.0 * f; c.flame.scale.set(0.3, 0.42 * f, 1); }
     // 紙屏：照引擎算的光發亮（哪一邊照到都算）
     for (const s of screens) s.mesh.material.emissiveIntensity = Math.min(0.9, (v.light[s.i] || 0) * 0.9);
-    // 魄：引擎說看得見才畫
-    for (const q of poSprites) {
-      const e = q.e, vis = e.vis;
-      if (e.state === 'gone' || !vis) { q.sp.visible = false; continue; }
-      q.sp.visible = true;
-      q.sp.material.map = q.looks[vis.mode]; q.sp.material.needsUpdate = true;
-      q.sp.material.opacity = vis.mode === 'silhouette' ? 0.85 : Math.min(1, vis.a * (vis.mode === 'dark' ? 1.4 : 1.1));
-      const dorm = e.state === 'dormant';
-      q.sp.material.rotation = dorm ? -0.5 : 0;
-      const wob = RM ? 1 : 1 + 0.05 * Math.sin(t * 3 + e.id);
-      q.sp.scale.set((dorm ? 0.8 : 1.0) * wob, (dorm ? 0.8 : 1.0) * wob, 1);
-      q.sp.position.set(e.x, dorm ? 0.35 : 0.7 + (RM ? 0 : Math.sin(t * 1.7 + e.id) * 0.05), e.y);
-    }
-    // 灰塵：跟著燈飄
-    const arr = motes.geometry.attributes.position.array;
-    moteData.forEach((q, k) => {
-      const a = q.ph + t * 0.25;
-      arr[k * 3] = p.x + q.ox + Math.cos(a) * 0.4; arr[k * 3 + 1] = 0.2 + ((q.oy + t * 0.05) % 1.6); arr[k * 3 + 2] = p.y + q.oz + Math.sin(a * 0.8) * 0.4;
-    });
-    motes.geometry.attributes.position.needsUpdate = true;
+    poStep(1);
+    moteStep(p.x, p.y);
     // 鏡頭：在燈的後上方，朝著燈要去的方向；位置與朝向都慢慢跟，一路平順
     const lead = w.lead || { dx: 1, dy: 0 };
     if (!cam || w.snap) cam = { dx: lead.dx, dy: lead.dy, x: p.x - lead.dx * CAM.back, y: CAM.up, z: p.y - lead.dy * CAM.back, lx: p.x + lead.dx * CAM.ahead, lz: p.y + lead.dy * CAM.ahead };
@@ -2434,8 +2623,94 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     camera.position.set(cam.x, cam.y, cam.z);
     camera.lookAt(cam.lx, 0.3, cam.lz);
     renderer.render(scene, camera);
-    watchPerf();
   }
+
+  // 立體版：w.turn（I、O 轉鏡頭，-1..1）、w.follow（往前走時鏡頭慢慢轉到人走的方向）、w.snap、w.autoAim
+  const angDiff = (a, b) => { let d = a - b; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return d; };
+  function framePlay(dt, w) {
+    const p = g.p;
+    const v = root.RENDER.floorFrame(dt, floorCv, FS, { autoAim: w.autoAim });
+    floorTex.needsUpdate = true;
+    t += dt;
+    const seen = (i) => Math.max(Math.min(1, (v.vis[i] || 0) * 1.3), g.explored[i] ? 0.1 : 0);   // 和 2D 的墨一樣：看不見就黑，走過的留一點
+    // 牆
+    const col = new THREE.Color();
+    walls.forEach((q, k) => { const f = seen(q.i); wallMesh.setColorAt(k, col.setRGB(q.k * f, q.k * 0.96 * f, q.k * 0.9 * f)); });
+    wallMesh.instanceColor.needsUpdate = true;
+    // 紙屏：看得見才看得到紙，被照到才發亮
+    for (const s of screens) { const f = seen(s.i); s.mesh.material.color.setScalar(f); s.mesh.material.emissiveIntensity = f > 0.1 ? Math.min(0.9, (v.light[s.i] || 0) * 0.9) : 0; }
+    for (const wm of wellMats) wm.mat.color.copy(wm.base).multiplyScalar(seen(wm.i));
+    for (const q of altars3) { const f = seen(q.i); q.seal.visible = !q.a.taken; for (const mm of q.mats) mm.mat.color.copy(mm.base).multiplyScalar(Math.max(f, 0.02)); }
+    // 燭：火苗直接看得到才畫（隔著紙屏只有地板上那一團暈）
+    for (const c of candles) {
+      const line = g.sightLine(p.x, p.y, c.c.x, c.c.y), near = Math.hypot(c.c.x - p.x, c.c.y - p.y) < 14, f = RM ? 1 : 0.85 + 0.15 * Math.sin(t * 11 + c.ph) * Math.sin(t * 7 + c.ph * 2);
+      c.flame.visible = line === 'clear' && near; c.flame.scale.set(0.3, 0.42 * f, 1);
+      c.stick.visible = line !== 'blocked' && near; c.stick.material.color.setScalar(Math.max(0.15, seen(Math.floor(c.c.y) * g.m.W + Math.floor(c.c.x))));
+    }
+    // 大門：推開門閂後兩扇往外開
+    if (doors) {
+      doors.open += ((g.exitOpen ? 1 : 0) - doors.open) * (1 - Math.pow(0.05, dt));
+      doors.left.rotation.y = -1.3 * doors.open; doors.right.rotation.y = 1.3 * doors.open;
+      const f = Math.max(...doors.idx.map((i) => seen(i)), 0.02);
+      doors.mat.color.setRGB(0.29 * f, 0.15 * f, 0.094 * f);
+    }
+    // 借火的火、飛出去的火符
+    spritePool(lureSprites, g.lures.length, () => new THREE.Sprite(new THREE.SpriteMaterial({ map: fireGlyph, transparent: true, depthWrite: false })));
+    g.lures.forEach((l, k) => {
+      const s = lureSprites[k], line = g.sightLine(p.x, p.y, l.x, l.y), fl = RM ? 1 : 0.88 + 0.12 * Math.sin(t * 13 + l.id);
+      s.visible = line === 'clear'; s.position.set(l.x, 0.42 + (RM ? 0 : 0.04 * Math.sin(t * 5)), l.y); s.scale.set(0.75 * fl, 0.75 * fl, 1); s.material.opacity = Math.min(1, l.t / 2);
+    });
+    spritePool(shotSprites, g.shots.length, () => new THREE.Sprite(new THREE.SpriteMaterial({ map: fireGlyph, transparent: true, depthWrite: false })));
+    g.shots.forEach((q, k) => { const s = shotSprites[k]; s.position.set(q.x, 0.6, q.y); s.scale.set(0.5, 0.5, 1); });
+    poStep(1.1);
+    // 人：面向對準的方向；走路時身子微微起伏，手燈晃
+    const walk = RM ? 0 : p.moving ? Math.abs(Math.sin(t * 9)) * 0.04 : 0;
+    player.grp.position.set(p.x, walk, p.y);
+    player.grp.rotation.y = -p.aim;
+    const sw = RM ? 0 : p.moving ? Math.sin(t * 9) * 0.12 : Math.sin(t * 2) * 0.03;
+    player.lamp.grp.rotation.x = sw;
+    const fl = RM ? 1 : 0.9 + 0.1 * Math.sin(t * 13) * Math.sin(t * 7.3 + 1);
+    player.lamp.shade.material.emissiveIntensity = p.lampOn ? 1.25 * fl : 0;
+    player.lamp.shade.material.color.setHex(p.lampOn ? 0xffe6b8 : 0x4a4038);
+    player.lamp.glow.visible = p.lampOn; player.lamp.glow.material.opacity = 0.55 * fl;
+    player.light.intensity = p.lampOn ? 1.5 * fl : 0;
+    player.light.castShadow = p.lampOn && perf.q === 0;
+    if (shadowPlane) shadowPlane.visible = p.lampOn && perf.q === 0;
+    moteStep(p.x, p.y); motes.visible = p.lampOn;
+    // 鏡頭：在人的背後、高過牆頭，往前看一點。I、O 轉；往前走時慢慢轉到人走的方向
+    if (w.turn) view.yaw += w.turn * 1.9 * dt;
+    if (w.follow != null) view.yaw += angDiff(w.follow, view.yaw) * (1 - Math.pow(0.4, dt));
+    const fx = Math.cos(view.yaw), fz = Math.sin(view.yaw);
+    const want = { x: p.x - fx * PCAM.back, y: PCAM.up, z: p.y - fz * PCAM.back, lx: p.x + fx * PCAM.ahead, lz: p.y + fz * PCAM.ahead };
+    const k = !view.ready || w.snap ? 1 : 1 - Math.pow(0.002, dt);
+    for (const key of ['x', 'y', 'z', 'lx', 'lz']) view[key] += (want[key] - view[key]) * k;
+    view.ready = true;
+    const sh = root.RENDER.shake / 0.3;
+    camera.position.set(view.x + (sh ? (Math.random() - 0.5) * 0.12 * sh : 0), view.y + (sh ? (Math.random() - 0.5) * 0.12 * sh : 0), view.z);
+    camera.lookAt(view.lx, 0.45, view.lz);
+    renderer.render(scene, camera);
+    if (fxCv) root.RENDER.overlayFrame(dt, fxCv, proj);
+  }
+  // 世界上 (x, y)、高 h 的點在疊層畫布的哪裡；k 是那裡一格幾像素
+  let v3 = null, v3b = null;
+  function proj(x, h, y) {
+    v3 = v3 || new THREE.Vector3(); v3b = v3b || new THREE.Vector3();
+    v3.set(x, h, y).project(camera);
+    if (v3.z > 1 || v3.z < -1) return null;
+    const W = fxCv.width, H = fxCv.height, d = camera.position.distanceTo(v3b.set(x, h, y));
+    return { X: (v3.x + 1) / 2 * W, Y: (1 - v3.y) / 2 * H, k: H / (2 * Math.max(0.5, d) * Math.tan(camera.fov * Math.PI / 360)) };
+  }
+  // 滑鼠指到的地方（腰的高度）在世界上哪一格：給對準用
+  let ray = null, plane = null;
+  function toWorld(clientX, clientY) {
+    ray = ray || new THREE.Raycaster(); plane = plane || new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.6);
+    const r = cv.getBoundingClientRect();
+    ray.setFromCamera({ x: ((clientX - r.left) / r.width) * 2 - 1, y: -((clientY - r.top) / r.height) * 2 + 1 }, camera);
+    const hit = new THREE.Vector3();
+    if (!ray.ray.intersectPlane(plane, hit)) return null;
+    return { x: hit.x, y: hit.z };
+  }
+
   // 太慢就降：先關影子、降解析度；還是太慢就請 ui 換回 2D，免得一頓一頓的又像剪接。
   // 量法（2026-11-05 改，擁有者在自己的電腦上沒看到 3D）：
   // - 先熱身一秒半不算（載貼圖、編譯著色器時會卡幾幀）；
@@ -2471,8 +2746,14 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     if (perf.failed) { perf.failed = false; perf.q = 1; if (lanternLight) lanternLight.castShadow = false; if (renderer) { renderer.setPixelRatio(1); resize(); } }
     restartPerf();
   }
+  // 暫停、結束畫面時 3D 不畫新的一幀：回來時幀率從頭量
+  function pausePerf() { perf.last = 0; }
 
-  root.RENDER3D = { ok, init, setGame, frame, resize, force, get cam() { return cam; }, get quality() { return perf.q; }, get failed() { return perf.failed; }, get fps() { return perf.fps; }, get keep() { return perf.keep; } };
+  root.RENDER3D = {
+    ok, init, setGame, frame, resize, force, pausePerf, toWorld, proj: (x, h, y) => proj(x, h, y),
+    get cam() { return cam; }, get view() { return view; }, get yaw() { return view.yaw; }, get mode() { return mode; }, get game() { return g; },
+    get quality() { return perf.q; }, get failed() { return perf.failed; }, get fps() { return perf.fps; }, get keep() { return perf.keep; }
+  };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
 </script>
@@ -2508,7 +2789,8 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     seal2: '兩印到手。回大門，按住 U 推開門閂（要一秒半）。魄也往玄關去了。',
     gate: '按住 U 推開門閂。推的時候不能動，被咬就要重來。魄在附近時，可以先借火把它引開，或封住它過來的廊口。',
     track: '那隻魄在聞你的腳印（頭上有「嗅」）。腳印新的時候它跟得上；你一直走，它就追不上，停下來就會被追到。掩燈放輕腳步，腳印淡得快；封戶擋得住它，借火也能把它引開。',
-    chill: '寒意很高。到燭火或借火旁邊可以取暖，但站在火光裡，魄看得見你。'
+    chill: '寒意很高。到燭火或借火旁邊可以取暖，但站在火光裡，魄看得見你。',
+    view3d: '立體：鏡頭在你背後。W 往前、S 往後、A D 往左右；I、O 轉鏡頭，往前走時鏡頭會慢慢跟上。右上角「換成平面」或暫停面板可以換回平面。'
   };
   const SPELL = { borrow: '借火', seal: '封戶' };
 
@@ -2534,7 +2816,8 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   }
   let hintTimer = 0;
   function showHint(key) {
-    const t = HINT[key]; if (!t) return;
+    let t = HINT[key]; if (!t) return;
+    if (key === 'start' && use3d && g && !g.attract) { t += '\n' + HINT.view3d; g._hint3d = true; }   // 立體版：開頭的提示順便說怎麼走、怎麼轉鏡頭
     const h = $('hint'); h.textContent = t; h.classList.remove('hidden');
     clearTimeout(hintTimer); hintTimer = setTimeout(() => h.classList.add('hidden'), 9000);
   }
@@ -2626,8 +2909,9 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   function seedFromUrl() { const m = /[?&]seed=(\d+)/.exec(location.search); return m ? +m[1] : (Date.now() % 100000) | 0; }
   function enter(gg) {
     g = gg; window.DENG.g = g;
-    if (use3d) { $('world3d').classList.add('hidden'); cv.classList.remove('hidden'); }   // 可玩的部分目前還是 2D
     RD.setGame(g);
+    if (use3d) { try { sync3d(); } catch (e) { use3d = false; viewWhy = 'broken'; } }   // 立體版：鏡頭在人背後
+    canvases(); renderView();
     $('log').innerHTML = ''; $('hint').classList.add('hidden');
     ['start', 'pause', 'end'].forEach((id) => $(id).classList.add('hidden'));
     $('hud').classList.remove('hidden');
@@ -2635,6 +2919,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     disarm(); $('save-msg').textContent = '';
     lsSet('xieyi.deng.slot', String(slot));
     SFX.ambient(true); heartT = 0.3; creakT = 6 + Math.random() * 6;
+    if (use3d) hint3d();
   }
   function newGame(n, seed) {
     if (n) slot = n;
@@ -2767,6 +3052,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     if (paused) { if (SLOT_KEY[ev.code] && !ev.repeat) saveAs(SLOT_KEY[ev.code]); else if (ev.code === 'KeyM' && !ev.repeat) toTitle(); return; }   // 暫停時 U、I、O：存到那一格；M 回主頁
     if (!running) return;
     if (MOVE[ev.code]) keys.add(ev.code);
+    if (ev.code === 'KeyI' || ev.code === 'KeyO') keys.add(ev.code);   // 立體版：I、O 轉鏡頭（平面時沒有作用）
     if (ev.repeat) return;
     if (ACT[ev.code]) press[ACT[ev.code]] = true;
     if (ev.code === HOLD) holdTake = true;
@@ -2777,25 +3063,35 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   document.addEventListener('visibilitychange', () => { if (document.hidden) { keys.clear(); holdTake = false; if (running && !paused) setPause(true, 'blur'); } });
   addEventListener('mousemove', (ev) => { mouse.x = ev.clientX; mouse.y = ev.clientY; mouse.t = performance.now(); mouse.in = true; });
   document.addEventListener('mouseleave', () => { mouse.in = false; });
-  cv.addEventListener('mousedown', (ev) => {
+  const onDown = (ev) => {
     if (!running || paused) return;
     mouse.x = ev.clientX; mouse.y = ev.clientY; mouse.t = performance.now(); mouse.in = true;
     if (ev.button === 0) press.sword = true;
     if (ev.button === 2) press.fire = true;
-  });
-  cv.addEventListener('contextmenu', (ev) => ev.preventDefault());
+  };
+  for (const c of [cv, $('world3d')]) { c.addEventListener('mousedown', onDown); c.addEventListener('contextmenu', (ev) => ev.preventDefault()); }
   document.querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', (ev) => { ev.preventDefault(); if (running && !paused) press[b.dataset.act] = true; b.blur(); }));
 
   let aimAuto = true;
+  const cam3 = { turn: 0, follow: null };   // 立體版的鏡頭：I、O 轉；往前走時跟上
   function input() {
-    let mx = 0, my = 0;
-    for (const k of keys) { const v = MOVE[k]; if (v) { mx += v[0]; my += v[1]; } }
+    let kx = 0, ky = 0;
+    for (const k of keys) { const v = MOVE[k]; if (v) { kx += v[0]; ky += v[1]; } }
+    let mx = kx, my = ky;
+    const in3d = use3d && RENDER3D.mode === 'play';
+    cam3.turn = in3d ? (keys.has('KeyO') ? 1 : 0) - (keys.has('KeyI') ? 1 : 0) : 0;
+    cam3.follow = null;
+    if (in3d && (kx || ky)) {   // 立體：W 是鏡頭看的方向，S 往回，A、D 往左右
+      const yaw = RENDER3D.yaw, fx = Math.cos(yaw), fy = Math.sin(yaw);
+      mx = fx * -ky - fy * kx; my = fy * -ky + fx * kx;
+      if (ky < 0) cam3.follow = Math.atan2(my, mx);   // 往前走（帶一點左右也算）時，鏡頭慢慢轉到人走的方向
+    }
     if (mx || my) moveDir = Math.atan2(my, mx);
     const now = performance.now(), useMouse = mouse.in && now - mouse.t < 2500;
     let aim = null, target = null;
     if (useMouse) {
-      const d = Math.min(2, window.devicePixelRatio || 1), w = RD.toWorld(mouse.x * d, mouse.y * d);
-      aim = Math.atan2(w.y - g.p.y, w.x - g.p.x); target = w;
+      const d = Math.min(2, window.devicePixelRatio || 1), w = in3d ? RENDER3D.toWorld(mouse.x, mouse.y) : RD.toWorld(mouse.x * d, mouse.y * d);
+      if (w) { aim = Math.atan2(w.y - g.p.y, w.x - g.p.x); target = w; }
     } else if (mx || my) aim = moveDir;
     aimAuto = !useMouse;   // 沒用滑鼠：劍與火符自動對準看得見的魄
     return { mx, my, aim, target, autoAim: aimAuto, press, hold: { take: holdTake } };
@@ -2865,28 +3161,41 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     g = E.create({ seed: seedFromUrl() }); g.attract = true;
     const q = window.TOUR.at(tour.s); g.tp(q.x, q.y); tourDir = { dx: q.dx, dy: q.dy };
     window.DENG.g = g; RD.setGame(g); g.drain(); snap = true;
-    if (use3d && !RENDER3D.failed) { RENDER3D.setGame(g); r3game = g; $('world3d').classList.remove('hidden'); cv.classList.add('hidden'); }
+    if (use3d && !RENDER3D.failed) sync3d();
+    canvases();
   }
 
-  // ---------- 開始畫面用立體還是平面（擁有者 2026-11-05：「我沒看到3d版的呢」） ----------
-  // 右上角「立體｜平面」：看得到現在用哪一種；自己換成平面時說原因；按「立體」再試就不再自動換。
-  // 玩家按過的選擇記在 xieyi.deng.view（'3d'／'2d'）。網址 ?flat=1 只管這一次。
+  // ---------- 立體還是平面（擁有者 2026-11-05「我沒看到3d版的呢」、2026-11-22「遊戲內部沒有3d這個選項呀」） ----------
+  // 開始畫面的選單角上、暫停面板、玩的時候右上角都能換：開始畫面是立體的長鏡頭，進一局是鏡頭在人背後的立體版。
+  // 自己換成平面時說原因；按「立體」再試就不再自動換。按過的選擇記在 xieyi.deng.view（'3d'／'2d'）。網址 ?flat=1 只管這一次。
   const FLAT_URL = /[?&]flat=1/.test(location.search);
   let r3ready = false, r3game = null, viewWhy = FLAT_URL || lsGet('xieyi.deng.view') === '2d' ? '' : 'loading';
   const can3d = () => !!(RENDER3D && RENDER3D.ok());
+  // 立體那邊蓋的是不是現在這一局、是開始畫面還是玩的那一種
+  function sync3d() {
+    const want = g.attract ? 'attract' : 'play';
+    if (r3game !== g || RENDER3D.mode !== want) { RENDER3D.setGame(g, want); r3game = g; snap = true; }
+  }
+  // 哪一張畫布在前面：開始畫面的立體只要 3D；立體版還要上面那層字；平面只要 2D
+  function canvases() {
+    $('world3d').classList.toggle('hidden', !use3d);
+    $('world3dfx').classList.toggle('hidden', !(use3d && g && !g.attract));
+    cv.classList.toggle('hidden', use3d);
+  }
+  function hint3d() { if (g && !g._hint3d) { g._hint3d = true; showHint('view3d'); } }
   function set3d(on, save, force) {
     if (on) {
       if (!can3d()) { renderView(); return false; }
       try {
-        if (!r3ready) { RENDER3D.init($('world3d')); r3ready = true; }
+        if (!r3ready) { RENDER3D.init($('world3d'), $('world3dfx')); r3ready = true; }
         if (force) RENDER3D.force();
-        if (r3game !== g && g.attract) { RENDER3D.setGame(g); r3game = g; }
-      } catch (e) { use3d = false; viewWhy = 'broken'; renderView(); return false; }
+        sync3d();
+      } catch (e) { use3d = false; viewWhy = 'broken'; canvases(); renderView(); return false; }
       use3d = true; viewWhy = '';
-      if (!running) { $('world3d').classList.remove('hidden'); cv.classList.add('hidden'); RENDER3D.resize(); }
+      canvases(); RENDER3D.resize();
+      if (running) hint3d();
     } else {
-      use3d = false;
-      $('world3d').classList.add('hidden'); cv.classList.remove('hidden'); snap = true;
+      use3d = false; canvases(); snap = true;
     }
     if (save) lsSet('xieyi.deng.view', on ? '3d' : '2d');
     renderView();
@@ -2894,14 +3203,16 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   }
   function renderView() {
     const can = can3d();
-    $('vm-3d').classList.toggle('on', use3d); $('vm-2d').classList.toggle('on', !use3d);
-    $('vm-3d').disabled = !can;
+    for (const [a, b] of [['vm-3d', 'vm-2d'], ['pv-3d', 'pv-2d']]) { $(a).classList.toggle('on', use3d); $(b).classList.toggle('on', !use3d); $(a).disabled = !can; }
+    $('btn-view').textContent = use3d ? '換成平面' : '換成立體';
+    $('btn-view').disabled = !can && !use3d;
     const fps = RENDER3D && RENDER3D.fps ? Math.round(RENDER3D.fps) : 0;
-    $('vm-note').textContent = viewWhy === 'loading' && can ? '立體的宅子載入中……'
+    const note = viewWhy === 'loading' && can ? '立體的宅子載入中……'
       : !window.THREE ? '立體要用的 three.js 沒載到，先用平面。'
       : !can || viewWhy === 'broken' ? '這個瀏覽器跑不了立體（WebGL 沒開），先用平面。'
       : viewWhy === 'slow' ? `這台跑立體太慢${fps ? `（每秒約 ${fps} 幀）` : ''}，自動換成平面。按「立體」再試，就不會再自動換。`
       : '';
+    $('vm-note').textContent = note; $('pv-note').textContent = note;
   }
   // 路線在 src/tour.js：一條平滑閉合的曲線，等速走，不停不頓，看起來是一個長鏡頭
   const tour = { s: 0 };
@@ -2926,9 +3237,13 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
         handle(g.drain());
         mood(dt);
       } else if (onStart) { tourStep(dt); g.advance(dt, {}); g.drain(); }
-      if (onStart && use3d && RENDER3D.failed) { set3d(false); viewWhy = 'slow'; renderView(); }   // 這台跑不動 3D：回 2D，右上角說原因
-      if (onStart && use3d) RENDER3D.frame(dt, { lead: tourDir, snap });
-      else RD.frame(running && !paused || onStart ? dt : 0, { snap, attract: onStart, lead: onStart ? tourDir : null, autoAim: aimAuto });
+      if (use3d && RENDER3D.failed) {   // 這台跑不動 3D：回 2D，說原因
+        set3d(false); viewWhy = 'slow'; renderView();
+        if (running) log('這台跑立體太慢，換成平面', 'warn');
+      }
+      const go = running && !paused || onStart ? dt : 0;
+      if (use3d) RENDER3D.frame(go, onStart ? { lead: tourDir, snap } : { snap, autoAim: aimAuto, turn: go ? cam3.turn : 0, follow: go ? cam3.follow : null });
+      else RD.frame(go, { snap, attract: onStart, lead: onStart ? tourDir : null, autoAim: aimAuto });
       snap = false;
       if (!onStart) hud();
     }
@@ -2957,7 +3272,9 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   const muteBtns = () => ['btn-mute', 'btn-mute2'].forEach((id) => { $(id).classList.toggle('off', SFX.muted); $(id).textContent = SFX.muted ? '音效關' : '音效'; });
   ['btn-mute', 'btn-mute2'].forEach((id) => $(id).addEventListener('click', (ev) => { SFX.unlock(); SFX.toggle(); muteBtns(); ev.currentTarget.blur(); }));
   muteBtns(); showBest();
-  ['vm-3d', 'vm-2d'].forEach((id) => $(id).addEventListener('click', (ev) => { ev.currentTarget.blur(); if (id === 'vm-3d') set3d(true, true, true); else { viewWhy = ''; set3d(false, true); } }));
+  const pickView = (on) => { if (on) set3d(true, true, true); else { viewWhy = ''; set3d(false, true); } };
+  ['vm-3d', 'pv-3d', 'vm-2d', 'pv-2d'].forEach((id) => $(id).addEventListener('click', (ev) => { ev.currentTarget.blur(); pickView(id.endsWith('3d')); }));
+  $('btn-view').addEventListener('click', (ev) => { ev.currentTarget.blur(); pickView(!use3d); });
   if (window.matchMedia && matchMedia('(pointer: coarse)').matches && !matchMedia('(pointer: fine)').matches) $('touchnote').textContent = '這一版是試做，只做了鍵盤與滑鼠；手機上還不能玩。';
 
   // 先在背景擺好宅子（開始畫面後面看得到一點點）

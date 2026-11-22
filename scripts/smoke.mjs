@@ -360,15 +360,49 @@ try {
   // 無頭瀏覽器一秒只有四幀，每幀超過 0.25 秒的上限，所以量到的比 1.15 慢；真機要 20 幀以上才留在 3D，不會碰到上限
   const onRoute = await tp.evaluate(() => { const q = TOUR.at(DENG.tour.s); return Math.hypot(q.x - DENG.g.p.x, q.y - DENG.g.p.y); });
   ok('3D 開始畫面：用 3D 畫、右上角亮「立體」、燈沿著路線走、沒有報錯', info.use3d && info.shown && info.flatHidden && info.btn && info.note === '' && speed > 0.5 && speed < 1.3 && onRoute < 0.01 && s1.cam && errs3.length === 0, { info, speed: +speed.toFixed(2), onRoute, errs: errs3.slice(0, 3) });
-  // 入宅（2D）再回主頁：開始畫面換回 3D，燈從剛才的地方接著走
-  await tp.keyboard.press('Enter'); await tp.waitForTimeout(500);
-  const in2d = await tp.evaluate(() => ({ running: DENG.running, flat: !document.getElementById('world').classList.contains('hidden'), d3: document.getElementById('world3d').classList.contains('hidden') }));
+  // 立體版（2026-11-22）：入宅後鏡頭在人背後；W 往鏡頭前方走、I／O 轉鏡頭、左鍵揮劍；字那一層在上面
+  await tp.keyboard.press('Enter'); await tp.waitForTimeout(1500);
+  const in3 = await tp.evaluate(() => ({ running: DENG.running, mode: window.RENDER3D.mode, d3: !document.getElementById('world3d').classList.contains('hidden'), fx: !document.getElementById('world3dfx').classList.contains('hidden'), flatHidden: document.getElementById('world').classList.contains('hidden'), btn: document.getElementById('btn-view').textContent, hint: document.getElementById('hint').textContent, x: DENG.g.p.x, y: DENG.g.p.y, yaw: window.RENDER3D.yaw }));
+  await tp.screenshot({ path: path.join(out, '26-play-3d.png') });
+  ok('立體版：入宅後用 3D 畫、鏡頭在背後、右上角「換成平面」、有操作提示', in3.running && in3.mode === 'play' && in3.d3 && in3.fx && in3.flatHidden && in3.btn === '換成平面' && in3.hint.includes('I、O'), in3);
+  await tp.keyboard.down('KeyW'); await tp.waitForTimeout(1200); await tp.keyboard.up('KeyW');
+  const w3 = await tp.evaluate(() => ({ x: DENG.g.p.x, y: DENG.g.p.y }));
+  await tp.keyboard.down('KeyO'); await tp.waitForTimeout(700); await tp.keyboard.up('KeyO');
+  const yaw1 = await tp.evaluate(() => window.RENDER3D.yaw);
+  // 轉了鏡頭之後，W 往新的前方走
+  const fw = await tp.evaluate(() => ({ x: DENG.g.p.x, y: DENG.g.p.y, fx: Math.cos(window.RENDER3D.yaw), fy: Math.sin(window.RENDER3D.yaw) }));
+  await tp.keyboard.down('KeyW'); await tp.waitForTimeout(900); await tp.keyboard.up('KeyW');
+  const fw2 = await tp.evaluate(() => ({ x: DENG.g.p.x, y: DENG.g.p.y }));
+  const along = ((fw2.x - fw.x) * fw.fx + (fw2.y - fw.y) * fw.fy) / (Math.hypot(fw2.x - fw.x, fw2.y - fw.y) || 1);
+  ok('立體版：W 往鏡頭前方走；O 轉鏡頭後，W 跟著換方向', w3.y < in3.y - 0.3 && Math.abs(w3.x - in3.x) < 0.2 && yaw1 > in3.yaw + 0.5 && along > 0.8, { w3, yaw0: in3.yaw, yaw1, along: +along.toFixed(2) });
+  const sw0 = await tp.evaluate(() => DENG.g.stats.swordHits + DENG.g.stats.swordMiss);
+  await tp.mouse.move(900, 300); await tp.mouse.down(); await tp.mouse.up(); await tp.waitForTimeout(400);
+  const sw1 = await tp.evaluate(() => ({ n: DENG.g.stats.swordHits + DENG.g.stats.swordMiss, aim: document.getElementById('aimmode').textContent }));
+  ok('立體版：滑鼠左鍵揮劍、改成跟著滑鼠對準', sw1.n === sw0 + 1 && sw1.aim.includes('滑鼠'), { sw0, sw1 });
+  // 蓄撲：引擎照舊判定，立體版看得到（字在上面那層、紅圈在地板）
+  await tp.evaluate(() => { const g = DENG.g; g.tp(19.5, 3.5); const e = g.pos[0]; g.place(e, 21.0, 3.5, 'chase'); e.lastKnown = { x: 19.5, y: 3.5 }; e.stateT = 0; });
+  await tp.waitForFunction(() => DENG.g.pos[0].state === 'windup', null, { timeout: 8000 });
+  await tp.waitForTimeout(100);
+  await tp.screenshot({ path: path.join(out, '27-windup-3d.png') });
+  const wv = await tp.evaluate(() => ({ vis: DENG.g.pos[0].windVisible, inFront: (() => { const q = window.RENDER3D.proj(DENG.g.pos[0].x, 1.5, DENG.g.pos[0].y); return !!q; })() }));
+  ok('立體版：照見的蓄撲看得到', wv.vis && wv.inFront, wv);
+  // 暫停面板換成平面：照樣玩；右上角換回立體
+  await tp.keyboard.press('Escape'); await tp.waitForTimeout(150);
+  await tp.click('#pv-2d'); await tp.waitForTimeout(150);
+  await tp.keyboard.press('Escape'); await tp.waitForTimeout(300);
+  const flatNow = await tp.evaluate(() => ({ use3d: DENG.use3d, flat: !document.getElementById('world').classList.contains('hidden'), d3: document.getElementById('world3d').classList.contains('hidden'), running: DENG.running && !DENG.paused, btn: document.getElementById('btn-view').textContent }));
+  await tp.click('#btn-view'); await tp.waitForTimeout(500);
+  const back3d = await tp.evaluate(() => ({ use3d: DENG.use3d, mode: window.RENDER3D.mode, d3: !document.getElementById('world3d').classList.contains('hidden'), running: DENG.running }));
+  ok('玩到一半換成平面、再換回立體，照樣在玩', !flatNow.use3d && flatNow.flat && flatNow.d3 && flatNow.running && flatNow.btn === '換成立體' && back3d.use3d && back3d.mode === 'play' && back3d.d3 && back3d.running, { flatNow, back3d });
+  // 回主頁：開始畫面換回 3D 的長鏡頭，燈從剛才的地方接著走
+  const in2d = { running: true, flat: true, d3: true };
   await tp.keyboard.press('Escape'); await tp.waitForTimeout(100); await tp.keyboard.press('KeyM'); await tp.waitForTimeout(300);
   const r0 = await tp.evaluate(() => DENG.tour.s);
   await tp.waitForTimeout(1500);
   const back3 = await tp.evaluate(() => ({ use3d: DENG.use3d, shown: !document.getElementById('world3d').classList.contains('hidden'), flatHidden: document.getElementById('world').classList.contains('hidden'), attract: DENG.g.attract, s: DENG.tour.s, failed: window.RENDER3D.failed }));
   await tp.screenshot({ path: path.join(out, '23-title-3d-again.png') });
-  ok('3D：入宅後回主頁，開始畫面換回 3D 長鏡頭、沒有報錯', in2d.running && in2d.flat && in2d.d3 && back3.use3d && back3.shown && back3.flatHidden && back3.attract && back3.s > r0 && !back3.failed && errs3.length === 0, { in2d, back3, r0, errs: errs3.slice(0, 3) });
+  const fxGone = await tp.evaluate(() => document.getElementById('world3dfx').classList.contains('hidden') && window.RENDER3D.mode === 'attract');
+  ok('3D：立體版回主頁，開始畫面換回 3D 長鏡頭、沒有報錯', in2d.running && fxGone && back3.use3d && back3.shown && back3.flatHidden && back3.attract && back3.s > r0 && !back3.failed && errs3.length === 0, { fxGone, back3, r0, errs: errs3.slice(0, 3) });
   await tctx.close();
   // 跑不動 3D 的機器（無頭瀏覽器就是）：幾秒後自己換回 2D 長鏡頭，照樣能入宅
   const sctx2 = await browser.newContext({ viewport: { width: 1280, height: 800 } });

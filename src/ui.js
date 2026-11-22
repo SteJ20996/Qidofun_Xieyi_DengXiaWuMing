@@ -29,7 +29,8 @@
     seal2: '兩印到手。回大門，按住 U 推開門閂（要一秒半）。魄也往玄關去了。',
     gate: '按住 U 推開門閂。推的時候不能動，被咬就要重來。魄在附近時，可以先借火把它引開，或封住它過來的廊口。',
     track: '那隻魄在聞你的腳印（頭上有「嗅」）。腳印新的時候它跟得上；你一直走，它就追不上，停下來就會被追到。掩燈放輕腳步，腳印淡得快；封戶擋得住它，借火也能把它引開。',
-    chill: '寒意很高。到燭火或借火旁邊可以取暖，但站在火光裡，魄看得見你。'
+    chill: '寒意很高。到燭火或借火旁邊可以取暖，但站在火光裡，魄看得見你。',
+    view3d: '立體：鏡頭在你背後。W 往前、S 往後、A D 往左右；I、O 轉鏡頭，往前走時鏡頭會慢慢跟上。右上角「換成平面」或暫停面板可以換回平面。'
   };
   const SPELL = { borrow: '借火', seal: '封戶' };
 
@@ -55,7 +56,8 @@
   }
   let hintTimer = 0;
   function showHint(key) {
-    const t = HINT[key]; if (!t) return;
+    let t = HINT[key]; if (!t) return;
+    if (key === 'start' && use3d && g && !g.attract) { t += '\n' + HINT.view3d; g._hint3d = true; }   // 立體版：開頭的提示順便說怎麼走、怎麼轉鏡頭
     const h = $('hint'); h.textContent = t; h.classList.remove('hidden');
     clearTimeout(hintTimer); hintTimer = setTimeout(() => h.classList.add('hidden'), 9000);
   }
@@ -147,8 +149,9 @@
   function seedFromUrl() { const m = /[?&]seed=(\d+)/.exec(location.search); return m ? +m[1] : (Date.now() % 100000) | 0; }
   function enter(gg) {
     g = gg; window.DENG.g = g;
-    if (use3d) { $('world3d').classList.add('hidden'); cv.classList.remove('hidden'); }   // 可玩的部分目前還是 2D
     RD.setGame(g);
+    if (use3d) { try { sync3d(); } catch (e) { use3d = false; viewWhy = 'broken'; } }   // 立體版：鏡頭在人背後
+    canvases(); renderView();
     $('log').innerHTML = ''; $('hint').classList.add('hidden');
     ['start', 'pause', 'end'].forEach((id) => $(id).classList.add('hidden'));
     $('hud').classList.remove('hidden');
@@ -156,6 +159,7 @@
     disarm(); $('save-msg').textContent = '';
     lsSet('xieyi.deng.slot', String(slot));
     SFX.ambient(true); heartT = 0.3; creakT = 6 + Math.random() * 6;
+    if (use3d) hint3d();
   }
   function newGame(n, seed) {
     if (n) slot = n;
@@ -288,6 +292,7 @@
     if (paused) { if (SLOT_KEY[ev.code] && !ev.repeat) saveAs(SLOT_KEY[ev.code]); else if (ev.code === 'KeyM' && !ev.repeat) toTitle(); return; }   // 暫停時 U、I、O：存到那一格；M 回主頁
     if (!running) return;
     if (MOVE[ev.code]) keys.add(ev.code);
+    if (ev.code === 'KeyI' || ev.code === 'KeyO') keys.add(ev.code);   // 立體版：I、O 轉鏡頭（平面時沒有作用）
     if (ev.repeat) return;
     if (ACT[ev.code]) press[ACT[ev.code]] = true;
     if (ev.code === HOLD) holdTake = true;
@@ -298,25 +303,35 @@
   document.addEventListener('visibilitychange', () => { if (document.hidden) { keys.clear(); holdTake = false; if (running && !paused) setPause(true, 'blur'); } });
   addEventListener('mousemove', (ev) => { mouse.x = ev.clientX; mouse.y = ev.clientY; mouse.t = performance.now(); mouse.in = true; });
   document.addEventListener('mouseleave', () => { mouse.in = false; });
-  cv.addEventListener('mousedown', (ev) => {
+  const onDown = (ev) => {
     if (!running || paused) return;
     mouse.x = ev.clientX; mouse.y = ev.clientY; mouse.t = performance.now(); mouse.in = true;
     if (ev.button === 0) press.sword = true;
     if (ev.button === 2) press.fire = true;
-  });
-  cv.addEventListener('contextmenu', (ev) => ev.preventDefault());
+  };
+  for (const c of [cv, $('world3d')]) { c.addEventListener('mousedown', onDown); c.addEventListener('contextmenu', (ev) => ev.preventDefault()); }
   document.querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', (ev) => { ev.preventDefault(); if (running && !paused) press[b.dataset.act] = true; b.blur(); }));
 
   let aimAuto = true;
+  const cam3 = { turn: 0, follow: null };   // 立體版的鏡頭：I、O 轉；往前走時跟上
   function input() {
-    let mx = 0, my = 0;
-    for (const k of keys) { const v = MOVE[k]; if (v) { mx += v[0]; my += v[1]; } }
+    let kx = 0, ky = 0;
+    for (const k of keys) { const v = MOVE[k]; if (v) { kx += v[0]; ky += v[1]; } }
+    let mx = kx, my = ky;
+    const in3d = use3d && RENDER3D.mode === 'play';
+    cam3.turn = in3d ? (keys.has('KeyO') ? 1 : 0) - (keys.has('KeyI') ? 1 : 0) : 0;
+    cam3.follow = null;
+    if (in3d && (kx || ky)) {   // 立體：W 是鏡頭看的方向，S 往回，A、D 往左右
+      const yaw = RENDER3D.yaw, fx = Math.cos(yaw), fy = Math.sin(yaw);
+      mx = fx * -ky - fy * kx; my = fy * -ky + fx * kx;
+      if (ky < 0) cam3.follow = Math.atan2(my, mx);   // 往前走（帶一點左右也算）時，鏡頭慢慢轉到人走的方向
+    }
     if (mx || my) moveDir = Math.atan2(my, mx);
     const now = performance.now(), useMouse = mouse.in && now - mouse.t < 2500;
     let aim = null, target = null;
     if (useMouse) {
-      const d = Math.min(2, window.devicePixelRatio || 1), w = RD.toWorld(mouse.x * d, mouse.y * d);
-      aim = Math.atan2(w.y - g.p.y, w.x - g.p.x); target = w;
+      const d = Math.min(2, window.devicePixelRatio || 1), w = in3d ? RENDER3D.toWorld(mouse.x, mouse.y) : RD.toWorld(mouse.x * d, mouse.y * d);
+      if (w) { aim = Math.atan2(w.y - g.p.y, w.x - g.p.x); target = w; }
     } else if (mx || my) aim = moveDir;
     aimAuto = !useMouse;   // 沒用滑鼠：劍與火符自動對準看得見的魄
     return { mx, my, aim, target, autoAim: aimAuto, press, hold: { take: holdTake } };
@@ -386,28 +401,41 @@
     g = E.create({ seed: seedFromUrl() }); g.attract = true;
     const q = window.TOUR.at(tour.s); g.tp(q.x, q.y); tourDir = { dx: q.dx, dy: q.dy };
     window.DENG.g = g; RD.setGame(g); g.drain(); snap = true;
-    if (use3d && !RENDER3D.failed) { RENDER3D.setGame(g); r3game = g; $('world3d').classList.remove('hidden'); cv.classList.add('hidden'); }
+    if (use3d && !RENDER3D.failed) sync3d();
+    canvases();
   }
 
-  // ---------- 開始畫面用立體還是平面（擁有者 2026-11-05：「我沒看到3d版的呢」） ----------
-  // 右上角「立體｜平面」：看得到現在用哪一種；自己換成平面時說原因；按「立體」再試就不再自動換。
-  // 玩家按過的選擇記在 xieyi.deng.view（'3d'／'2d'）。網址 ?flat=1 只管這一次。
+  // ---------- 立體還是平面（擁有者 2026-11-05「我沒看到3d版的呢」、2026-11-22「遊戲內部沒有3d這個選項呀」） ----------
+  // 開始畫面的選單角上、暫停面板、玩的時候右上角都能換：開始畫面是立體的長鏡頭，進一局是鏡頭在人背後的立體版。
+  // 自己換成平面時說原因；按「立體」再試就不再自動換。按過的選擇記在 xieyi.deng.view（'3d'／'2d'）。網址 ?flat=1 只管這一次。
   const FLAT_URL = /[?&]flat=1/.test(location.search);
   let r3ready = false, r3game = null, viewWhy = FLAT_URL || lsGet('xieyi.deng.view') === '2d' ? '' : 'loading';
   const can3d = () => !!(RENDER3D && RENDER3D.ok());
+  // 立體那邊蓋的是不是現在這一局、是開始畫面還是玩的那一種
+  function sync3d() {
+    const want = g.attract ? 'attract' : 'play';
+    if (r3game !== g || RENDER3D.mode !== want) { RENDER3D.setGame(g, want); r3game = g; snap = true; }
+  }
+  // 哪一張畫布在前面：開始畫面的立體只要 3D；立體版還要上面那層字；平面只要 2D
+  function canvases() {
+    $('world3d').classList.toggle('hidden', !use3d);
+    $('world3dfx').classList.toggle('hidden', !(use3d && g && !g.attract));
+    cv.classList.toggle('hidden', use3d);
+  }
+  function hint3d() { if (g && !g._hint3d) { g._hint3d = true; showHint('view3d'); } }
   function set3d(on, save, force) {
     if (on) {
       if (!can3d()) { renderView(); return false; }
       try {
-        if (!r3ready) { RENDER3D.init($('world3d')); r3ready = true; }
+        if (!r3ready) { RENDER3D.init($('world3d'), $('world3dfx')); r3ready = true; }
         if (force) RENDER3D.force();
-        if (r3game !== g && g.attract) { RENDER3D.setGame(g); r3game = g; }
-      } catch (e) { use3d = false; viewWhy = 'broken'; renderView(); return false; }
+        sync3d();
+      } catch (e) { use3d = false; viewWhy = 'broken'; canvases(); renderView(); return false; }
       use3d = true; viewWhy = '';
-      if (!running) { $('world3d').classList.remove('hidden'); cv.classList.add('hidden'); RENDER3D.resize(); }
+      canvases(); RENDER3D.resize();
+      if (running) hint3d();
     } else {
-      use3d = false;
-      $('world3d').classList.add('hidden'); cv.classList.remove('hidden'); snap = true;
+      use3d = false; canvases(); snap = true;
     }
     if (save) lsSet('xieyi.deng.view', on ? '3d' : '2d');
     renderView();
@@ -415,14 +443,16 @@
   }
   function renderView() {
     const can = can3d();
-    $('vm-3d').classList.toggle('on', use3d); $('vm-2d').classList.toggle('on', !use3d);
-    $('vm-3d').disabled = !can;
+    for (const [a, b] of [['vm-3d', 'vm-2d'], ['pv-3d', 'pv-2d']]) { $(a).classList.toggle('on', use3d); $(b).classList.toggle('on', !use3d); $(a).disabled = !can; }
+    $('btn-view').textContent = use3d ? '換成平面' : '換成立體';
+    $('btn-view').disabled = !can && !use3d;
     const fps = RENDER3D && RENDER3D.fps ? Math.round(RENDER3D.fps) : 0;
-    $('vm-note').textContent = viewWhy === 'loading' && can ? '立體的宅子載入中……'
+    const note = viewWhy === 'loading' && can ? '立體的宅子載入中……'
       : !window.THREE ? '立體要用的 three.js 沒載到，先用平面。'
       : !can || viewWhy === 'broken' ? '這個瀏覽器跑不了立體（WebGL 沒開），先用平面。'
       : viewWhy === 'slow' ? `這台跑立體太慢${fps ? `（每秒約 ${fps} 幀）` : ''}，自動換成平面。按「立體」再試，就不會再自動換。`
       : '';
+    $('vm-note').textContent = note; $('pv-note').textContent = note;
   }
   // 路線在 src/tour.js：一條平滑閉合的曲線，等速走，不停不頓，看起來是一個長鏡頭
   const tour = { s: 0 };
@@ -447,9 +477,13 @@
         handle(g.drain());
         mood(dt);
       } else if (onStart) { tourStep(dt); g.advance(dt, {}); g.drain(); }
-      if (onStart && use3d && RENDER3D.failed) { set3d(false); viewWhy = 'slow'; renderView(); }   // 這台跑不動 3D：回 2D，右上角說原因
-      if (onStart && use3d) RENDER3D.frame(dt, { lead: tourDir, snap });
-      else RD.frame(running && !paused || onStart ? dt : 0, { snap, attract: onStart, lead: onStart ? tourDir : null, autoAim: aimAuto });
+      if (use3d && RENDER3D.failed) {   // 這台跑不動 3D：回 2D，說原因
+        set3d(false); viewWhy = 'slow'; renderView();
+        if (running) log('這台跑立體太慢，換成平面', 'warn');
+      }
+      const go = running && !paused || onStart ? dt : 0;
+      if (use3d) RENDER3D.frame(go, onStart ? { lead: tourDir, snap } : { snap, autoAim: aimAuto, turn: go ? cam3.turn : 0, follow: go ? cam3.follow : null });
+      else RD.frame(go, { snap, attract: onStart, lead: onStart ? tourDir : null, autoAim: aimAuto });
       snap = false;
       if (!onStart) hud();
     }
@@ -478,7 +512,9 @@
   const muteBtns = () => ['btn-mute', 'btn-mute2'].forEach((id) => { $(id).classList.toggle('off', SFX.muted); $(id).textContent = SFX.muted ? '音效關' : '音效'; });
   ['btn-mute', 'btn-mute2'].forEach((id) => $(id).addEventListener('click', (ev) => { SFX.unlock(); SFX.toggle(); muteBtns(); ev.currentTarget.blur(); }));
   muteBtns(); showBest();
-  ['vm-3d', 'vm-2d'].forEach((id) => $(id).addEventListener('click', (ev) => { ev.currentTarget.blur(); if (id === 'vm-3d') set3d(true, true, true); else { viewWhy = ''; set3d(false, true); } }));
+  const pickView = (on) => { if (on) set3d(true, true, true); else { viewWhy = ''; set3d(false, true); } };
+  ['vm-3d', 'pv-3d', 'vm-2d', 'pv-2d'].forEach((id) => $(id).addEventListener('click', (ev) => { ev.currentTarget.blur(); pickView(id.endsWith('3d')); }));
+  $('btn-view').addEventListener('click', (ev) => { ev.currentTarget.blur(); pickView(!use3d); });
   if (window.matchMedia && matchMedia('(pointer: coarse)').matches && !matchMedia('(pointer: fine)').matches) $('touchnote').textContent = '這一版是試做，只做了鍵盤與滑鼠；手機上還不能玩。';
 
   // 先在背景擺好宅子（開始畫面後面看得到一點點）
