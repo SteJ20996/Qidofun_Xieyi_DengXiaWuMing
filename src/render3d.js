@@ -455,7 +455,7 @@
   function pausePerf() { perf.last = 0; }
 
   root.RENDER3D = {
-    ok, init, setGame, frame, resize, force, pausePerf, toWorld, proj: (x, h, y) => proj(x, h, y),
+    ok, init, setGame, frame, resize, force, pausePerf, toWorld, proj: (x, h, y) => proj(x, h, y), turnBy(rad) { view.yaw += rad; },
     get cam() { return cam; }, get view() { return view; }, get yaw() { return view.yaw; }, get mode() { return mode; }, get game() { return g; },
     get quality() { return perf.q; }, get failed() { return perf.failed; }, get fps() { return perf.fps; }, get keep() { return perf.keep; }
   };

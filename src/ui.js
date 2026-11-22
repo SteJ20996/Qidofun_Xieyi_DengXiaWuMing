@@ -32,6 +32,15 @@
     chill: '寒意很高。到燭火或借火旁邊可以取暖，但站在火光裡，魄看得見你。',
     view3d: '立體：鏡頭在你背後。W 往前、S 往後、A D 往左右；I、O 轉鏡頭，往前走時鏡頭會慢慢跟上。右上角「換成平面」或暫停面板可以換回平面。'
   };
+  // 觸控時，提到按鍵的提示換一種說法
+  const HINT_TOUCH = {
+    altar: '按住右下角的「取」取印。取印時不能動，被咬就要重來。',
+    seal2: '兩印到手。回大門，按住「取」推開門閂（要一秒半）。魄也往玄關去了。',
+    gate: '按住「取」推開門閂。推的時候不能動，被咬就要重來。魄在附近時，可以先借火把它引開，或封住它過來的廊口。',
+    whiff: '劍揮空了。看飄出的字：「偏了」是方向不對，「差一步」是不夠近，「隔著」是中間有牆或屏。',
+    controls: '左半邊按住拖動就走，推得越遠走得越快。右下角是劍、符、鈴、燈、借火、封戶；走到印臺或大門旁，按住「取」。',
+    view3d: '立體：鏡頭在你背後。左半邊往上推就往鏡頭前方走；右半邊左右滑動轉鏡頭，往前走時鏡頭也會慢慢跟上。右上角「換成平面」可以換回平面。'
+  };
   const SPELL = { borrow: '借火', seal: '封戶' };
 
   // ---------- 畫面大小 ----------
@@ -56,8 +65,13 @@
   }
   let hintTimer = 0;
   function showHint(key) {
-    let t = HINT[key]; if (!t) return;
-    if (key === 'start' && use3d && g && !g.attract) { t += '\n' + HINT.view3d; g._hint3d = true; }   // 立體版：開頭的提示順便說怎麼走、怎麼轉鏡頭
+    let t = (touch.on && HINT_TOUCH[key]) || HINT[key]; if (!t) return;
+    const in3d = use3d && g && !g.attract;
+    if (key === 'start') {   // 開頭的提示順便說怎麼操作：觸控說手指怎麼用；立體版說怎麼走、怎麼轉鏡頭
+      if (touch.on) t += '\n' + (in3d ? HINT_TOUCH.view3d : HINT_TOUCH.controls);
+      else if (in3d) t += '\n' + HINT.view3d;
+      if (in3d) g._hint3d = true;
+    }
     const h = $('hint'); h.textContent = t; h.classList.remove('hidden');
     clearTimeout(hintTimer); hintTimer = setTimeout(() => h.classList.add('hidden'), 9000);
   }
@@ -155,7 +169,7 @@
     $('log').innerHTML = ''; $('hint').classList.add('hidden');
     ['start', 'pause', 'end'].forEach((id) => $(id).classList.add('hidden'));
     $('hud').classList.remove('hidden');
-    paused = false; running = true; snap = true; keys.clear(); holdTake = false; press = {};
+    paused = false; running = true; snap = true; keys.clear(); holdTake = false; press = {}; dropTouch();
     disarm(); $('save-msg').textContent = '';
     lsSet('xieyi.deng.slot', String(slot));
     SFX.ambient(true); heartT = 0.3; creakT = 6 + Math.random() * 6;
@@ -180,7 +194,7 @@
   }
   function setPause(on, why) {
     if (!running) return;
-    paused = on;
+    paused = on; dropTouch();
     if (on) autosave(false);
     SFX.ambient(!on);
     $('pause').classList.toggle('hidden', !on);
@@ -301,22 +315,97 @@
   addEventListener('blur', () => { keys.clear(); holdTake = false; if (running && !paused) setPause(true, 'blur'); });
   addEventListener('pagehide', () => { if (running && g && g.state === 'play') autosave(false); });
   document.addEventListener('visibilitychange', () => { if (document.hidden) { keys.clear(); holdTake = false; if (running && !paused) setPause(true, 'blur'); } });
-  addEventListener('mousemove', (ev) => { mouse.x = ev.clientX; mouse.y = ev.clientY; mouse.t = performance.now(); mouse.in = true; });
+  // 手機在手指放開後會補發「假的」滑鼠事件：剛摸過螢幕就不理滑鼠，免得對準跑到按鈕那裡、或點一下就揮劍
+  const fromTouch = () => performance.now() - touch.lastT < 900;
+  addEventListener('mousemove', (ev) => { if (fromTouch()) return; mouse.x = ev.clientX; mouse.y = ev.clientY; mouse.t = performance.now(); mouse.in = true; });
   document.addEventListener('mouseleave', () => { mouse.in = false; });
   const onDown = (ev) => {
-    if (!running || paused) return;
+    if (!running || paused || fromTouch()) return;
     mouse.x = ev.clientX; mouse.y = ev.clientY; mouse.t = performance.now(); mouse.in = true;
     if (ev.button === 0) press.sword = true;
     if (ev.button === 2) press.fire = true;
   };
   for (const c of [cv, $('world3d')]) { c.addEventListener('mousedown', onDown); c.addEventListener('contextmenu', (ev) => ev.preventDefault()); }
-  document.querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', (ev) => { ev.preventDefault(); if (running && !paused) press[b.dataset.act] = true; b.blur(); }));
+  // 工具鈕：滑鼠用 click；手指一按下就算（另一根手指正在拖動時也按得到），之後補發的 click 不再算一次
+  document.querySelectorAll('[data-act]').forEach((b) => {
+    b.addEventListener('click', (ev) => { ev.preventDefault(); if (fromTouch()) return; if (running && !paused) press[b.dataset.act] = true; b.blur(); });
+    b.addEventListener('pointerdown', (ev) => {
+      if (ev.pointerType === 'mouse') return;
+      ev.preventDefault(); touch.lastT = performance.now();
+      if (running && !paused) press[b.dataset.act] = true;
+      b.classList.add('pressed');
+    });
+    for (const t of ['pointerup', 'pointercancel', 'pointerleave']) b.addEventListener(t, () => b.classList.remove('pressed'));
+  });
+
+  // ---------- 觸控（2026-11-22，擁有者：「請優化手機版介面」） ----------
+  // 摸到螢幕（或一開始就是觸控螢幕）就換成觸控介面：左半邊拖動走（推得越遠走得越快）；
+  // 右下角一叢大按鈕；「取」要按住；立體版右半邊左右滑動轉鏡頭。電腦上不受影響。
+  const touch = { on: false, stick: null, look: null, take: false, lastT: -1e9 };
+  const STICK_R = 58;
+  function enableTouch() {
+    if (touch.on) return;
+    touch.on = true; document.body.classList.add('touch');
+    $('touchnote').textContent = '手機、平板建議橫拿，看得比較多。';
+    if (!$('hint').classList.contains('hidden') && g && !g.attract) $('hint').classList.add('hidden');
+  }
+  function dropTouch() { touch.stick = null; touch.look = null; touch.take = false; $('stick').classList.add('hidden'); $('t-take').classList.remove('holding'); }
+  if (window.matchMedia && matchMedia('(pointer: coarse)').matches) enableTouch();
+  addEventListener('touchstart', () => { touch.lastT = performance.now(); enableTouch(); SFX.unlock(); }, { passive: true, capture: true });
+  const tz = $('touchzone'), stickEl = $('stick'), knob = stickEl.firstElementChild;
+  tz.addEventListener('pointerdown', (ev) => {
+    if (ev.pointerType === 'mouse' || !running || paused) return;
+    ev.preventDefault(); touch.lastT = performance.now();
+    if (ev.clientX < innerWidth * 0.5) {
+      if (touch.stick) return;
+      touch.stick = { id: ev.pointerId, x0: ev.clientX, y0: ev.clientY, dx: 0, dy: 0 };
+      stickEl.style.left = ev.clientX + 'px'; stickEl.style.top = ev.clientY + 'px'; knob.style.transform = '';
+      stickEl.classList.remove('hidden');
+    } else {
+      if (touch.look) return;
+      touch.look = { id: ev.pointerId, x: ev.clientX };
+    }
+    try { tz.setPointerCapture(ev.pointerId); } catch (e) { /* 沒有就算了 */ }
+  });
+  tz.addEventListener('pointermove', (ev) => {
+    const s = touch.stick, l = touch.look;
+    if (s && ev.pointerId === s.id) {
+      let dx = ev.clientX - s.x0, dy = ev.clientY - s.y0;
+      const d = Math.hypot(dx, dy);
+      if (d > STICK_R) { dx *= STICK_R / d; dy *= STICK_R / d; }
+      s.dx = dx; s.dy = dy; knob.style.transform = `translate(${dx}px, ${dy}px)`;
+    }
+    if (l && ev.pointerId === l.id) {   // 立體版：右半邊左右滑動轉鏡頭
+      const dx = ev.clientX - l.x; l.x = ev.clientX;
+      if (use3d && RENDER3D.mode === 'play' && running && !paused) RENDER3D.turnBy(dx * 0.007);
+    }
+  });
+  const endTouch = (ev) => {
+    if (touch.stick && ev.pointerId === touch.stick.id) { touch.stick = null; stickEl.classList.add('hidden'); }
+    if (touch.look && ev.pointerId === touch.look.id) touch.look = null;
+  };
+  for (const t of ['pointerup', 'pointercancel', 'lostpointercapture']) tz.addEventListener(t, endTouch);
+  // 「取」：按住才算（取印一秒、推門閂一秒半）
+  const takeBtn = $('t-take');
+  takeBtn.addEventListener('pointerdown', (ev) => { ev.preventDefault(); touch.lastT = performance.now(); if (running && !paused) { touch.take = true; takeBtn.classList.add('holding'); } });
+  for (const t of ['pointerup', 'pointercancel', 'pointerleave']) takeBtn.addEventListener(t, () => { touch.take = false; takeBtn.classList.remove('holding'); });
+  takeBtn.addEventListener('contextmenu', (ev) => ev.preventDefault());
+  // 站的地方能不能取印、推門閂（和引擎的 tryTake 同一套距離）
+  function takeNear() {
+    const p = g.p;
+    if (g.exitReady && !g.exitOpen && g.gate && Math.hypot(p.x - g.gate.x, p.y - g.gate.y) <= R.TAKE.gateReach) return 'gate';
+    return g.altars.some((a) => !a.taken && Math.hypot(a.x - p.x, a.y - p.y) <= R.TAKE.reach) ? 'seal' : null;
+  }
 
   let aimAuto = true;
   const cam3 = { turn: 0, follow: null };   // 立體版的鏡頭：I、O 轉；往前走時跟上
   function input() {
     let kx = 0, ky = 0;
     for (const k of keys) { const v = MOVE[k]; if (v) { kx += v[0]; ky += v[1]; } }
+    if (touch.stick) {   // 手指推出去的方向；推得越遠走得越快（推到七成就是全速）
+      const s = touch.stick, d = Math.hypot(s.dx, s.dy);
+      if (d > 10) { const m = Math.min(1, (d - 10) / (STICK_R * 0.7 - 10)); kx += (s.dx / d) * m; ky += (s.dy / d) * m; }
+    }
     let mx = kx, my = ky;
     const in3d = use3d && RENDER3D.mode === 'play';
     cam3.turn = in3d ? (keys.has('KeyO') ? 1 : 0) - (keys.has('KeyI') ? 1 : 0) : 0;
@@ -324,7 +413,7 @@
     if (in3d && (kx || ky)) {   // 立體：W 是鏡頭看的方向，S 往回，A、D 往左右
       const yaw = RENDER3D.yaw, fx = Math.cos(yaw), fy = Math.sin(yaw);
       mx = fx * -ky - fy * kx; my = fy * -ky + fx * kx;
-      if (ky < 0) cam3.follow = Math.atan2(my, mx);   // 往前走（帶一點左右也算）時，鏡頭慢慢轉到人走的方向
+      if (ky < -0.3) cam3.follow = Math.atan2(my, mx);   // 往前走（帶一點左右也算）時，鏡頭慢慢轉到人走的方向
     }
     if (mx || my) moveDir = Math.atan2(my, mx);
     const now = performance.now(), useMouse = mouse.in && now - mouse.t < 2500;
@@ -334,7 +423,7 @@
       if (w) { aim = Math.atan2(w.y - g.p.y, w.x - g.p.x); target = w; }
     } else if (mx || my) aim = moveDir;
     aimAuto = !useMouse;   // 沒用滑鼠：劍與火符自動對準看得見的魄
-    return { mx, my, aim, target, autoAim: aimAuto, press, hold: { take: holdTake } };
+    return { mx, my, aim, target, autoAim: aimAuto, press, hold: { take: holdTake || touch.take } };
   }
 
   // ---------- HUD ----------
@@ -385,6 +474,11 @@
     $('t-bell').classList.toggle('busy', reading);
     $('t-lamp').classList.toggle('covered', !p.lampOn); $('lamp-s').textContent = p.lampOn ? '點著' : '掩著';
     setHTML('aimmode', aimAuto ? '<b>對準</b>自動（看得見的魄）' : '<b>對準</b>跟著滑鼠');
+    if (touch.on) {   // 觸控的「取」：站在印臺或大門旁才亮；正在取就是紅的
+      const near = takeNear();
+      takeBtn.classList.toggle('ready', !!near);
+      setHTML('take-s', p.taking ? (p.taking.gate ? '推門中' : '取印中') : near === 'gate' ? '推門閂' : '取印');
+    }
     if (frameN % 6 === 0) RD.minimap($('minimap'));
     prev.chill = p.chill; prev.armor = p.armor; prev.ink = p.ink; prev.bell = p.bellCD;
   }
@@ -515,10 +609,9 @@
   const pickView = (on) => { if (on) set3d(true, true, true); else { viewWhy = ''; set3d(false, true); } };
   ['vm-3d', 'pv-3d', 'vm-2d', 'pv-2d'].forEach((id) => $(id).addEventListener('click', (ev) => { ev.currentTarget.blur(); pickView(id.endsWith('3d')); }));
   $('btn-view').addEventListener('click', (ev) => { ev.currentTarget.blur(); pickView(!use3d); });
-  if (window.matchMedia && matchMedia('(pointer: coarse)').matches && !matchMedia('(pointer: fine)').matches) $('touchnote').textContent = '這一版是試做，只做了鍵盤與滑鼠；手機上還不能玩。';
 
   // 先在背景擺好宅子（開始畫面後面看得到一點點）
-  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, continueGame, setPause, toTitle, saveAs, readSlot, canSave, snap() { snap = true; }, tour, get use3d() { return use3d; }, set3d, get slot() { return slot; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
+  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, continueGame, setPause, toTitle, saveAs, readSlot, canSave, snap() { snap = true; }, tour, get use3d() { return use3d; }, set3d, get touch() { return touch; }, get slot() { return slot; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
   showcase();
   renderSlots(); renderView();
   if (!canSave) $('slot-msg').textContent = '這個瀏覽器存不了檔（例如無痕視窗）：照樣能玩，只是關掉就沒了。';

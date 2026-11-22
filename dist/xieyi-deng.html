@@ -289,12 +289,85 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   #bigstamp.show span { animation: none !important; transform: rotate(-6deg); }
 }
 
+/* ---------- 手機、平板（2026-11-22，擁有者：「請優化手機版介面」） ----------
+   摸到螢幕（或一開始就是觸控螢幕）時 body 加 .touch：左半邊拖動走，右下角一叢大按鈕，HUD 縮小、不互相蓋住。
+   電腦上看不到這些。 */
+.touch-only, #touchzone, #stick, #t-take { display: none; }
+body.touch .key-only, body.touch #hud kbd, body.touch #seal, body.touch #aimmode { display: none !important; }
+body.touch span.touch-only { display: inline; }
+body.touch div.touch-only { display: block; }
+body.touch li.touch-only { display: list-item; }
+body.touch #hud { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+body.touch #hud button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+/* 左半邊拖動：手指按下的地方出現一個圓，推出去就走 */
+body.touch #touchzone { display: block; position: absolute; inset: 0; touch-action: none; }
+body.touch #stick:not(.hidden) { display: block; position: absolute; width: 116px; height: 116px; margin: -58px 0 0 -58px; border-radius: 50%; border: 2px solid rgba(239,229,207,.6); background: rgba(13,12,11,.3); pointer-events: none !important; }
+#stick i { position: absolute; left: 50%; top: 50%; width: 50px; height: 50px; margin: -25px 0 0 -25px; border-radius: 50%; background: rgba(239,229,207,.8); border: 2px solid var(--ink); box-shadow: 0 2px 8px rgba(0,0,0,.4); }
+/* HUD 縮小：左上是寒、護、目與顯／隱；右上是兩印、大門與三顆鈕；小地圖在右上鈕的下面 */
+body.touch #bars { left: calc(8px + env(safe-area-inset-left, 0px)); top: calc(8px + env(safe-area-inset-top, 0px)); padding: 4px 8px; gap: 3px; }
+body.touch .hbar { font-size: 13px; gap: 6px; }
+body.touch .hbar .track, body.touch .seals3 { width: 92px; }
+body.touch .hbar .track { height: 9px; }
+body.touch .seals3 i { height: 14px; font-size: 10px; }
+body.touch .hbar span { font-size: 10.5px; min-width: 3.2em; }
+body.touch #expose { left: calc(8px + env(safe-area-inset-left, 0px)); top: calc(76px + env(safe-area-inset-top, 0px)); font-size: 12.5px; padding: 2px 8px; }
+body.touch #expose b { font-size: 15px; margin-right: 4px; }
+body.touch #topright { right: calc(8px + env(safe-area-inset-right, 0px)); top: calc(8px + env(safe-area-inset-top, 0px)); gap: 4px; }
+body.touch #goal { font-size: 13px; padding: 3px 8px; gap: 8px; }
+body.touch #goal .s i { width: 18px; height: 18px; font-size: 12px; }
+body.touch .hudbtns { gap: 4px; }
+body.touch .hudbtns button { font-size: 13px; padding: 6px 9px; }
+body.touch #minimap { width: 112px; height: 78px; right: calc(8px + env(safe-area-inset-right, 0px)); top: calc(84px + env(safe-area-inset-top, 0px)); bottom: auto; }
+body.touch #log { left: calc(8px + env(safe-area-inset-left, 0px)); top: calc(106px + env(safe-area-inset-top, 0px)); max-width: 44vw; }
+body.touch #log div { font-size: 12.5px; padding: 2px 8px; }
+body.touch #hint { top: calc(8px + env(safe-area-inset-top, 0px)); bottom: auto; min-width: 0; width: max-content; max-width: max(240px, calc(100vw - 480px)); font-size: 13.5px; line-height: 1.5; padding: 6px 10px 6px 34px; }
+body.touch #hint::before { left: 7px; top: 7px; width: 20px; height: 20px; font-size: 12px; }
+/* 右下角一叢大按鈕：劍最大，在拇指底下；符、鈴在它左邊；燈在上面；借火、封戶、取在外圈 */
+body.touch #tools { left: auto; right: calc(10px + env(safe-area-inset-right, 0px)); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); transform: none;
+  display: grid; --c: 56px; grid-template-columns: repeat(4, var(--c)); grid-template-rows: repeat(3, var(--c)); gap: 8px;
+  grid-template-areas: "borrow seal lamp lamp" "take bell sword sword" "ink fire sword sword"; }
+body.touch #tools .tool, body.touch .pages button { min-width: 0; padding: 0; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 14px; border: 1.5px solid var(--ink); background: rgba(239,229,207,.9); box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+body.touch .tool > b { font-size: 24px; }
+body.touch .tool small { display: block; font-size: 10.5px; }
+body.touch #tools #t-sword { grid-area: sword; border-radius: 50%; }
+body.touch #t-sword > b { font-size: 46px; }
+body.touch #t-bell { grid-area: bell; } body.touch #t-fire { grid-area: fire; }
+body.touch #t-lamp { grid-area: lamp; flex-direction: row; gap: 8px; }
+body.touch #t-take { display: flex; grid-area: take; opacity: .55; }
+body.touch #t-take.ready { opacity: 1; border-color: var(--red); box-shadow: 0 0 0 3px rgba(180,57,42,.45), 0 2px 8px rgba(0,0,0,.35); }
+body.touch #t-take.holding { background: var(--red); color: #f7efe0; }
+body.touch #t-take.holding small { color: #f7efe0; }
+body.touch #tools #t-book, body.touch #tools #t-book .pages { display: contents; }
+body.touch #t-book > b, body.touch #t-book > small { display: none; }
+body.touch #pg-borrow { grid-area: borrow; font-size: 15px; } body.touch #pg-seal { grid-area: seal; font-size: 15px; }
+body.touch #ink-n { grid-area: ink; position: static; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 3px; writing-mode: horizontal-tb; font: 12px var(--font); color: var(--ink); background: rgba(239,229,207,.88); border: 1px solid rgba(28,26,23,.4); border-radius: 12px; height: 30px; align-self: center; }
+body.touch .tool.pressed, body.touch .pages button.pressed { transform: scale(.93); filter: brightness(.9); }
+body.touch #t-fire small { display: none; }
+body.touch #t-fire em#fire-n { position: static; display: flex; gap: 2px; min-height: 12px; }
+/* 直拿：畫面窄，按鈕小一號；右上三顆鈕直排，兩印與大門放到左邊第三列；提示在 HUD 下面整行 */
+@media (orientation: portrait) {
+  body.touch #tools { --c: 50px; gap: 6px; }
+  body.touch #t-sword > b { font-size: 40px; }
+  body.touch .hudbtns { flex-direction: column; align-items: flex-end; }
+  body.touch #goal { position: fixed; left: calc(8px + env(safe-area-inset-left, 0px)); top: calc(104px + env(safe-area-inset-top, 0px)); }
+  body.touch #minimap { top: calc(122px + env(safe-area-inset-top, 0px)); }
+  body.touch #log { top: calc(136px + env(safe-area-inset-top, 0px)); }
+  body.touch #hint { top: calc(208px + env(safe-area-inset-top, 0px)); width: auto; left: 12px; right: 12px; transform: none; max-width: none; }
+}
+/* 開始畫面：觸控說明 */
+.touchkeys { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 16px; margin: 10px auto 2px; max-width: 37em; text-align: left; font-size: 14px; line-height: 1.45; }
+.touchkeys b { font-weight: normal; color: var(--red-2); margin-right: 6px; }
+body.touch div.touchkeys { display: grid; }
+@media (max-width: 640px) { .touchkeys { grid-template-columns: 1fr; } }
+
 </style>
 <canvas id="world"></canvas>
 <canvas id="world3d" class="hidden"></canvas>
 <canvas id="world3dfx" class="hidden"></canvas>
 
 <div id="hud" class="hidden">
+  <div id="touchzone" aria-hidden="true"></div>
+  <div id="stick" class="hidden"><i></i></div>
   <div id="seal" title="燈下無明"><span>燈</span><span>下</span><span>無</span><span>明</span></div>
   <div id="bars">
     <div class="hbar chill" title="寒意：被咬、久留在魄身邊都會上升；滿了就失魂。只有在火邊才會退。"><b>寒</b><div class="track"><div class="fill" id="chill-fill"></div></div><span id="chill-num"></span></div>
@@ -322,6 +395,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
       </div>
       <em id="ink-n"></em>
     </div>
+    <button class="tool" id="t-take" title="取印、推門閂：站在印臺或大門旁按住"><b>取</b><small id="take-s">取印</small></button>
     <button class="tool" id="t-lamp" data-act="lamp" title="手燈（：鍵，也就是分號鍵）：點著看得清身邊，但魄從遠處就看得見你。掩燈後，眼睛會慢慢習慣黑暗。"><b>燈</b><kbd>：</kbd><small id="lamp-s">點著</small></button>
   </div>
   <canvas id="minimap" width="200" height="140" title="走過的地方：只記牆、屏、門與印，不記魄"></canvas>
@@ -345,8 +419,8 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
       <section class="win">
         <h3><i>出</i>出宅就贏</h3>
         <ol>
-          <li>到西北的<b>書房</b>取名印、東北的<b>祠堂</b>取息印：站在印臺旁，按住 <kbd>U</kbd>。</li>
-          <li>回南邊的<b>玄關</b>，按住 <kbd>U</kbd> 一秒半推開門閂。兩印到手後，兩隻魄都會守在玄關。</li>
+          <li>到西北的<b>書房</b>取名印、東北的<b>祠堂</b>取息印：站在印臺旁，按住 <kbd class="key-only">U</kbd><span class="touch-only">「取」</span>。</li>
+          <li>回南邊的<b>玄關</b>，按住 <kbd class="key-only">U</kbd><span class="touch-only">「取」</span> 一秒半推開門閂。兩印到手後，兩隻魄都會守在玄關。</li>
           <li>走出大門，就出宅了。</li>
         </ol>
       </section>
@@ -356,7 +430,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
       </section>
     </div>
     <p class="story meaning"><b>燈下無明</b>：燈照得到的地方，你看得清，魄也看得見你；燈外的黑暗，你什麼都看不見。掩了燈，眼睛會慢慢習慣，反而看得更遠。這一夜要學的，是什麼時候點燈、什麼時候掩燈。</p>
-    <div class="keys">
+    <div class="keys key-only">
       <div><span><kbd>WASD</kbd></span><b>走動</b></div>
       <div><span><kbd>J</kbd></span><b>桃木劍</b></div>
       <div><span><kbd>K</kbd></span><b>銅鈴</b></div>
@@ -366,12 +440,20 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
       <div><span><kbd>U</kbd></span><b>按住：取印、推門閂</b></div>
       <div><span><kbd>P</kbd><kbd>Esc</kbd></span><b>暫停，可回主頁</b></div>
     </div>
-    <div class="dim small">分號、逗號、句號鍵就是畫面上的：《》，不必按 Shift；方向鍵也能走。滑鼠左鍵劍、右鍵火符；不用滑鼠時自動對準看得見的魄。立體時 W 往鏡頭前方走，I、O 轉鏡頭。</div>
+    <div class="touchkeys touch-only">
+      <div><b>走</b>左半邊按住拖動；推得越遠走得越快</div>
+      <div><b>劍 符 鈴</b>右下角，自動對準看得見的魄</div>
+      <div><b>燈 借火 封戶</b>右下角上排</div>
+      <div><b>取</b>站在印臺或大門旁，按住「取」</div>
+      <div><b>立體</b>往鏡頭前方走；右半邊左右滑動轉鏡頭</div>
+      <div><b>暫停</b>右上角「暫停」</div>
+    </div>
+    <div class="dim small key-only">分號、逗號、句號鍵就是畫面上的：《》，不必按 Shift；方向鍵也能走。滑鼠左鍵劍、右鍵火符；不用滑鼠時自動對準看得見的魄。立體時 W 往鏡頭前方走，I、O 轉鏡頭。</div>
     <div id="slots" class="slots"></div>
     <div class="dim small warn" id="slot-msg"></div>
     <div class="small warn" id="vm-note" aria-live="polite"></div>
-    <div class="dim small">三格存檔：U、I、O 選一格，Enter 開始或繼續；滑鼠點也可以<span id="best"></span></div>
-    <div class="dim small" id="touchnote">這一版是試做：一個關卡，只做了鍵盤與滑鼠。</div>
+    <div class="dim small"><span class="key-only">三格存檔：U、I、O 選一格，Enter 開始或繼續；滑鼠點也可以</span><span class="touch-only">三格存檔：點一格的「入宅」或「繼續」</span><span id="best"></span></div>
+    <div class="dim small" id="touchnote">這一版是試做：一個關卡。電腦用鍵盤滑鼠，手機、平板用觸控。</div>
   </div>
 </div>
 
@@ -381,10 +463,11 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     <p class="dim small" id="pause-why"></p>
     <div class="row"><button id="btn-resume" class="big">繼續</button><button id="btn-title" title="先把這一局存在自己那格，再回到開始畫面">回主頁（M）</button><button id="btn-restart">重來</button><button id="btn-mute2">音效</button></div>
     <div class="viewrow"><span class="dim small">畫面</span><span class="vm-row"><button id="pv-3d" title="立體：鏡頭在你背後">立體</button><button id="pv-2d" title="平面：從上往下看">平面</button></span><span class="small warn" id="pv-note"></span></div>
-    <div class="savebox"><div class="dim small">存到（U、I、O）：這一局自動存在自己那格；也可以把這一刻抄進別格，當作存檔點。</div><div id="saverow" class="saverow"></div><div class="small" id="save-msg"></div></div>
+    <div class="savebox"><div class="dim small">存到<span class="key-only">（U、I、O）</span>：這一局自動存在自己那格；也可以把這一刻抄進別格，當作存檔點。</div><div id="saverow" class="saverow"></div><div class="small" id="save-msg"></div></div>
     <ul class="rules">
       <li><b>目標</b>：書房取名印、祠堂取息印（按住 U），回玄關按住 U 推開門閂，走出大門就出宅。寒意滿一百就失魂。</li>
-      <li><b>立體</b>：鏡頭在你背後，W 往鏡頭前方走，I、O 轉鏡頭；上面「畫面」可以換回平面。</li>
+      <li class="touch-only"><b>觸控</b>：左半邊拖動走；右下角劍、符、鈴、燈、借火、封戶；印臺、大門旁按住「取」；立體時右半邊滑動轉鏡頭。</li>
+      <li><b>立體</b>：鏡頭在你背後，<span class="key-only">W 往鏡頭前方走，I、O 轉鏡頭</span><span class="touch-only">往鏡頭前方走，右半邊左右滑動轉鏡頭</span>；上面「畫面」可以換回平面。</li>
       <li><b>燈</b>：點著看得清，但魄從九格外就看得見你；隔著紙屏也看得到你的燈光。掩燈時，魄要靠到兩格左右才察覺。</li>
       <li><b>噬</b>：魄撲之前會停下來蓄力（約半秒）。看得見時頭上有「噬」字與紅圈；黑暗裡只有一聲嘶。退出紅圈，它就撲空，會愣一下。</li>
       <li><b>寒</b>：被咬時護心衣先擋；久留在魄身邊會直接加寒意。只有在燭火、借火旁邊才會退，但站在火光裡，魄看得見你。</li>
@@ -404,7 +487,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     <p id="end-text"></p>
     <table id="end-stats" class="stats"></table>
     <div class="row"><button id="btn-load" class="big hidden"></button><button id="btn-again" class="big">再一夜</button><button id="btn-title2" class="plain">回主頁</button></div>
-    <div class="dim small">Enter 是左邊那個；M 回主頁</div>
+    <div class="dim small key-only">Enter 是左邊那個；M 回主頁</div>
   </div>
 </div>
 
@@ -1665,13 +1748,15 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     shake = Math.max(0, shake - dt);
     const sh = RM ? 0 : shake / 0.3;
     cam.ox = sh ? (Math.random() - 0.5) * 16 * sh : 0; cam.oy = sh ? (Math.random() - 0.5) * 16 * sh : 0;
-    // 鏡頭：每格大小跟著螢幕；跟著人走，稍微平滑
-    const s = Math.max(26, Math.min(76, Math.min(W / 21, H / 12.5)));
+    // 鏡頭：每格大小跟著螢幕；跟著人走，稍微平滑。直拿的手機（高比寬多）看橫的十三格半，不然格子太小
+    const portrait = H > W * 1.15;
+    const s = Math.max(26, Math.min(76, portrait ? W / 13.5 : Math.min(W / 21, H / 12.5)));
     cam.s = s;
     // 開始畫面：鏡頭跟得慢一點、往燈要去的方向多看一點，選單在左時燈放在右半邊；一路平順，不像剪接
     const k = 1 - Math.pow(w.attract ? 0.12 : 0.0005, dt);
     // 窄螢幕選單在下面：燈放在畫面上面五分之一
-    const wide = cv.clientWidth > 980, offX = w.attract && wide ? -0.2 * W / s : 0, offY = w.attract && !wide ? 0.29 * H / s : 0;
+    // 直拿時玩的畫面：人放在畫面上面一點（下面是拇指與按鈕）
+    const wide = cv.clientWidth > 980, offX = w.attract && wide ? -0.2 * W / s : 0, offY = w.attract && !wide ? 0.29 * H / s : !w.attract && portrait ? 0.1 * H / s : 0;
     const lx = w.attract && w.lead ? w.lead.dx * 1.4 : 0, ly = w.attract && w.lead ? w.lead.dy * 1.4 : 0;
     cam.x += (p.x + lx + offX - cam.x) * k; cam.y += (p.y + ly + offY - cam.y) * k;
     if (w.snap) { cam.x = p.x + lx + offX; cam.y = p.y + ly + offY; }
@@ -2750,7 +2835,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   function pausePerf() { perf.last = 0; }
 
   root.RENDER3D = {
-    ok, init, setGame, frame, resize, force, pausePerf, toWorld, proj: (x, h, y) => proj(x, h, y),
+    ok, init, setGame, frame, resize, force, pausePerf, toWorld, proj: (x, h, y) => proj(x, h, y), turnBy(rad) { view.yaw += rad; },
     get cam() { return cam; }, get view() { return view; }, get yaw() { return view.yaw; }, get mode() { return mode; }, get game() { return g; },
     get quality() { return perf.q; }, get failed() { return perf.failed; }, get fps() { return perf.fps; }, get keep() { return perf.keep; }
   };
@@ -2792,6 +2877,15 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     chill: '寒意很高。到燭火或借火旁邊可以取暖，但站在火光裡，魄看得見你。',
     view3d: '立體：鏡頭在你背後。W 往前、S 往後、A D 往左右；I、O 轉鏡頭，往前走時鏡頭會慢慢跟上。右上角「換成平面」或暫停面板可以換回平面。'
   };
+  // 觸控時，提到按鍵的提示換一種說法
+  const HINT_TOUCH = {
+    altar: '按住右下角的「取」取印。取印時不能動，被咬就要重來。',
+    seal2: '兩印到手。回大門，按住「取」推開門閂（要一秒半）。魄也往玄關去了。',
+    gate: '按住「取」推開門閂。推的時候不能動，被咬就要重來。魄在附近時，可以先借火把它引開，或封住它過來的廊口。',
+    whiff: '劍揮空了。看飄出的字：「偏了」是方向不對，「差一步」是不夠近，「隔著」是中間有牆或屏。',
+    controls: '左半邊按住拖動就走，推得越遠走得越快。右下角是劍、符、鈴、燈、借火、封戶；走到印臺或大門旁，按住「取」。',
+    view3d: '立體：鏡頭在你背後。左半邊往上推就往鏡頭前方走；右半邊左右滑動轉鏡頭，往前走時鏡頭也會慢慢跟上。右上角「換成平面」可以換回平面。'
+  };
   const SPELL = { borrow: '借火', seal: '封戶' };
 
   // ---------- 畫面大小 ----------
@@ -2816,8 +2910,13 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   }
   let hintTimer = 0;
   function showHint(key) {
-    let t = HINT[key]; if (!t) return;
-    if (key === 'start' && use3d && g && !g.attract) { t += '\n' + HINT.view3d; g._hint3d = true; }   // 立體版：開頭的提示順便說怎麼走、怎麼轉鏡頭
+    let t = (touch.on && HINT_TOUCH[key]) || HINT[key]; if (!t) return;
+    const in3d = use3d && g && !g.attract;
+    if (key === 'start') {   // 開頭的提示順便說怎麼操作：觸控說手指怎麼用；立體版說怎麼走、怎麼轉鏡頭
+      if (touch.on) t += '\n' + (in3d ? HINT_TOUCH.view3d : HINT_TOUCH.controls);
+      else if (in3d) t += '\n' + HINT.view3d;
+      if (in3d) g._hint3d = true;
+    }
     const h = $('hint'); h.textContent = t; h.classList.remove('hidden');
     clearTimeout(hintTimer); hintTimer = setTimeout(() => h.classList.add('hidden'), 9000);
   }
@@ -2915,7 +3014,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     $('log').innerHTML = ''; $('hint').classList.add('hidden');
     ['start', 'pause', 'end'].forEach((id) => $(id).classList.add('hidden'));
     $('hud').classList.remove('hidden');
-    paused = false; running = true; snap = true; keys.clear(); holdTake = false; press = {};
+    paused = false; running = true; snap = true; keys.clear(); holdTake = false; press = {}; dropTouch();
     disarm(); $('save-msg').textContent = '';
     lsSet('xieyi.deng.slot', String(slot));
     SFX.ambient(true); heartT = 0.3; creakT = 6 + Math.random() * 6;
@@ -2940,7 +3039,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   }
   function setPause(on, why) {
     if (!running) return;
-    paused = on;
+    paused = on; dropTouch();
     if (on) autosave(false);
     SFX.ambient(!on);
     $('pause').classList.toggle('hidden', !on);
@@ -3061,22 +3160,97 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   addEventListener('blur', () => { keys.clear(); holdTake = false; if (running && !paused) setPause(true, 'blur'); });
   addEventListener('pagehide', () => { if (running && g && g.state === 'play') autosave(false); });
   document.addEventListener('visibilitychange', () => { if (document.hidden) { keys.clear(); holdTake = false; if (running && !paused) setPause(true, 'blur'); } });
-  addEventListener('mousemove', (ev) => { mouse.x = ev.clientX; mouse.y = ev.clientY; mouse.t = performance.now(); mouse.in = true; });
+  // 手機在手指放開後會補發「假的」滑鼠事件：剛摸過螢幕就不理滑鼠，免得對準跑到按鈕那裡、或點一下就揮劍
+  const fromTouch = () => performance.now() - touch.lastT < 900;
+  addEventListener('mousemove', (ev) => { if (fromTouch()) return; mouse.x = ev.clientX; mouse.y = ev.clientY; mouse.t = performance.now(); mouse.in = true; });
   document.addEventListener('mouseleave', () => { mouse.in = false; });
   const onDown = (ev) => {
-    if (!running || paused) return;
+    if (!running || paused || fromTouch()) return;
     mouse.x = ev.clientX; mouse.y = ev.clientY; mouse.t = performance.now(); mouse.in = true;
     if (ev.button === 0) press.sword = true;
     if (ev.button === 2) press.fire = true;
   };
   for (const c of [cv, $('world3d')]) { c.addEventListener('mousedown', onDown); c.addEventListener('contextmenu', (ev) => ev.preventDefault()); }
-  document.querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', (ev) => { ev.preventDefault(); if (running && !paused) press[b.dataset.act] = true; b.blur(); }));
+  // 工具鈕：滑鼠用 click；手指一按下就算（另一根手指正在拖動時也按得到），之後補發的 click 不再算一次
+  document.querySelectorAll('[data-act]').forEach((b) => {
+    b.addEventListener('click', (ev) => { ev.preventDefault(); if (fromTouch()) return; if (running && !paused) press[b.dataset.act] = true; b.blur(); });
+    b.addEventListener('pointerdown', (ev) => {
+      if (ev.pointerType === 'mouse') return;
+      ev.preventDefault(); touch.lastT = performance.now();
+      if (running && !paused) press[b.dataset.act] = true;
+      b.classList.add('pressed');
+    });
+    for (const t of ['pointerup', 'pointercancel', 'pointerleave']) b.addEventListener(t, () => b.classList.remove('pressed'));
+  });
+
+  // ---------- 觸控（2026-11-22，擁有者：「請優化手機版介面」） ----------
+  // 摸到螢幕（或一開始就是觸控螢幕）就換成觸控介面：左半邊拖動走（推得越遠走得越快）；
+  // 右下角一叢大按鈕；「取」要按住；立體版右半邊左右滑動轉鏡頭。電腦上不受影響。
+  const touch = { on: false, stick: null, look: null, take: false, lastT: -1e9 };
+  const STICK_R = 58;
+  function enableTouch() {
+    if (touch.on) return;
+    touch.on = true; document.body.classList.add('touch');
+    $('touchnote').textContent = '手機、平板建議橫拿，看得比較多。';
+    if (!$('hint').classList.contains('hidden') && g && !g.attract) $('hint').classList.add('hidden');
+  }
+  function dropTouch() { touch.stick = null; touch.look = null; touch.take = false; $('stick').classList.add('hidden'); $('t-take').classList.remove('holding'); }
+  if (window.matchMedia && matchMedia('(pointer: coarse)').matches) enableTouch();
+  addEventListener('touchstart', () => { touch.lastT = performance.now(); enableTouch(); SFX.unlock(); }, { passive: true, capture: true });
+  const tz = $('touchzone'), stickEl = $('stick'), knob = stickEl.firstElementChild;
+  tz.addEventListener('pointerdown', (ev) => {
+    if (ev.pointerType === 'mouse' || !running || paused) return;
+    ev.preventDefault(); touch.lastT = performance.now();
+    if (ev.clientX < innerWidth * 0.5) {
+      if (touch.stick) return;
+      touch.stick = { id: ev.pointerId, x0: ev.clientX, y0: ev.clientY, dx: 0, dy: 0 };
+      stickEl.style.left = ev.clientX + 'px'; stickEl.style.top = ev.clientY + 'px'; knob.style.transform = '';
+      stickEl.classList.remove('hidden');
+    } else {
+      if (touch.look) return;
+      touch.look = { id: ev.pointerId, x: ev.clientX };
+    }
+    try { tz.setPointerCapture(ev.pointerId); } catch (e) { /* 沒有就算了 */ }
+  });
+  tz.addEventListener('pointermove', (ev) => {
+    const s = touch.stick, l = touch.look;
+    if (s && ev.pointerId === s.id) {
+      let dx = ev.clientX - s.x0, dy = ev.clientY - s.y0;
+      const d = Math.hypot(dx, dy);
+      if (d > STICK_R) { dx *= STICK_R / d; dy *= STICK_R / d; }
+      s.dx = dx; s.dy = dy; knob.style.transform = `translate(${dx}px, ${dy}px)`;
+    }
+    if (l && ev.pointerId === l.id) {   // 立體版：右半邊左右滑動轉鏡頭
+      const dx = ev.clientX - l.x; l.x = ev.clientX;
+      if (use3d && RENDER3D.mode === 'play' && running && !paused) RENDER3D.turnBy(dx * 0.007);
+    }
+  });
+  const endTouch = (ev) => {
+    if (touch.stick && ev.pointerId === touch.stick.id) { touch.stick = null; stickEl.classList.add('hidden'); }
+    if (touch.look && ev.pointerId === touch.look.id) touch.look = null;
+  };
+  for (const t of ['pointerup', 'pointercancel', 'lostpointercapture']) tz.addEventListener(t, endTouch);
+  // 「取」：按住才算（取印一秒、推門閂一秒半）
+  const takeBtn = $('t-take');
+  takeBtn.addEventListener('pointerdown', (ev) => { ev.preventDefault(); touch.lastT = performance.now(); if (running && !paused) { touch.take = true; takeBtn.classList.add('holding'); } });
+  for (const t of ['pointerup', 'pointercancel', 'pointerleave']) takeBtn.addEventListener(t, () => { touch.take = false; takeBtn.classList.remove('holding'); });
+  takeBtn.addEventListener('contextmenu', (ev) => ev.preventDefault());
+  // 站的地方能不能取印、推門閂（和引擎的 tryTake 同一套距離）
+  function takeNear() {
+    const p = g.p;
+    if (g.exitReady && !g.exitOpen && g.gate && Math.hypot(p.x - g.gate.x, p.y - g.gate.y) <= R.TAKE.gateReach) return 'gate';
+    return g.altars.some((a) => !a.taken && Math.hypot(a.x - p.x, a.y - p.y) <= R.TAKE.reach) ? 'seal' : null;
+  }
 
   let aimAuto = true;
   const cam3 = { turn: 0, follow: null };   // 立體版的鏡頭：I、O 轉；往前走時跟上
   function input() {
     let kx = 0, ky = 0;
     for (const k of keys) { const v = MOVE[k]; if (v) { kx += v[0]; ky += v[1]; } }
+    if (touch.stick) {   // 手指推出去的方向；推得越遠走得越快（推到七成就是全速）
+      const s = touch.stick, d = Math.hypot(s.dx, s.dy);
+      if (d > 10) { const m = Math.min(1, (d - 10) / (STICK_R * 0.7 - 10)); kx += (s.dx / d) * m; ky += (s.dy / d) * m; }
+    }
     let mx = kx, my = ky;
     const in3d = use3d && RENDER3D.mode === 'play';
     cam3.turn = in3d ? (keys.has('KeyO') ? 1 : 0) - (keys.has('KeyI') ? 1 : 0) : 0;
@@ -3084,7 +3258,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     if (in3d && (kx || ky)) {   // 立體：W 是鏡頭看的方向，S 往回，A、D 往左右
       const yaw = RENDER3D.yaw, fx = Math.cos(yaw), fy = Math.sin(yaw);
       mx = fx * -ky - fy * kx; my = fy * -ky + fx * kx;
-      if (ky < 0) cam3.follow = Math.atan2(my, mx);   // 往前走（帶一點左右也算）時，鏡頭慢慢轉到人走的方向
+      if (ky < -0.3) cam3.follow = Math.atan2(my, mx);   // 往前走（帶一點左右也算）時，鏡頭慢慢轉到人走的方向
     }
     if (mx || my) moveDir = Math.atan2(my, mx);
     const now = performance.now(), useMouse = mouse.in && now - mouse.t < 2500;
@@ -3094,7 +3268,7 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
       if (w) { aim = Math.atan2(w.y - g.p.y, w.x - g.p.x); target = w; }
     } else if (mx || my) aim = moveDir;
     aimAuto = !useMouse;   // 沒用滑鼠：劍與火符自動對準看得見的魄
-    return { mx, my, aim, target, autoAim: aimAuto, press, hold: { take: holdTake } };
+    return { mx, my, aim, target, autoAim: aimAuto, press, hold: { take: holdTake || touch.take } };
   }
 
   // ---------- HUD ----------
@@ -3145,6 +3319,11 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
     $('t-bell').classList.toggle('busy', reading);
     $('t-lamp').classList.toggle('covered', !p.lampOn); $('lamp-s').textContent = p.lampOn ? '點著' : '掩著';
     setHTML('aimmode', aimAuto ? '<b>對準</b>自動（看得見的魄）' : '<b>對準</b>跟著滑鼠');
+    if (touch.on) {   // 觸控的「取」：站在印臺或大門旁才亮；正在取就是紅的
+      const near = takeNear();
+      takeBtn.classList.toggle('ready', !!near);
+      setHTML('take-s', p.taking ? (p.taking.gate ? '推門中' : '取印中') : near === 'gate' ? '推門閂' : '取印');
+    }
     if (frameN % 6 === 0) RD.minimap($('minimap'));
     prev.chill = p.chill; prev.armor = p.armor; prev.ink = p.ink; prev.bell = p.bellCD;
   }
@@ -3275,10 +3454,9 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   const pickView = (on) => { if (on) set3d(true, true, true); else { viewWhy = ''; set3d(false, true); } };
   ['vm-3d', 'pv-3d', 'vm-2d', 'pv-2d'].forEach((id) => $(id).addEventListener('click', (ev) => { ev.currentTarget.blur(); pickView(id.endsWith('3d')); }));
   $('btn-view').addEventListener('click', (ev) => { ev.currentTarget.blur(); pickView(!use3d); });
-  if (window.matchMedia && matchMedia('(pointer: coarse)').matches && !matchMedia('(pointer: fine)').matches) $('touchnote').textContent = '這一版是試做，只做了鍵盤與滑鼠；手機上還不能玩。';
 
   // 先在背景擺好宅子（開始畫面後面看得到一點點）
-  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, continueGame, setPause, toTitle, saveAs, readSlot, canSave, snap() { snap = true; }, tour, get use3d() { return use3d; }, set3d, get slot() { return slot; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
+  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, continueGame, setPause, toTitle, saveAs, readSlot, canSave, snap() { snap = true; }, tour, get use3d() { return use3d; }, set3d, get touch() { return touch; }, get slot() { return slot; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
   showcase();
   renderSlots(); renderView();
   if (!canSave) $('slot-msg').textContent = '這個瀏覽器存不了檔（例如無痕視窗）：照樣能玩，只是關掉就沒了。';

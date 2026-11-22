@@ -148,13 +148,15 @@
     shake = Math.max(0, shake - dt);
     const sh = RM ? 0 : shake / 0.3;
     cam.ox = sh ? (Math.random() - 0.5) * 16 * sh : 0; cam.oy = sh ? (Math.random() - 0.5) * 16 * sh : 0;
-    // 鏡頭：每格大小跟著螢幕；跟著人走，稍微平滑
-    const s = Math.max(26, Math.min(76, Math.min(W / 21, H / 12.5)));
+    // 鏡頭：每格大小跟著螢幕；跟著人走，稍微平滑。直拿的手機（高比寬多）看橫的十三格半，不然格子太小
+    const portrait = H > W * 1.15;
+    const s = Math.max(26, Math.min(76, portrait ? W / 13.5 : Math.min(W / 21, H / 12.5)));
     cam.s = s;
     // 開始畫面：鏡頭跟得慢一點、往燈要去的方向多看一點，選單在左時燈放在右半邊；一路平順，不像剪接
     const k = 1 - Math.pow(w.attract ? 0.12 : 0.0005, dt);
     // 窄螢幕選單在下面：燈放在畫面上面五分之一
-    const wide = cv.clientWidth > 980, offX = w.attract && wide ? -0.2 * W / s : 0, offY = w.attract && !wide ? 0.29 * H / s : 0;
+    // 直拿時玩的畫面：人放在畫面上面一點（下面是拇指與按鈕）
+    const wide = cv.clientWidth > 980, offX = w.attract && wide ? -0.2 * W / s : 0, offY = w.attract && !wide ? 0.29 * H / s : !w.attract && portrait ? 0.1 * H / s : 0;
     const lx = w.attract && w.lead ? w.lead.dx * 1.4 : 0, ly = w.attract && w.lead ? w.lead.dy * 1.4 : 0;
     cam.x += (p.x + lx + offX - cam.x) * k; cam.y += (p.y + ly + offY - cam.y) * k;
     if (w.snap) { cam.x = p.x + lx + offX; cam.y = p.y + ly + offY; }

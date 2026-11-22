@@ -16,6 +16,8 @@
 <canvas id="world3dfx" class="hidden"></canvas>
 
 <div id="hud" class="hidden">
+  <div id="touchzone" aria-hidden="true"></div>
+  <div id="stick" class="hidden"><i></i></div>
   <div id="seal" title="燈下無明"><span>燈</span><span>下</span><span>無</span><span>明</span></div>
   <div id="bars">
     <div class="hbar chill" title="寒意：被咬、久留在魄身邊都會上升；滿了就失魂。只有在火邊才會退。"><b>寒</b><div class="track"><div class="fill" id="chill-fill"></div></div><span id="chill-num"></span></div>
@@ -43,6 +45,7 @@
       </div>
       <em id="ink-n"></em>
     </div>
+    <button class="tool" id="t-take" title="取印、推門閂：站在印臺或大門旁按住"><b>取</b><small id="take-s">取印</small></button>
     <button class="tool" id="t-lamp" data-act="lamp" title="手燈（：鍵，也就是分號鍵）：點著看得清身邊，但魄從遠處就看得見你。掩燈後，眼睛會慢慢習慣黑暗。"><b>燈</b><kbd>：</kbd><small id="lamp-s">點著</small></button>
   </div>
   <canvas id="minimap" width="200" height="140" title="走過的地方：只記牆、屏、門與印，不記魄"></canvas>
@@ -66,8 +69,8 @@
       <section class="win">
         <h3><i>出</i>出宅就贏</h3>
         <ol>
-          <li>到西北的<b>書房</b>取名印、東北的<b>祠堂</b>取息印：站在印臺旁，按住 <kbd>U</kbd>。</li>
-          <li>回南邊的<b>玄關</b>，按住 <kbd>U</kbd> 一秒半推開門閂。兩印到手後，兩隻魄都會守在玄關。</li>
+          <li>到西北的<b>書房</b>取名印、東北的<b>祠堂</b>取息印：站在印臺旁，按住 <kbd class="key-only">U</kbd><span class="touch-only">「取」</span>。</li>
+          <li>回南邊的<b>玄關</b>，按住 <kbd class="key-only">U</kbd><span class="touch-only">「取」</span> 一秒半推開門閂。兩印到手後，兩隻魄都會守在玄關。</li>
           <li>走出大門，就出宅了。</li>
         </ol>
       </section>
@@ -77,7 +80,7 @@
       </section>
     </div>
     <p class="story meaning"><b>燈下無明</b>：燈照得到的地方，你看得清，魄也看得見你；燈外的黑暗，你什麼都看不見。掩了燈，眼睛會慢慢習慣，反而看得更遠。這一夜要學的，是什麼時候點燈、什麼時候掩燈。</p>
-    <div class="keys">
+    <div class="keys key-only">
       <div><span><kbd>WASD</kbd></span><b>走動</b></div>
       <div><span><kbd>J</kbd></span><b>桃木劍</b></div>
       <div><span><kbd>K</kbd></span><b>銅鈴</b></div>
@@ -87,12 +90,20 @@
       <div><span><kbd>U</kbd></span><b>按住：取印、推門閂</b></div>
       <div><span><kbd>P</kbd><kbd>Esc</kbd></span><b>暫停，可回主頁</b></div>
     </div>
-    <div class="dim small">分號、逗號、句號鍵就是畫面上的：《》，不必按 Shift；方向鍵也能走。滑鼠左鍵劍、右鍵火符；不用滑鼠時自動對準看得見的魄。立體時 W 往鏡頭前方走，I、O 轉鏡頭。</div>
+    <div class="touchkeys touch-only">
+      <div><b>走</b>左半邊按住拖動；推得越遠走得越快</div>
+      <div><b>劍 符 鈴</b>右下角，自動對準看得見的魄</div>
+      <div><b>燈 借火 封戶</b>右下角上排</div>
+      <div><b>取</b>站在印臺或大門旁，按住「取」</div>
+      <div><b>立體</b>往鏡頭前方走；右半邊左右滑動轉鏡頭</div>
+      <div><b>暫停</b>右上角「暫停」</div>
+    </div>
+    <div class="dim small key-only">分號、逗號、句號鍵就是畫面上的：《》，不必按 Shift；方向鍵也能走。滑鼠左鍵劍、右鍵火符；不用滑鼠時自動對準看得見的魄。立體時 W 往鏡頭前方走，I、O 轉鏡頭。</div>
     <div id="slots" class="slots"></div>
     <div class="dim small warn" id="slot-msg"></div>
     <div class="small warn" id="vm-note" aria-live="polite"></div>
-    <div class="dim small">三格存檔：U、I、O 選一格，Enter 開始或繼續；滑鼠點也可以<span id="best"></span></div>
-    <div class="dim small" id="touchnote">這一版是試做：一個關卡，只做了鍵盤與滑鼠。</div>
+    <div class="dim small"><span class="key-only">三格存檔：U、I、O 選一格，Enter 開始或繼續；滑鼠點也可以</span><span class="touch-only">三格存檔：點一格的「入宅」或「繼續」</span><span id="best"></span></div>
+    <div class="dim small" id="touchnote">這一版是試做：一個關卡。電腦用鍵盤滑鼠，手機、平板用觸控。</div>
   </div>
 </div>
 
@@ -102,10 +113,11 @@
     <p class="dim small" id="pause-why"></p>
     <div class="row"><button id="btn-resume" class="big">繼續</button><button id="btn-title" title="先把這一局存在自己那格，再回到開始畫面">回主頁（M）</button><button id="btn-restart">重來</button><button id="btn-mute2">音效</button></div>
     <div class="viewrow"><span class="dim small">畫面</span><span class="vm-row"><button id="pv-3d" title="立體：鏡頭在你背後">立體</button><button id="pv-2d" title="平面：從上往下看">平面</button></span><span class="small warn" id="pv-note"></span></div>
-    <div class="savebox"><div class="dim small">存到（U、I、O）：這一局自動存在自己那格；也可以把這一刻抄進別格，當作存檔點。</div><div id="saverow" class="saverow"></div><div class="small" id="save-msg"></div></div>
+    <div class="savebox"><div class="dim small">存到<span class="key-only">（U、I、O）</span>：這一局自動存在自己那格；也可以把這一刻抄進別格，當作存檔點。</div><div id="saverow" class="saverow"></div><div class="small" id="save-msg"></div></div>
     <ul class="rules">
       <li><b>目標</b>：書房取名印、祠堂取息印（按住 U），回玄關按住 U 推開門閂，走出大門就出宅。寒意滿一百就失魂。</li>
-      <li><b>立體</b>：鏡頭在你背後，W 往鏡頭前方走，I、O 轉鏡頭；上面「畫面」可以換回平面。</li>
+      <li class="touch-only"><b>觸控</b>：左半邊拖動走；右下角劍、符、鈴、燈、借火、封戶；印臺、大門旁按住「取」；立體時右半邊滑動轉鏡頭。</li>
+      <li><b>立體</b>：鏡頭在你背後，<span class="key-only">W 往鏡頭前方走，I、O 轉鏡頭</span><span class="touch-only">往鏡頭前方走，右半邊左右滑動轉鏡頭</span>；上面「畫面」可以換回平面。</li>
       <li><b>燈</b>：點著看得清，但魄從九格外就看得見你；隔著紙屏也看得到你的燈光。掩燈時，魄要靠到兩格左右才察覺。</li>
       <li><b>噬</b>：魄撲之前會停下來蓄力（約半秒）。看得見時頭上有「噬」字與紅圈；黑暗裡只有一聲嘶。退出紅圈，它就撲空，會愣一下。</li>
       <li><b>寒</b>：被咬時護心衣先擋；久留在魄身邊會直接加寒意。只有在燭火、借火旁邊才會退，但站在火光裡，魄看得見你。</li>
@@ -125,7 +137,7 @@
     <p id="end-text"></p>
     <table id="end-stats" class="stats"></table>
     <div class="row"><button id="btn-load" class="big hidden"></button><button id="btn-again" class="big">再一夜</button><button id="btn-title2" class="plain">回主頁</button></div>
-    <div class="dim small">Enter 是左邊那個；M 回主頁</div>
+    <div class="dim small key-only">Enter 是左邊那個；M 回主頁</div>
   </div>
 </div>
 

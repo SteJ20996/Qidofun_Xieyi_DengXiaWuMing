@@ -33,6 +33,7 @@ try {
   ok('字體載入（霞鶩文楷）', await ev(() => document.fonts.check('32px "LXGW WenKai TC"', '燈下無明魄噬')));
   await shot('01-start');
   ok('開始畫面', await ev(() => !document.getElementById('start').classList.contains('hidden')));
+  ok('電腦上不出現觸控介面', await ev(() => !document.body.classList.contains('touch') && getComputedStyle(document.querySelector('.touchkeys')).display === 'none'));
   // 開始畫面的展示：一盞燈在宅子裡飄，魄照常巡行但不理它
   const a0 = await ev(() => ({ x: DENG.g.p.x, y: DENG.g.p.y, attract: DENG.g.attract }));
   await wait(1200);
@@ -469,6 +470,51 @@ await mp.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 30000
 await mp.screenshot({ path: path.join(out, '16-phone-start.png') });
 const over = await mp.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
 ok('手機寬度不會左右捲', !over);
+// 手機（2026-11-22）：觸控介面。左半邊拖動走、右下角按鈕、按住「取」取印；說明換成手指的說法
+try {
+  const tinfo = await mp.evaluate(() => ({ touch: document.body.classList.contains('touch'), keys: getComputedStyle(document.querySelector('#start .keys')).display, tk: getComputedStyle(document.querySelector('.touchkeys')).display, goal: document.getElementById('goalbox').innerText }));
+  ok('手機：開始畫面換成觸控說明（看不到鍵盤按鍵）', tinfo.touch && tinfo.keys === 'none' && tinfo.tk !== 'none' && tinfo.goal.includes('「取」') && !tinfo.goal.includes('U'), tinfo);
+  await mp.tap('#slots .slot .go'); await mp.waitForTimeout(600);
+  const hint = await mp.evaluate(() => ({ running: DENG.running, hint: document.getElementById('hint').textContent, tools: getComputedStyle(document.getElementById('tools')).display, take: getComputedStyle(document.getElementById('t-take')).display }));
+  await mp.screenshot({ path: path.join(out, '28-phone-play.png') });
+  ok('手機：入宅後右下角是一叢按鈕、有「取」，提示說手指怎麼用', hint.running && hint.tools === 'grid' && hint.take !== 'none' && hint.hint.includes('左半邊'), hint);
+  const tz = (type, id, x, y) => mp.evaluate(([type, id, x, y]) => { document.getElementById('touchzone').dispatchEvent(new PointerEvent(type, { pointerId: id, pointerType: 'touch', clientX: x, clientY: y, bubbles: true })); }, [type, id, x, y]);
+  const y0 = await mp.evaluate(() => DENG.g.p.y);
+  await tz('pointerdown', 3, 70, 500); await tz('pointermove', 3, 70, 440);
+  const stick = await mp.evaluate(() => !document.getElementById('stick').classList.contains('hidden'));
+  await mp.waitForTimeout(900); await tz('pointerup', 3, 70, 440);
+  const y1 = await mp.evaluate(() => ({ y: DENG.g.p.y, stick: !document.getElementById('stick').classList.contains('hidden') }));
+  ok('手機：左半邊往上拖就往上走，放開就停、圓圈收起', stick && y1.y < y0 - 0.3 && !y1.stick, { y0, y1, stick });
+  const sw0 = await mp.evaluate(() => DENG.g.stats.swordHits + DENG.g.stats.swordMiss);
+  await mp.tap('#t-sword'); await mp.waitForTimeout(400);
+  const sw1 = await mp.evaluate(() => ({ n: DENG.g.stats.swordHits + DENG.g.stats.swordMiss, bites: DENG.g.stats.bites }));
+  ok('手機：點一下劍就揮一劍（不會因為補發的滑鼠事件多揮一次）', sw1.n === sw0 + 1, { sw0, sw1 });
+  await mp.evaluate(() => { const g = DENG.g; g.pos.forEach((e, i) => { g.place(e, 2.5 + i, 25.5, 'recover'); e.stateT = 999; }); const a = g.altars.find((q) => q.key === 'name'); g.tp(a.x + 0.8, a.y); DENG.snap(); });
+  await mp.waitForTimeout(300);
+  const ready = await mp.evaluate(() => ({ ready: document.getElementById('t-take').classList.contains('ready'), label: document.getElementById('take-s').textContent }));
+  await mp.evaluate(() => document.getElementById('t-take').dispatchEvent(new PointerEvent('pointerdown', { pointerId: 5, pointerType: 'touch', bubbles: true })));
+  await mp.waitForTimeout(1400);
+  await mp.evaluate(() => document.getElementById('t-take').dispatchEvent(new PointerEvent('pointerup', { pointerId: 5, pointerType: 'touch', bubbles: true })));
+  const took = await mp.evaluate(() => ({ name: DENG.g.seals.name, hint: document.getElementById('hint').textContent }));
+  ok('手機：站在印臺旁「取」會亮，按住就取到印', ready.ready && ready.label === '取印' && took.name, { ready, took });
+  const over2 = await mp.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
+  ok('手機：玩的時候也不會左右捲', !over2);
+} catch (e) { ok('手機的觸控介面', false, String(e && e.message || e)); }
+// 橫拿的手機：立體版，右半邊左右滑動轉鏡頭
+try {
+  const lctx = await browser.newContext({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
+  const lp = await lctx.newPage(); watch(lp);
+  await lp.goto(base + (base.includes('?') ? '&' : '?') + 'seed=7&keep3d=1');
+  await lp.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 40000 });
+  await lp.evaluate(() => DENG.newGame(1)); await lp.waitForTimeout(1200);
+  const yaw0 = await lp.evaluate(() => window.RENDER3D.yaw);
+  const tz = (type, id, x, y) => lp.evaluate(([type, id, x, y]) => { document.getElementById('touchzone').dispatchEvent(new PointerEvent(type, { pointerId: id, pointerType: 'touch', clientX: x, clientY: y, bubbles: true })); }, [type, id, x, y]);
+  await tz('pointerdown', 4, 600, 120); await tz('pointermove', 4, 680, 120); await tz('pointerup', 4, 680, 120);
+  const l = await lp.evaluate(() => ({ yaw: window.RENDER3D.yaw, mode: window.RENDER3D.mode, hint: document.getElementById('hint').textContent }));
+  await lp.screenshot({ path: path.join(out, '29-phone-3d.png') });
+  ok('橫拿的手機：立體版右半邊滑動轉鏡頭，提示說手指怎麼轉', l.mode === 'play' && l.yaw > yaw0 + 0.3 && l.hint.includes('右半邊'), { yaw0, l });
+  await lctx.close();
+} catch (e) { ok('橫拿的手機', false, String(e && e.message || e)); }
 
 ok('沒有報錯', errors.length === 0, errors.slice(0, 5));
 await browser.close();

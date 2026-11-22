@@ -282,3 +282,74 @@ h1 span:nth-child(1) { animation-delay: .1s; } h1 span:nth-child(2) { animation-
   *, *::before, *::after { animation-duration: .001s !important; animation-iteration-count: 1 !important; transition: none !important; }
   #bigstamp.show span { animation: none !important; transform: rotate(-6deg); }
 }
+
+/* ---------- 手機、平板（2026-11-22，擁有者：「請優化手機版介面」） ----------
+   摸到螢幕（或一開始就是觸控螢幕）時 body 加 .touch：左半邊拖動走，右下角一叢大按鈕，HUD 縮小、不互相蓋住。
+   電腦上看不到這些。 */
+.touch-only, #touchzone, #stick, #t-take { display: none; }
+body.touch .key-only, body.touch #hud kbd, body.touch #seal, body.touch #aimmode { display: none !important; }
+body.touch span.touch-only { display: inline; }
+body.touch div.touch-only { display: block; }
+body.touch li.touch-only { display: list-item; }
+body.touch #hud { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+body.touch #hud button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+/* 左半邊拖動：手指按下的地方出現一個圓，推出去就走 */
+body.touch #touchzone { display: block; position: absolute; inset: 0; touch-action: none; }
+body.touch #stick:not(.hidden) { display: block; position: absolute; width: 116px; height: 116px; margin: -58px 0 0 -58px; border-radius: 50%; border: 2px solid rgba(239,229,207,.6); background: rgba(13,12,11,.3); pointer-events: none !important; }
+#stick i { position: absolute; left: 50%; top: 50%; width: 50px; height: 50px; margin: -25px 0 0 -25px; border-radius: 50%; background: rgba(239,229,207,.8); border: 2px solid var(--ink); box-shadow: 0 2px 8px rgba(0,0,0,.4); }
+/* HUD 縮小：左上是寒、護、目與顯／隱；右上是兩印、大門與三顆鈕；小地圖在右上鈕的下面 */
+body.touch #bars { left: calc(8px + env(safe-area-inset-left, 0px)); top: calc(8px + env(safe-area-inset-top, 0px)); padding: 4px 8px; gap: 3px; }
+body.touch .hbar { font-size: 13px; gap: 6px; }
+body.touch .hbar .track, body.touch .seals3 { width: 92px; }
+body.touch .hbar .track { height: 9px; }
+body.touch .seals3 i { height: 14px; font-size: 10px; }
+body.touch .hbar span { font-size: 10.5px; min-width: 3.2em; }
+body.touch #expose { left: calc(8px + env(safe-area-inset-left, 0px)); top: calc(76px + env(safe-area-inset-top, 0px)); font-size: 12.5px; padding: 2px 8px; }
+body.touch #expose b { font-size: 15px; margin-right: 4px; }
+body.touch #topright { right: calc(8px + env(safe-area-inset-right, 0px)); top: calc(8px + env(safe-area-inset-top, 0px)); gap: 4px; }
+body.touch #goal { font-size: 13px; padding: 3px 8px; gap: 8px; }
+body.touch #goal .s i { width: 18px; height: 18px; font-size: 12px; }
+body.touch .hudbtns { gap: 4px; }
+body.touch .hudbtns button { font-size: 13px; padding: 6px 9px; }
+body.touch #minimap { width: 112px; height: 78px; right: calc(8px + env(safe-area-inset-right, 0px)); top: calc(84px + env(safe-area-inset-top, 0px)); bottom: auto; }
+body.touch #log { left: calc(8px + env(safe-area-inset-left, 0px)); top: calc(106px + env(safe-area-inset-top, 0px)); max-width: 44vw; }
+body.touch #log div { font-size: 12.5px; padding: 2px 8px; }
+body.touch #hint { top: calc(8px + env(safe-area-inset-top, 0px)); bottom: auto; min-width: 0; width: max-content; max-width: max(240px, calc(100vw - 480px)); font-size: 13.5px; line-height: 1.5; padding: 6px 10px 6px 34px; }
+body.touch #hint::before { left: 7px; top: 7px; width: 20px; height: 20px; font-size: 12px; }
+/* 右下角一叢大按鈕：劍最大，在拇指底下；符、鈴在它左邊；燈在上面；借火、封戶、取在外圈 */
+body.touch #tools { left: auto; right: calc(10px + env(safe-area-inset-right, 0px)); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); transform: none;
+  display: grid; --c: 56px; grid-template-columns: repeat(4, var(--c)); grid-template-rows: repeat(3, var(--c)); gap: 8px;
+  grid-template-areas: "borrow seal lamp lamp" "take bell sword sword" "ink fire sword sword"; }
+body.touch #tools .tool, body.touch .pages button { min-width: 0; padding: 0; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 14px; border: 1.5px solid var(--ink); background: rgba(239,229,207,.9); box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+body.touch .tool > b { font-size: 24px; }
+body.touch .tool small { display: block; font-size: 10.5px; }
+body.touch #tools #t-sword { grid-area: sword; border-radius: 50%; }
+body.touch #t-sword > b { font-size: 46px; }
+body.touch #t-bell { grid-area: bell; } body.touch #t-fire { grid-area: fire; }
+body.touch #t-lamp { grid-area: lamp; flex-direction: row; gap: 8px; }
+body.touch #t-take { display: flex; grid-area: take; opacity: .55; }
+body.touch #t-take.ready { opacity: 1; border-color: var(--red); box-shadow: 0 0 0 3px rgba(180,57,42,.45), 0 2px 8px rgba(0,0,0,.35); }
+body.touch #t-take.holding { background: var(--red); color: #f7efe0; }
+body.touch #t-take.holding small { color: #f7efe0; }
+body.touch #tools #t-book, body.touch #tools #t-book .pages { display: contents; }
+body.touch #t-book > b, body.touch #t-book > small { display: none; }
+body.touch #pg-borrow { grid-area: borrow; font-size: 15px; } body.touch #pg-seal { grid-area: seal; font-size: 15px; }
+body.touch #ink-n { grid-area: ink; position: static; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 3px; writing-mode: horizontal-tb; font: 12px var(--font); color: var(--ink); background: rgba(239,229,207,.88); border: 1px solid rgba(28,26,23,.4); border-radius: 12px; height: 30px; align-self: center; }
+body.touch .tool.pressed, body.touch .pages button.pressed { transform: scale(.93); filter: brightness(.9); }
+body.touch #t-fire small { display: none; }
+body.touch #t-fire em#fire-n { position: static; display: flex; gap: 2px; min-height: 12px; }
+/* 直拿：畫面窄，按鈕小一號；右上三顆鈕直排，兩印與大門放到左邊第三列；提示在 HUD 下面整行 */
+@media (orientation: portrait) {
+  body.touch #tools { --c: 50px; gap: 6px; }
+  body.touch #t-sword > b { font-size: 40px; }
+  body.touch .hudbtns { flex-direction: column; align-items: flex-end; }
+  body.touch #goal { position: fixed; left: calc(8px + env(safe-area-inset-left, 0px)); top: calc(104px + env(safe-area-inset-top, 0px)); }
+  body.touch #minimap { top: calc(122px + env(safe-area-inset-top, 0px)); }
+  body.touch #log { top: calc(136px + env(safe-area-inset-top, 0px)); }
+  body.touch #hint { top: calc(208px + env(safe-area-inset-top, 0px)); width: auto; left: 12px; right: 12px; transform: none; max-width: none; }
+}
+/* 開始畫面：觸控說明 */
+.touchkeys { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 16px; margin: 10px auto 2px; max-width: 37em; text-align: left; font-size: 14px; line-height: 1.45; }
+.touchkeys b { font-weight: normal; color: var(--red-2); margin-right: 6px; }
+body.touch div.touchkeys { display: grid; }
+@media (max-width: 640px) { .touchkeys { grid-template-columns: 1fr; } }
