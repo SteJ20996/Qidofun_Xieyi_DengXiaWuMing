@@ -1,0 +1,28 @@
+/* 示意：首頁第三張紙《燈下無明》。夜色的紙，中間一盞燈：滑過或選到時「點燈」，照亮的圈變大。 */
+body.home { --dg-night: #0d1018; --dg-lamp: #f3c779; --dg-paper: #efe5cf; }
+.hm-card.deng { background: var(--dg-night); color: var(--dg-paper);
+  box-shadow: 0 0 0 1px rgba(243, 199, 121, .16), 0 22px 60px -18px rgba(240, 170, 80, .38); }
+.hm-card.deng:hover, .hm-card.deng.active { box-shadow: 0 0 0 1px rgba(243, 199, 121, .32), 0 26px 80px -14px rgba(240, 170, 80, .6); }
+/* 片段只露出燈照得到的一圈；點燈（選到）時圈變大 */
+.hm-card.deng .hm-stage video { opacity: .95; object-position: 50% 50%;
+  -webkit-mask-image: radial-gradient(circle at 50% 52%, #000 0, #000 22%, transparent 52%); mask-image: radial-gradient(circle at 50% 52%, #000 0, #000 22%, transparent 52%); transition: transform 6s linear, -webkit-mask-size .6s, mask-size .6s; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-position: center; mask-position: center; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+.hm-card.deng.active .hm-stage video, .hm-card.deng:hover .hm-stage video { -webkit-mask-size: 190% 190%; mask-size: 190% 190%; }
+.hm-card.deng .hm-stage::after { background: linear-gradient(180deg, transparent 0%, transparent 55%, var(--dg-night) 100%); }
+.dg-zh { font: 700 clamp(40px, 4.6vw, 62px)/1 var(--zh); letter-spacing: .06em; display: inline-flex; align-items: flex-end; gap: .04em; }
+.dg-zh i { font-style: normal; display: inline-block; }
+/* 燈最亮，離燈越遠越暗：燈下無明 */
+.dg-zh i:nth-child(1) { color: var(--dg-lamp); text-shadow: 0 0 18px rgba(243, 199, 121, .75), 0 0 46px rgba(240, 160, 70, .45); }
+.dg-zh i:nth-child(2) { color: rgba(239, 229, 207, .82); }
+.dg-zh i:nth-child(3) { color: rgba(239, 229, 207, .5); }
+.dg-zh i:nth-child(4) { color: rgba(239, 229, 207, .26); }
+.hm-card.deng .hm-genre { color: var(--dg-lamp); }
+.hm-card.deng .hm-tag { color: rgba(239, 229, 207, .88); }
+.hm-card.deng .hm-pitch { color: rgba(239, 229, 207, .76); }
+.hm-card.deng .hm-status { color: var(--dg-lamp); border: 1px dashed rgba(243, 199, 121, .6); }
+/* 三張紙時，「選一部」放寬，收起的兩張也放得下標題（力透紙背 62px 四個字） */
+@media (min-width: 861px) {
+  body.home main > section, body.home footer { max-width: 1320px; }
+  .hm-row.has-active .hm-card { flex-grow: .85; }
+  .hm-row.has-active .hm-card.active { flex-grow: 1.3; }
+}
+@media (min-width: 861px) { body.home .top { padding-left: max(16px, calc(50% - 680px)); padding-right: max(16px, calc(50% - 680px)); } }

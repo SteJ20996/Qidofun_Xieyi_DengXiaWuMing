@@ -1,0 +1,100 @@
+/* 示意：《燈下無明》介紹頁。整頁是夜裡的紙宅：墨藍的底、紙色的字、燈的琥珀色只給要緊的東西。
+   頂欄、聯絡、頁尾沿用 site.css，換成夜色。 */
+body.deng { --night: #0d1018; --night-2: #151a25; --paper-x: #efe5cf; --lamp: #f3c779; --lamp-2: #e9a54d;
+  --ink: #efe5cf; --ink-2: rgba(239, 229, 207, .78); --dim: rgba(239, 229, 207, .5); --line: rgba(239, 229, 207, .14);
+  background: var(--night); color: var(--paper-x); }
+body.deng .top { background: rgba(13, 16, 24, .82); border-bottom-color: var(--line); }
+body.deng .studio, body.deng .sections a { color: var(--ink-2); }
+body.deng .studio img { filter: invert(1) brightness(1.6); }
+body.deng .sections a:hover { color: var(--lamp); }
+body.deng a { color: var(--lamp); }
+body.deng footer { border-top-color: var(--line); }
+
+/* 開頭：一盞燈照亮宅子的一角，字在燈的左邊 */
+.dg-hero { position: relative; max-width: none !important; min-height: min(86vh, 760px); margin: 0 !important; padding: 0 !important;
+  display: flex; align-items: center; overflow: hidden;
+  background: radial-gradient(circle at 69% 56%, rgba(13, 16, 24, 0) 0, rgba(13, 16, 24, 0) 13%, rgba(13, 16, 24, .55) 27%, var(--night) 46%), url(../img/hero.jpg) 50% 50% / cover no-repeat; }
+.dg-hero::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 30%; background: linear-gradient(180deg, transparent, var(--night)); }
+.dg-hero-text { position: relative; z-index: 2; width: min(1080px, 100%); margin: 0 auto; padding: 40px 16px; }
+.dg-kicker { margin: 0 0 6px; color: var(--lamp); letter-spacing: .3em; font-size: 16px; }
+.dg-logo { margin: 0; font: 400 clamp(64px, 10vw, 132px)/1.05 var(--zh); letter-spacing: .08em; display: flex; }
+.dg-logo i { font-style: normal; }
+.dg-logo i:nth-child(1) { color: var(--lamp); text-shadow: 0 0 24px rgba(243, 199, 121, .7), 0 0 70px rgba(233, 165, 77, .45); }
+.dg-logo i:nth-child(2) { color: rgba(239, 229, 207, .85); }
+.dg-logo i:nth-child(3) { color: rgba(239, 229, 207, .52); }
+.dg-logo i:nth-child(4) { color: rgba(239, 229, 207, .26); }
+.dg-sub { margin: 14px 0 4px; font-size: 24px; letter-spacing: .4em; color: var(--paper-x); }
+.dg-motto { margin: 0 0 28px; font-size: 18px; letter-spacing: .3em; color: var(--ink-2); }
+.dg-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.dg-seal { background: #b4392a; color: #f7efe0; padding: 4px 14px; border-radius: 3px; letter-spacing: .12em; font-size: 15px; rotate: -3deg; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .35); }
+.dg-btn { display: inline-block; padding: 8px 20px; border-radius: 4px; font-size: 16px; letter-spacing: .12em; text-decoration: none; background: var(--lamp); color: #1c1a17 !important; }
+.dg-btn.ghost { background: transparent; color: var(--lamp) !important; border: 1px solid rgba(243, 199, 121, .6); }
+
+/* 段落：標題左邊一點燈 */
+.dg-sec h2, body.deng .contact h2 { display: flex; align-items: center; gap: 12px; font-weight: 400; font-size: 30px; letter-spacing: .2em; margin: 0 0 22px; }
+.dg-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--lamp); box-shadow: 0 0 12px 3px rgba(243, 199, 121, .55), 0 0 40px 10px rgba(233, 165, 77, .18); }
+.dg-lead { margin: -6px 0 26px; color: var(--ink-2); }
+.dg-frame { position: relative; aspect-ratio: 16 / 10; border-radius: 6px; overflow: hidden; box-shadow: 0 0 0 1px var(--line), 0 30px 90px -30px rgba(233, 165, 77, .4); }
+.dg-frame img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.dg-play { position: absolute; left: 50%; top: 50%; width: 76px; height: 76px; margin: -38px 0 0 -38px; border-radius: 50%; border: 1.5px solid rgba(239, 229, 207, .8); background: rgba(13, 16, 24, .4); }
+.dg-play::after { content: ""; position: absolute; left: 31px; top: 24px; border-left: 22px solid var(--paper-x); border-top: 14px solid transparent; border-bottom: 14px solid transparent; }
+.dg-note { margin: 12px 0 0; font-size: 14px; color: var(--dim); }
+
+/* 故事 */
+.dg-quote { margin: 0 0 26px; padding-left: 20px; border-left: 3px solid var(--lamp); }
+.dg-quote p { margin: 0; font-size: 24px; letter-spacing: .14em; }
+.dg-quote cite { display: block; margin-top: 4px; color: var(--dim); font-style: normal; font-size: 14px; }
+.dg-story-text p { max-width: 760px; margin: 0 0 1em; text-indent: 2em; color: var(--ink-2); }
+.dg-route { list-style: none; counter-reset: r; margin: 34px 0 22px; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; position: relative; }
+.dg-route::before { content: ""; position: absolute; left: 22px; right: 22px; top: 22px; border-top: 1px dashed rgba(243, 199, 121, .5); }
+.dg-route li { position: relative; padding: 0 18px 0 0; counter-increment: r; }
+.dg-route li::before { content: counter(r); position: relative; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--night); border: 1px solid var(--lamp); color: var(--lamp); font: 18px var(--en); margin-bottom: 12px; }
+.dg-route b { font-weight: 400; font-size: 21px; letter-spacing: .14em; }
+.dg-route span { margin-left: 10px; font-size: 13px; color: var(--dim); letter-spacing: .1em; }
+.dg-route p { margin: 4px 0 0; font-size: 15.5px; line-height: 1.7; color: var(--ink-2); }
+.dg-rule { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 30px; }
+.dg-rule > div { display: flex; gap: 16px; align-items: flex-start; padding: 18px 20px; border-radius: 6px; background: var(--night-2); border: 1px solid var(--line); }
+.dg-rule i { font-style: normal; flex: none; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 4px; font-size: 26px; }
+.dg-rule .win i { background: var(--lamp); color: #1c1a17; }
+.dg-rule .lose i { background: #b4392a; color: #f7efe0; }
+.dg-rule p { margin: 0; font-size: 15.5px; line-height: 1.7; color: var(--ink-2); }
+.dg-rule b { display: block; font-weight: 400; font-size: 20px; letter-spacing: .14em; color: var(--paper-x); margin-bottom: 2px; }
+
+/* 玩法：四張畫面 */
+.dg-grid4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 26px 22px; }
+.dg-grid4 figure, .dg-views figure { margin: 0; }
+.dg-grid4 img, .dg-views img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 5px; box-shadow: 0 0 0 1px var(--line); }
+.dg-grid4 figcaption, .dg-views figcaption { margin-top: 10px; color: var(--ink-2); font-size: 15.5px; line-height: 1.7; }
+.dg-grid4 b, .dg-views b { display: block; color: var(--paper-x); font-weight: 400; font-size: 21px; letter-spacing: .12em; margin-bottom: 2px; }
+.dg-views em { font-style: normal; font-size: 12px; letter-spacing: .1em; color: var(--lamp); border: 1px dashed rgba(243, 199, 121, .6); border-radius: 3px; padding: 0 6px; margin-left: 10px; vertical-align: 3px; }
+
+/* 裝備：遊戲裡的字當圖示 */
+.dg-kit { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 26px; }
+.dg-kit li { display: flex; gap: 14px; align-items: flex-start; padding: 16px 0; border-top: 1px solid var(--line); }
+.dg-g { flex: none; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 5px; background: var(--paper-x); color: #1c1a17; font-size: 30px; box-shadow: 3px 3px 0 rgba(180, 57, 42, .85); }
+.dg-g.lamp { background: var(--lamp); box-shadow: 0 0 22px rgba(243, 199, 121, .6); }
+.dg-kit b { font-weight: 400; font-size: 19px; letter-spacing: .1em; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.dg-kit kbd { font: 13px var(--en); color: var(--lamp); border: 1px solid rgba(243, 199, 121, .5); border-radius: 3px; padding: 0 6px; line-height: 1.6; }
+.dg-kit p { margin: 4px 0 0; font-size: 15px; line-height: 1.7; color: var(--ink-2); }
+
+/* 畫面：三種看法 */
+.dg-views { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.dg-facts { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 26px 0 0; padding: 0; }
+.dg-facts li { border: 1px solid var(--line); border-radius: 999px; padding: 3px 14px; font-size: 15px; color: var(--ink-2); }
+body.deng .contact p { color: var(--ink-2); }
+
+@media (max-width: 860px) {
+  .dg-hero { min-height: 640px; align-items: flex-end; background: radial-gradient(circle at 62% 34%, rgba(13, 16, 24, 0) 0, rgba(13, 16, 24, 0) 16%, rgba(13, 16, 24, .55) 32%, var(--night) 58%), url(../img/hero.jpg) 69% 0 / auto 64% no-repeat; }
+  .dg-hero-text { padding-bottom: 28px; }
+  .dg-sub { font-size: 20px; } .dg-motto { font-size: 16px; letter-spacing: .2em; }
+  .dg-route { grid-template-columns: 1fr; gap: 18px; }
+  .dg-route::before { left: 22px; right: auto; top: 22px; bottom: 22px; border-top: 0; border-left: 1px dashed rgba(243, 199, 121, .5); }
+  .dg-route li { display: grid; grid-template-columns: 56px 1fr; padding: 0; }
+  .dg-route li::before { grid-row: 1 / 3; margin: 0; }
+  .dg-route p { grid-column: 2; }
+  .dg-rule, .dg-grid4, .dg-views, .dg-kit { grid-template-columns: 1fr; }
+  .dg-quote p { font-size: 20px; }
+}
+body.deng::before { display: none; }   /* site.css 的紙色底層 */
+body.deng .dg-sec h2::before { display: none; }   /* 標題前用燈，不用紅方塊 */
+body.deng .contact h2::before { background: var(--lamp); border-radius: 50%; width: 12px; height: 12px; box-shadow: 0 0 12px 3px rgba(243, 199, 121, .55); }
