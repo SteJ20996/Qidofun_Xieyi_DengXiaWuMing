@@ -541,11 +541,13 @@
   // 沒用滑鼠時的自動對準：看得見的（照見，或眼睛習慣後看見）、在射程內、中間沒有牆屏封戶的魄，挑最近的；
   // 前後左右都算（邊跑邊回身丟火符也行）。看不見的魄不會被對準，黑暗裡照樣只能靠聲音。
   const AUTO = { sword: R.SWORD.reach + 0.3, fire: R.FIRE.range };
+  // g.aimCone（第一人稱，2026-11-24）：只對準面前這個角度以內的魄，看不到的背後不對準
   function autoTarget(g, kind) {
     const p = g.p;
     let best = null, bd = AUTO[kind] + 1e-9;
     for (const e of g.pos) {
       if (!awake(e) || !e.vis || e.vis.mode === 'silhouette') continue;
+      if (g.aimCone && Math.abs(angDiff(Math.atan2(e.y - p.y, e.x - p.x), p.aim)) > g.aimCone) continue;
       const d = dist(p, e);
       if (d > bd || !hitClear(g, p.x, p.y, e.x, e.y)) continue;
       bd = d; best = e;
@@ -686,6 +688,7 @@
     p.swordCD = Math.max(0, p.swordCD - dt); p.bellCD = Math.max(0, p.bellCD - dt);
     if (inp.aim != null) p.aim = inp.aim;
     g.autoAim = !!inp.autoAim;
+    g.aimCone = inp.aimCone || 0;
     if (press.lamp) { p.lampOn = !p.lampOn; if (p.lampOn) p.adapt = 0; emit(g, 'lamp', { on: p.lampOn }); if (!p.lampOn) hint(g, 'dark'); }
     let mx = inp.mx || 0, my = inp.my || 0;
     const ml = hyp(mx, my), moving = ml > 0.05;

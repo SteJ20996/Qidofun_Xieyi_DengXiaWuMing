@@ -23,6 +23,8 @@
   const perf = { q: 0, ft: [], sum: 0, last: 0, warm: 0, slow: 0, slowSum: 0, fps: 0, failed: false, keep: /[?&]keep3d=1/.test(root.location ? location.search : '') };
   const CAM = { back: 4.8, up: 7.0, ahead: 1.6 };          // 開始畫面
   const PCAM = { back: 4.3, up: 4.4, ahead: 2.6, fov: 55 }; // 立體版：人的背後、高過牆頭，往前多看一點（人在畫面下方三分之一）
+  const FCAM = { eye: 1.05, pitch: -0.16, fov: 72 };       // 第一人稱（2026-11-24 試玩）：眼睛的高度，微微往下看，看得到腳前的地
+  let camMode = 'behind', viewLamp = null, viewSword = null, swingT = 9, lastCD = 0, offscreen = 0;
 
   // 能不能跑 3D：只試一次（每試一次就多開一個 WebGL，開太多瀏覽器會把舊的關掉），試完就放掉
   let okCache = null;
@@ -109,8 +111,11 @@
     g = game; mode = md === 'play' ? 'play' : 'attract';
     candles = []; poSprites = []; screens = []; doors = null; cam = null; walls = []; altars3 = []; wellMats = []; lureSprites = []; shotSprites = []; player = null; shadowPlane = null;
     view.ready = false; view.yaw = g.p.aim;
+    while (camera.children.length) camera.remove(camera.children[0]);   // 第一人稱拿在手上的燈與劍：重蓋時拿掉舊的
+    if (camera.parent) camera.parent.remove(camera);   // 鏡頭還掛在舊宅子上的話拿下來，不然新宅子裡它不會跟著動
+    viewLamp = null; viewSword = null; swingT = 9; lastCD = 0;
     const play = mode === 'play', m = g.m, W = m.W, H = m.H;
-    camera.fov = play ? PCAM.fov : 42; resize();
+    lensFor(); resize();
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0b0a09);
     scene.fog = new THREE.FogExp2(0x0b0a09, play ? 0.03 : 0.065);
@@ -231,7 +236,7 @@
     const glowS = new THREE.Sprite(new THREE.SpriteMaterial({ map: flameTex, color: 0xffb060, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.8 }));
     glowS.scale.set(1.2, 1.2, 1); grp.add(glowS);
     grp.scale.setScalar(scale || 1);
-    return { grp, shade, glow: glowS, word };
+    return { grp, shade, glow: glowS, word, handle };
   }
   function lampLight(power, dist) {
     const l = new THREE.PointLight(0xffc27a, power, dist, 1.6);
@@ -258,11 +263,23 @@
     const L = lanternModel(0.62);   // 手燈：提在右手前方
     L.grp.position.set(0.16, 0.55, 0.34);
     grp.add(L.grp);
-    const light = lampLight(1.5, 7.5); light.position.set(0.16, 0.6, 0.34);
-    grp.add(light);
-    scene.add(grp);
+    const light = lampLight(1.5, 7.5);   // 燈光放在場景裡，每一幀照手燈在哪裡擺（第一人稱時人不畫，光照樣要有）
+    scene.add(grp, light);
     lanternLight = light; lanternGlow = L.glow; lantern = null;
     player = { grp, lamp: L, light, robe };
+    // 第一人稱：右手提的燈在畫面右下，左手的桃木劍揮的時候才掃過畫面
+    const VL = lanternModel(0.3);
+    VL.handle.visible = false;   // 提把在畫面外，不畫
+    VL.grp.position.set(0.3, -0.27, -0.6);
+    viewLamp = VL;
+    const sw = new THREE.Group(), wood = new THREE.MeshStandardMaterial({ color: 0x8a5a2b, roughness: 0.8, emissive: 0x2a1406, emissiveIntensity: 0.6 });
+    const blade = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.012, 0.62), wood); blade.position.z = -0.31;
+    const guard = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.02, 0.025), new THREE.MeshStandardMaterial({ color: 0x3a2412, roughness: 0.7 })); guard.position.z = -0.01;
+    const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.14, 8), new THREE.MeshStandardMaterial({ color: 0xb4392a, roughness: 0.8 })); grip.rotation.x = Math.PI / 2; grip.position.z = 0.07;
+    sw.add(blade, guard, grip); sw.visible = false;
+    viewSword = sw;
+    camera.add(VL.grp, sw);
+    scene.add(camera);
     // 借火的火、飛出去的火符：立起來的一團火（字在地板那層也有光）
     fireGlyph = tex(glyphCanvas('火', 128, '#c8461f', { glow: 'rgba(255,150,60,.95)' }));
   }
@@ -369,37 +386,106 @@
     g.shots.forEach((q, k) => { const s = shotSprites[k]; s.position.set(q.x, 0.6, q.y); s.scale.set(0.5, 0.5, 1); });
     poStep(1.1);
     // 人：面向對準的方向；走路時身子微微起伏，手燈晃
+    const fp = camMode === 'first';
     const walk = RM ? 0 : p.moving ? Math.abs(Math.sin(t * 9)) * 0.04 : 0;
     player.grp.position.set(p.x, walk, p.y);
     player.grp.rotation.y = -p.aim;
+    player.grp.visible = !fp;
     const sw = RM ? 0 : p.moving ? Math.sin(t * 9) * 0.12 : Math.sin(t * 2) * 0.03;
     player.lamp.grp.rotation.x = sw;
     const fl = RM ? 1 : 0.9 + 0.1 * Math.sin(t * 13) * Math.sin(t * 7.3 + 1);
-    player.lamp.shade.material.emissiveIntensity = p.lampOn ? 1.25 * fl : 0;
-    player.lamp.shade.material.color.setHex(p.lampOn ? 0xffe6b8 : 0x4a4038);
-    player.lamp.glow.visible = p.lampOn; player.lamp.glow.material.opacity = 0.55 * fl;
+    for (const L of [player.lamp, viewLamp]) {
+      L.shade.material.emissiveIntensity = p.lampOn ? 1.25 * fl : 0;
+      L.shade.material.color.setHex(p.lampOn ? 0xffe6b8 : 0x4a4038);
+      L.glow.visible = p.lampOn; L.glow.material.opacity = 0.55 * fl;
+    }
+    viewLamp.grp.visible = fp;
     player.light.intensity = p.lampOn ? 1.5 * fl : 0;
     player.light.castShadow = p.lampOn && perf.q === 0;
     if (shadowPlane) shadowPlane.visible = p.lampOn && perf.q === 0;
     moteStep(p.x, p.y); motes.visible = p.lampOn;
-    // 鏡頭：在人的背後、高過牆頭，往前看一點。I、O 轉；往前走時慢慢轉到人走的方向
+    // 鏡頭。I、O 轉（第一人稱還可以用滑鼠轉）。人的背後：在人後上方、高過牆頭，往前走時慢慢轉到人走的方向。
+    // 第一人稱：眼睛的高度、看鏡頭朝的方向，走路時微微起伏；人不畫，手燈在畫面右下
     if (w.turn) view.yaw += w.turn * 1.9 * dt;
-    if (w.follow != null) view.yaw += angDiff(w.follow, view.yaw) * (1 - Math.pow(0.4, dt));
+    if (w.follow != null && !fp) view.yaw += angDiff(w.follow, view.yaw) * (1 - Math.pow(0.4, dt));
     const fx = Math.cos(view.yaw), fz = Math.sin(view.yaw);
-    const want = { x: p.x - fx * PCAM.back, y: PCAM.up, z: p.y - fz * PCAM.back, lx: p.x + fx * PCAM.ahead, lz: p.y + fz * PCAM.ahead };
-    const k = !view.ready || w.snap ? 1 : 1 - Math.pow(0.002, dt);
-    for (const key of ['x', 'y', 'z', 'lx', 'lz']) view[key] += (want[key] - view[key]) * k;
-    view.ready = true;
-    const sh = root.RENDER.shake / 0.3;
-    camera.position.set(view.x + (sh ? (Math.random() - 0.5) * 0.12 * sh : 0), view.y + (sh ? (Math.random() - 0.5) * 0.12 * sh : 0), view.z);
-    camera.lookAt(view.lx, 0.45, view.lz);
+    const sh = root.RENDER.shake / 0.3, jit = () => (sh ? (Math.random() - 0.5) * 0.12 * sh : 0);
+    if (fp) {
+      const bob = RM ? 0 : p.moving ? Math.sin(t * 9) * 0.025 : 0;
+      view.x = p.x; view.y = FCAM.eye + bob; view.z = p.y; view.ready = false;   // 換回人的背後時鏡頭重新就位
+      camera.position.set(p.x + jit() * 0.4, FCAM.eye + bob + jit() * 0.4, p.y);
+      camera.lookAt(p.x + fx, FCAM.eye + bob + Math.tan(FCAM.pitch), p.y + fz);
+      viewLamp.grp.position.set(0.3, -0.27 + (RM ? 0 : p.moving ? Math.abs(Math.sin(t * 9)) * 0.015 : 0), -0.6);
+      viewLamp.grp.rotation.z = sw * 0.6;
+      // 劍：剛揮（冷卻剛滿）就從右往左掃過畫面
+      if (p.swordCD > lastCD + 0.05) swingT = 0;
+      lastCD = p.swordCD; swingT += dt;
+      const q = swingT / 0.28;
+      viewSword.visible = q < 1;
+      if (q < 1) { viewSword.position.set(0.32 - q * 0.6, -0.22 - Math.sin(q * Math.PI) * 0.05, -0.45); viewSword.rotation.set(-0.15, 0.9 - q * 1.8, -0.4); }
+    } else {
+      const want = { x: p.x - fx * PCAM.back, y: PCAM.up, z: p.y - fz * PCAM.back, lx: p.x + fx * PCAM.ahead, lz: p.y + fz * PCAM.ahead };
+      const k = !view.ready || w.snap ? 1 : 1 - Math.pow(0.002, dt);
+      for (const key of ['x', 'y', 'z', 'lx', 'lz']) view[key] += (want[key] - view[key]) * k;
+      view.ready = true;
+      camera.position.set(view.x + jit(), view.y + jit(), view.z);
+      camera.lookAt(view.lx, 0.45, view.lz);
+      viewSword.visible = false;
+    }
+    // 手燈的光：第一人稱在畫面右下那盞燈的位置；人的背後在人右手的燈
+    camera.updateMatrixWorld();
+    (fp ? viewLamp.grp : player.lamp.grp).getWorldPosition(player.light.position);
     renderer.render(scene, camera);
-    if (fxCv) root.RENDER.overlayFrame(dt, fxCv, proj);
+    if (fxCv) { root.RENDER.overlayFrame(dt, fxCv, proj); if (fp) fpMarks(); else offscreen = 0; }
+  }
+  // 第一人稱的鏡頭：視角比較寬，近的牆不被切掉
+  function lensFor() {
+    const fp = mode === 'play' && camMode === 'first';
+    camera.fov = mode === 'play' ? (fp ? FCAM.fov : PCAM.fov) : 42;
+    camera.near = fp ? 0.05 : 0.1;
+  }
+  function setCam(m) { camMode = m === 'first' ? 'first' : 'behind'; if (camera) { lensFor(); resize(); } }
+  // 橫的半個視角（弧度）：自動對準只對這個角度以內的魄
+  function hfov() { return Math.atan(Math.tan(camera.fov * Math.PI / 360) * camera.aspect); }
+  // 第一人稱的疊層：中間一點準星；看得見（照引擎）但不在畫面裡的魄，在畫面邊上朝它的方向畫記號，
+  // 要撲的是紅的「噬」。2D 看得到四周，第一人稱只看得到前面，這些記號補回 2D 本來就給的資訊，不多給。
+  function fpMarks() {
+    const c = fxCv.getContext('2d'), W = fxCv.width, H = fxCv.height, p = g.p, u = Math.min(W, H) / 100;
+    c.save();
+    c.fillStyle = 'rgba(236,226,200,.75)'; c.strokeStyle = 'rgba(20,16,12,.7)'; c.lineWidth = u * 0.25;
+    c.beginPath(); c.arc(W / 2, H / 2, u * 0.55, 0, Math.PI * 2); c.fill(); c.stroke();
+    const hf = hfov();
+    offscreen = 0;
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    for (const e of g.pos) {
+      if (e.state === 'gone' || !e.vis) continue;
+      let rel = Math.atan2(e.y - p.y, e.x - p.x) - view.yaw;
+      while (rel > Math.PI) rel -= 2 * Math.PI; while (rel < -Math.PI) rel += 2 * Math.PI;
+      if (Math.abs(rel) < hf * 0.92) continue;
+      offscreen++;
+      const wind = e.state === 'windup' && e.windVisible, pulse = RM ? 1 : 0.75 + 0.25 * Math.sin(t * 12);
+      // 畫在一個橢圓上：左右在兩邊，正後方在畫面中間偏下（避開下面一排工具鈕）
+      const X = W / 2 + Math.sin(rel) * W * 0.44, Y = H / 2 - Math.cos(rel) * H * 0.27, r = u * (wind ? 4.6 : 3.4);
+      c.globalAlpha = wind ? pulse : e.vis.mode === 'silhouette' ? 0.5 : 0.8;
+      c.fillStyle = wind ? 'rgba(180,57,42,.92)' : e.vis.mode === 'dark' ? 'rgba(20,40,38,.75)' : 'rgba(236,226,200,.88)';
+      c.beginPath(); c.arc(X, Y, r, 0, Math.PI * 2); c.fill();
+      c.lineWidth = u * 0.35; c.strokeStyle = wind ? '#f7efe0' : 'rgba(28,26,23,.7)'; c.stroke();
+      const a = Math.atan2(Y - H / 2, X - W / 2);   // 往外指的小三角：魄在那個方向
+      c.beginPath(); c.moveTo(X + Math.cos(a) * r * 1.55, Y + Math.sin(a) * r * 1.55); c.lineTo(X + Math.cos(a + 0.5) * r * 1.05, Y + Math.sin(a + 0.5) * r * 1.05); c.lineTo(X + Math.cos(a - 0.5) * r * 1.05, Y + Math.sin(a - 0.5) * r * 1.05); c.closePath(); c.fill();
+      c.font = `${Math.round(r * 1.25)}px ${FONT}`;
+      c.fillStyle = wind ? '#f7efe0' : e.vis.mode === 'dark' ? '#cfeee6' : e.vis.mode === 'silhouette' ? '#3c3630' : '#2e3338';
+      c.fillText(wind ? '噬' : '魄', X, Y + r * 0.05);
+    }
+    c.restore();
   }
   // 世界上 (x, y)、高 h 的點在疊層畫布的哪裡；k 是那裡一格幾像素
   let v3 = null, v3b = null;
   function proj(x, h, y) {
     v3 = v3 || new THREE.Vector3(); v3b = v3b || new THREE.Vector3();
+    if (mode === 'play' && camMode === 'first' && g && Math.hypot(x - g.p.x, y - g.p.y) < 0.35) {   // 第一人稱：落在自己身上的字（噬、寒 +、取印）放在畫面中間偏下
+      const H = fxCv.height;
+      return { X: fxCv.width / 2, Y: H * (0.6 - (h - 1.25) * 0.12), k: H / 9 };
+    }
     v3.set(x, h, y).project(camera);
     if (v3.z > 1 || v3.z < -1) return null;
     const W = fxCv.width, H = fxCv.height, d = camera.position.distanceTo(v3b.set(x, h, y));
@@ -455,7 +541,8 @@
   function pausePerf() { perf.last = 0; }
 
   root.RENDER3D = {
-    ok, init, setGame, frame, resize, force, pausePerf, toWorld, proj: (x, h, y) => proj(x, h, y), turnBy(rad) { view.yaw += rad; },
+    ok, init, setGame, frame, resize, force, pausePerf, toWorld, proj: (x, h, y) => proj(x, h, y), turnBy(rad) { view.yaw += rad; }, setCam, hfov,
+    get camMode() { return camMode; }, get offscreen() { return offscreen; }, get camPos() { return camera ? { x: camera.position.x, y: camera.position.y, z: camera.position.z } : null; },
     get cam() { return cam; }, get view() { return view; }, get yaw() { return view.yaw; }, get mode() { return mode; }, get game() { return g; },
     get quality() { return perf.q; }, get failed() { return perf.failed; }, get fps() { return perf.fps; }, get keep() { return perf.keep; }
   };

@@ -387,7 +387,7 @@ try {
   await tp.keyboard.press('Enter'); await tp.waitForTimeout(1500);
   const in3 = await tp.evaluate(() => ({ running: DENG.running, mode: window.RENDER3D.mode, d3: !document.getElementById('world3d').classList.contains('hidden'), fx: !document.getElementById('world3dfx').classList.contains('hidden'), flatHidden: document.getElementById('world').classList.contains('hidden'), btn: document.getElementById('btn-view').textContent, hint: document.getElementById('hint').textContent, x: DENG.g.p.x, y: DENG.g.p.y, yaw: window.RENDER3D.yaw }));
   await tp.screenshot({ path: path.join(out, '26-play-3d.png') });
-  ok('立體版：入宅後用 3D 畫、鏡頭在背後、右上角「換成平面」、有操作提示', in3.running && in3.mode === 'play' && in3.d3 && in3.fx && in3.flatHidden && in3.btn === '換成平面' && in3.hint.includes('I、O'), in3);
+  ok('立體版：入宅後用 3D 畫、鏡頭在背後、右上角「換成第一人稱」、有操作提示', in3.running && in3.mode === 'play' && in3.d3 && in3.fx && in3.flatHidden && in3.btn === '換成第一人稱' && in3.hint.includes('I、O'), in3);
   await tp.keyboard.down('KeyW'); await tp.waitForTimeout(1200); await tp.keyboard.up('KeyW');
   const w3 = await tp.evaluate(() => ({ x: DENG.g.p.x, y: DENG.g.p.y }));
   await tp.keyboard.down('KeyO'); await tp.waitForTimeout(700); await tp.keyboard.up('KeyO');
@@ -471,6 +471,56 @@ try {
   ok('窄螢幕：選單在下面，上面看得到 3D 的宅子', nar.use3d && nar.top > nar.h * 0.35 && nar.vm, nar);
   await nctx3.close();
 } catch (e) { ok('3D 開始畫面', false, String(e && e.message || e)); }
+
+// ---------- 第一人稱（2026-11-24 試玩） ----------
+try {
+  const fctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const fp = await fctx.newPage();
+  const errsF = [];
+  fp.on('pageerror', (e) => errsF.push('pageerror: ' + e.message));
+  fp.on('console', (m) => { if (m.type() === 'error' && !/fonts\.g/.test(m.text())) errsF.push('console: ' + m.text()); });
+  const fev = (f) => fp.evaluate(f), fw = (ms) => fp.waitForTimeout(ms);
+  await fp.goto(base + Q + 'seed=7&keep3d=1');
+  await fp.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 40000 });
+  await fp.click('#vm-fp'); await fw(200);
+  await fp.keyboard.press('Enter'); await fw(1200);
+  const f0 = await fev(() => ({ fpv: DENG.fpv, cam: window.RENDER3D.camMode, eye: window.RENDER3D.camPos.y, btn: document.getElementById('btn-view').textContent, hint: document.getElementById('hint').textContent, pref: localStorage.getItem('xieyi.deng.view'), aim: document.getElementById('aimmode').textContent }));
+  await fp.screenshot({ path: path.join(out, '30-first-person.png') });
+  ok('第一人稱：開始畫面選了第一人稱，入宅後鏡頭在眼睛高度、提示說明、記住選擇', f0.fpv && f0.cam === 'first' && Math.abs(f0.eye - 1.05) < 0.1 && f0.btn === '換成平面' && f0.hint.includes('第一人稱') && f0.pref === 'fp', f0);
+  const s0 = await fev(() => ({ x: DENG.g.p.x, y: DENG.g.p.y, aim: DENG.g.p.aim }));
+  await fp.keyboard.down('KeyW'); await fw(900); await fp.keyboard.up('KeyW');
+  await fp.keyboard.down('KeyD'); await fw(500); await fp.keyboard.up('KeyD');
+  const s1 = await fev(() => ({ x: DENG.g.p.x, y: DENG.g.p.y, aim: DENG.g.p.aim }));
+  ok('第一人稱：W 往前走；D 往右橫著走，不會轉身', s1.y < s0.y - 0.3 && s1.x > s0.x + 0.2 && Math.abs(s1.aim - s0.aim) < 1e-6, { s0, s1 });
+  // 背後看得見的魄：畫面邊上有記號；劍不會自動往背後揮
+  const sword = async (dx, dy) => {
+    await fp.evaluate(([dx, dy]) => { const g = DENG.g; g.tp(19.5, 3.5); g.pos.forEach((e, i) => { g.place(e, 2.5 + i, 25.5, 'recover'); e.stateT = 999; }); const e = g.pos[0]; g.place(e, 19.5 + dx, 3.5 + dy, 'recover'); e.stateT = 999; e.hp = window.DENG.R.PO.hp; }, [dx, dy]);
+    // 無頭瀏覽器的立體一秒只有幾幀，遊戲時間走得比真的慢：等魄看得見、劍冷卻好了再揮
+    await fp.waitForFunction(() => DENG.g.pos[0].vis && DENG.g.p.swordCD <= 0 && !DENG.g.p.act, null, { timeout: 15000 }); await fw(300);
+    const off = await fev(() => window.RENDER3D.offscreen), aimTxt = await fev(() => document.getElementById('aimmode').textContent);
+    const h0 = await fev(() => DENG.g.stats.swordHits);
+    await fp.keyboard.press('KeyJ');
+    await fp.waitForFunction((h0) => DENG.g.stats.swordHits > h0 || DENG.g.stats.swordMiss > 0 && !DENG.g.p.act, h0, { timeout: 15000 }).catch(() => {}); await fw(200);
+    return { off, aimTxt, hit: (await fev(() => DENG.g.stats.swordHits)) > h0 };
+  };
+  await fev(() => { window.RENDER3D.view.yaw = -Math.PI / 2; });   // 面向北
+  const behind = await sword(0, 1.0), front = await sword(0, -1.0);
+  await fp.screenshot({ path: path.join(out, '31-first-person-front.png') });
+  ok('第一人稱：背後的魄在畫面邊上有記號、劍不會往背後揮；面前的照樣自動對準打中', behind.off >= 1 && !behind.hit && front.off === 0 && front.hit && behind.aimTxt.includes('面前'), { behind, front });
+  // 右上角換到平面，再從暫停面板換回第一人稱；I、O 照樣轉頭
+  await fp.click('#btn-view'); await fw(300);
+  const flat = await fev(() => ({ use3d: DENG.use3d, btn: document.getElementById('btn-view').textContent }));
+  await fp.keyboard.press('Escape'); await fw(150); await fp.click('#pv-fp'); await fw(150); await fp.keyboard.press('Escape'); await fw(400);
+  const y0 = await fev(() => window.RENDER3D.yaw);
+  await fp.keyboard.down('KeyI'); await fw(500); await fp.keyboard.up('KeyI');
+  const back = await fev(() => ({ use3d: DENG.use3d, fpv: DENG.fpv, cam: window.RENDER3D.camMode, yaw: window.RENDER3D.yaw, running: DENG.running && !DENG.paused }));
+  ok('第一人稱：右上角換成平面、暫停面板換回第一人稱，I 往左轉頭', !flat.use3d && flat.btn === '換成立體' && back.use3d && back.fpv && back.cam === 'first' && back.yaw < y0 - 0.3 && back.running, { flat, back, y0 });
+  await fp.keyboard.press('KeyM'); await fw(200);   // 滑鼠轉頭：無頭瀏覽器可能不讓鎖，只要不出錯
+  await fp.keyboard.press('Escape'); await fw(100); await fp.keyboard.press('KeyM'); await fw(400);
+  const home = await fev(() => ({ start: !document.getElementById('start').classList.contains('hidden'), mode: window.RENDER3D.mode, lock: !!document.pointerLockElement }));
+  ok('第一人稱：回主頁換回 3D 長鏡頭、不鎖滑鼠、沒有報錯', home.start && home.mode === 'attract' && !home.lock && errsF.length === 0, { home, errs: errsF.slice(0, 3) });
+  await fctx.close();
+} catch (e) { ok('第一人稱', false, String(e && e.message || e)); }
 
 // 減少動態：照樣能玩、不報錯
 try {

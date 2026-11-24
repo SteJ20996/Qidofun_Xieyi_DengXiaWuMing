@@ -518,6 +518,20 @@ const wallRoom = (set) => { for (let y = 1; y <= 7; y++) set(10, y, '#'); };
   ok('超出範圍的數值收回範圍內', over && over.p.chill === 100 && over.p.ink === R.P.inkMax && over.p.talismans === 0, over && [over.p.chill, over.p.ink, over.p.talismans]);
 }
 
+// ---------- 第一人稱（2026-11-24）：自動對準只對面前的魄 ----------
+{
+  const swing = (cone, ex, ey) => {
+    const g = mkArena(), p = g.p; put(g, g.pos[0], p.x + ex, p.y + ey, 'recover');
+    run(g, R.STEP, {});
+    run(g, R.SWORD.windup + R.STEP * 2, { aim: 0, autoAim: true, aimCone: cone, press: { sword: true } });
+    const ev = g.drain();
+    return ev.find((x) => x.type === 'swordHit') ? 'hit' : (ev.find((x) => x.type === 'swordMiss') || {}).why || '?';
+  };
+  ok('第一人稱：面前的魄照樣自動對準（偏一點也算）', swing(Math.PI / 4, 1.0, 0.4) === 'hit');
+  ok('第一人稱：背後的魄不自動對準，劍往面前揮（偏了）', swing(Math.PI / 4, -1.0, 0) === 'dir');
+  ok('第一人稱：不給角度就跟原本一樣，背後的也打得到', swing(0, -1.0, 0) === 'hit');
+}
+
 // ---------- 無敵格（第四格，擁有者 2026-11-24：「在我本地增設一個無敵存檔格子」） ----------
 {
   const trial = (god) => {

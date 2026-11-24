@@ -408,7 +408,7 @@ body.touch div.touchkeys { display: grid; }
 <div id="start" class="overlay">
   <div class="panel startpanel">
     <div id="viewmode" class="viewmode">
-      <div class="vm-row" role="group" aria-label="畫面用立體還是平面"><span class="vm-lab">畫面</span><button id="vm-3d" title="立體：開始畫面是長鏡頭，進宅後鏡頭在你背後（three.js）">立體</button><button id="vm-2d" title="平面：從上往下看">平面</button></div>
+      <div class="vm-row" role="group" aria-label="畫面：平面、立體或第一人稱"><button id="vm-2d" title="平面：從上往下看">平面</button><button id="vm-3d" title="立體：開始畫面是長鏡頭，進宅後鏡頭在你背後（three.js）">立體</button><button id="vm-fp" title="第一人稱（試玩）：用你的眼睛看；進宅後才是第一人稱">第一人稱</button></div>
     </div>
     <div class="titlerow">
       <div class="titleseal"><span>燈</span><span>下</span><span>無</span><span>明</span></div>
@@ -449,10 +449,10 @@ body.touch div.touchkeys { display: grid; }
       <div><b>劍 符 鈴</b>右下角，自動對準看得見的魄</div>
       <div><b>燈 借火 封戶</b>右下角上排</div>
       <div><b>取</b>站在印臺或大門旁，按住「取」</div>
-      <div><b>立體</b>往鏡頭前方走；右半邊左右滑動轉鏡頭</div>
+      <div><b>立體、第一人稱</b>往鏡頭前方走；右半邊左右滑動轉頭</div>
       <div><b>暫停</b>右上角「暫停」</div>
     </div>
-    <div class="dim small key-only">分號、逗號、句號鍵就是畫面上的：《》，不必按 Shift；方向鍵也能走。滑鼠左鍵劍、右鍵火符；不用滑鼠時自動對準看得見的魄。立體時 W 往鏡頭前方走，I、O 轉鏡頭。</div>
+    <div class="dim small key-only">分號、逗號、句號鍵就是畫面上的：《》，不必按 Shift；方向鍵也能走。滑鼠左鍵劍、右鍵火符；不用滑鼠時自動對準看得見的魄。立體、第一人稱時 I、O 轉頭，第一人稱按 M 用滑鼠轉頭。</div>
     <div id="slots" class="slots"></div>
     <div class="dim small warn" id="slot-msg"></div>
     <div class="small warn" id="vm-note" aria-live="polite"></div>
@@ -466,12 +466,12 @@ body.touch div.touchkeys { display: grid; }
     <h2>暫停</h2>
     <p class="dim small" id="pause-why"></p>
     <div class="row"><button id="btn-resume" class="big">繼續</button><button id="btn-title" title="先把這一局存在自己那格，再回到開始畫面">回主頁（M）</button><button id="btn-restart">重來</button><button id="btn-mute2">音效</button></div>
-    <div class="viewrow"><span class="dim small">畫面</span><span class="vm-row"><button id="pv-3d" title="立體：鏡頭在你背後">立體</button><button id="pv-2d" title="平面：從上往下看">平面</button></span><span class="small warn" id="pv-note"></span></div>
+    <div class="viewrow"><span class="dim small">畫面</span><span class="vm-row"><button id="pv-2d" title="平面：從上往下看">平面</button><button id="pv-3d" title="立體：鏡頭在你背後">立體</button><button id="pv-fp" title="第一人稱（試玩）：用你的眼睛看">第一人稱</button></span><span class="small warn" id="pv-note"></span></div>
     <div class="savebox"><div class="dim small">存到<span class="key-only">（U、I、O；第四格用點的）</span>：這一局自動存在自己那格；也可以把這一刻抄進別格，當作存檔點。第四格是無敵格。</div><div id="saverow" class="saverow"></div><div class="small" id="save-msg"></div></div>
     <ul class="rules">
       <li><b>目標</b>：書房取名印、祠堂取息印（按住 U），回玄關按住 U 推開門閂，走出大門就出宅。寒意滿一百就失魂。</li>
       <li class="touch-only"><b>觸控</b>：左半邊拖動走；右下角劍、符、鈴、燈、借火、封戶；印臺、大門旁按住「取」；立體時右半邊滑動轉鏡頭。</li>
-      <li><b>立體</b>：鏡頭在你背後，<span class="key-only">W 往鏡頭前方走，I、O 轉鏡頭</span><span class="touch-only">往鏡頭前方走，右半邊左右滑動轉鏡頭</span>；上面「畫面」可以換回平面。</li>
+      <li><b>立體／第一人稱</b>：<span class="key-only">W 往鏡頭前方走，I、O 轉頭（第一人稱按 M 用滑鼠轉頭）</span><span class="touch-only">往鏡頭前方走，右半邊左右滑動轉頭</span>；第一人稱畫面邊上的記號是看不到的魄。上面「畫面」可以換。</li>
       <li><b>燈</b>：點著看得清，但魄從九格外就看得見你；隔著紙屏也看得到你的燈光。掩燈時，魄要靠到兩格左右才察覺。</li>
       <li><b>噬</b>：魄撲之前會停下來蓄力（約半秒）。看得見時頭上有「噬」字與紅圈；黑暗裡只有一聲嘶。退出紅圈，它就撲空，會愣一下。</li>
       <li><b>寒</b>：被咬時護心衣先擋；久留在魄身邊會直接加寒意。只有在燭火、借火旁邊才會退，但站在火光裡，魄看得見你。</li>
@@ -1212,11 +1212,13 @@ body.touch div.touchkeys { display: grid; }
   // 沒用滑鼠時的自動對準：看得見的（照見，或眼睛習慣後看見）、在射程內、中間沒有牆屏封戶的魄，挑最近的；
   // 前後左右都算（邊跑邊回身丟火符也行）。看不見的魄不會被對準，黑暗裡照樣只能靠聲音。
   const AUTO = { sword: R.SWORD.reach + 0.3, fire: R.FIRE.range };
+  // g.aimCone（第一人稱，2026-11-24）：只對準面前這個角度以內的魄，看不到的背後不對準
   function autoTarget(g, kind) {
     const p = g.p;
     let best = null, bd = AUTO[kind] + 1e-9;
     for (const e of g.pos) {
       if (!awake(e) || !e.vis || e.vis.mode === 'silhouette') continue;
+      if (g.aimCone && Math.abs(angDiff(Math.atan2(e.y - p.y, e.x - p.x), p.aim)) > g.aimCone) continue;
       const d = dist(p, e);
       if (d > bd || !hitClear(g, p.x, p.y, e.x, e.y)) continue;
       bd = d; best = e;
@@ -1357,6 +1359,7 @@ body.touch div.touchkeys { display: grid; }
     p.swordCD = Math.max(0, p.swordCD - dt); p.bellCD = Math.max(0, p.bellCD - dt);
     if (inp.aim != null) p.aim = inp.aim;
     g.autoAim = !!inp.autoAim;
+    g.aimCone = inp.aimCone || 0;
     if (press.lamp) { p.lampOn = !p.lampOn; if (p.lampOn) p.adapt = 0; emit(g, 'lamp', { on: p.lampOn }); if (!p.lampOn) hint(g, 'dark'); }
     let mx = inp.mx || 0, my = inp.my || 0;
     const ml = hyp(mx, my), moving = ml > 0.05;
@@ -2408,6 +2411,8 @@ body.touch div.touchkeys { display: grid; }
   const perf = { q: 0, ft: [], sum: 0, last: 0, warm: 0, slow: 0, slowSum: 0, fps: 0, failed: false, keep: /[?&]keep3d=1/.test(root.location ? location.search : '') };
   const CAM = { back: 4.8, up: 7.0, ahead: 1.6 };          // 開始畫面
   const PCAM = { back: 4.3, up: 4.4, ahead: 2.6, fov: 55 }; // 立體版：人的背後、高過牆頭，往前多看一點（人在畫面下方三分之一）
+  const FCAM = { eye: 1.05, pitch: -0.16, fov: 72 };       // 第一人稱（2026-11-24 試玩）：眼睛的高度，微微往下看，看得到腳前的地
+  let camMode = 'behind', viewLamp = null, viewSword = null, swingT = 9, lastCD = 0, offscreen = 0;
 
   // 能不能跑 3D：只試一次（每試一次就多開一個 WebGL，開太多瀏覽器會把舊的關掉），試完就放掉
   let okCache = null;
@@ -2494,8 +2499,11 @@ body.touch div.touchkeys { display: grid; }
     g = game; mode = md === 'play' ? 'play' : 'attract';
     candles = []; poSprites = []; screens = []; doors = null; cam = null; walls = []; altars3 = []; wellMats = []; lureSprites = []; shotSprites = []; player = null; shadowPlane = null;
     view.ready = false; view.yaw = g.p.aim;
+    while (camera.children.length) camera.remove(camera.children[0]);   // 第一人稱拿在手上的燈與劍：重蓋時拿掉舊的
+    if (camera.parent) camera.parent.remove(camera);   // 鏡頭還掛在舊宅子上的話拿下來，不然新宅子裡它不會跟著動
+    viewLamp = null; viewSword = null; swingT = 9; lastCD = 0;
     const play = mode === 'play', m = g.m, W = m.W, H = m.H;
-    camera.fov = play ? PCAM.fov : 42; resize();
+    lensFor(); resize();
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0b0a09);
     scene.fog = new THREE.FogExp2(0x0b0a09, play ? 0.03 : 0.065);
@@ -2616,7 +2624,7 @@ body.touch div.touchkeys { display: grid; }
     const glowS = new THREE.Sprite(new THREE.SpriteMaterial({ map: flameTex, color: 0xffb060, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.8 }));
     glowS.scale.set(1.2, 1.2, 1); grp.add(glowS);
     grp.scale.setScalar(scale || 1);
-    return { grp, shade, glow: glowS, word };
+    return { grp, shade, glow: glowS, word, handle };
   }
   function lampLight(power, dist) {
     const l = new THREE.PointLight(0xffc27a, power, dist, 1.6);
@@ -2643,11 +2651,23 @@ body.touch div.touchkeys { display: grid; }
     const L = lanternModel(0.62);   // 手燈：提在右手前方
     L.grp.position.set(0.16, 0.55, 0.34);
     grp.add(L.grp);
-    const light = lampLight(1.5, 7.5); light.position.set(0.16, 0.6, 0.34);
-    grp.add(light);
-    scene.add(grp);
+    const light = lampLight(1.5, 7.5);   // 燈光放在場景裡，每一幀照手燈在哪裡擺（第一人稱時人不畫，光照樣要有）
+    scene.add(grp, light);
     lanternLight = light; lanternGlow = L.glow; lantern = null;
     player = { grp, lamp: L, light, robe };
+    // 第一人稱：右手提的燈在畫面右下，左手的桃木劍揮的時候才掃過畫面
+    const VL = lanternModel(0.3);
+    VL.handle.visible = false;   // 提把在畫面外，不畫
+    VL.grp.position.set(0.3, -0.27, -0.6);
+    viewLamp = VL;
+    const sw = new THREE.Group(), wood = new THREE.MeshStandardMaterial({ color: 0x8a5a2b, roughness: 0.8, emissive: 0x2a1406, emissiveIntensity: 0.6 });
+    const blade = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.012, 0.62), wood); blade.position.z = -0.31;
+    const guard = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.02, 0.025), new THREE.MeshStandardMaterial({ color: 0x3a2412, roughness: 0.7 })); guard.position.z = -0.01;
+    const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.14, 8), new THREE.MeshStandardMaterial({ color: 0xb4392a, roughness: 0.8 })); grip.rotation.x = Math.PI / 2; grip.position.z = 0.07;
+    sw.add(blade, guard, grip); sw.visible = false;
+    viewSword = sw;
+    camera.add(VL.grp, sw);
+    scene.add(camera);
     // 借火的火、飛出去的火符：立起來的一團火（字在地板那層也有光）
     fireGlyph = tex(glyphCanvas('火', 128, '#c8461f', { glow: 'rgba(255,150,60,.95)' }));
   }
@@ -2754,37 +2774,106 @@ body.touch div.touchkeys { display: grid; }
     g.shots.forEach((q, k) => { const s = shotSprites[k]; s.position.set(q.x, 0.6, q.y); s.scale.set(0.5, 0.5, 1); });
     poStep(1.1);
     // 人：面向對準的方向；走路時身子微微起伏，手燈晃
+    const fp = camMode === 'first';
     const walk = RM ? 0 : p.moving ? Math.abs(Math.sin(t * 9)) * 0.04 : 0;
     player.grp.position.set(p.x, walk, p.y);
     player.grp.rotation.y = -p.aim;
+    player.grp.visible = !fp;
     const sw = RM ? 0 : p.moving ? Math.sin(t * 9) * 0.12 : Math.sin(t * 2) * 0.03;
     player.lamp.grp.rotation.x = sw;
     const fl = RM ? 1 : 0.9 + 0.1 * Math.sin(t * 13) * Math.sin(t * 7.3 + 1);
-    player.lamp.shade.material.emissiveIntensity = p.lampOn ? 1.25 * fl : 0;
-    player.lamp.shade.material.color.setHex(p.lampOn ? 0xffe6b8 : 0x4a4038);
-    player.lamp.glow.visible = p.lampOn; player.lamp.glow.material.opacity = 0.55 * fl;
+    for (const L of [player.lamp, viewLamp]) {
+      L.shade.material.emissiveIntensity = p.lampOn ? 1.25 * fl : 0;
+      L.shade.material.color.setHex(p.lampOn ? 0xffe6b8 : 0x4a4038);
+      L.glow.visible = p.lampOn; L.glow.material.opacity = 0.55 * fl;
+    }
+    viewLamp.grp.visible = fp;
     player.light.intensity = p.lampOn ? 1.5 * fl : 0;
     player.light.castShadow = p.lampOn && perf.q === 0;
     if (shadowPlane) shadowPlane.visible = p.lampOn && perf.q === 0;
     moteStep(p.x, p.y); motes.visible = p.lampOn;
-    // 鏡頭：在人的背後、高過牆頭，往前看一點。I、O 轉；往前走時慢慢轉到人走的方向
+    // 鏡頭。I、O 轉（第一人稱還可以用滑鼠轉）。人的背後：在人後上方、高過牆頭，往前走時慢慢轉到人走的方向。
+    // 第一人稱：眼睛的高度、看鏡頭朝的方向，走路時微微起伏；人不畫，手燈在畫面右下
     if (w.turn) view.yaw += w.turn * 1.9 * dt;
-    if (w.follow != null) view.yaw += angDiff(w.follow, view.yaw) * (1 - Math.pow(0.4, dt));
+    if (w.follow != null && !fp) view.yaw += angDiff(w.follow, view.yaw) * (1 - Math.pow(0.4, dt));
     const fx = Math.cos(view.yaw), fz = Math.sin(view.yaw);
-    const want = { x: p.x - fx * PCAM.back, y: PCAM.up, z: p.y - fz * PCAM.back, lx: p.x + fx * PCAM.ahead, lz: p.y + fz * PCAM.ahead };
-    const k = !view.ready || w.snap ? 1 : 1 - Math.pow(0.002, dt);
-    for (const key of ['x', 'y', 'z', 'lx', 'lz']) view[key] += (want[key] - view[key]) * k;
-    view.ready = true;
-    const sh = root.RENDER.shake / 0.3;
-    camera.position.set(view.x + (sh ? (Math.random() - 0.5) * 0.12 * sh : 0), view.y + (sh ? (Math.random() - 0.5) * 0.12 * sh : 0), view.z);
-    camera.lookAt(view.lx, 0.45, view.lz);
+    const sh = root.RENDER.shake / 0.3, jit = () => (sh ? (Math.random() - 0.5) * 0.12 * sh : 0);
+    if (fp) {
+      const bob = RM ? 0 : p.moving ? Math.sin(t * 9) * 0.025 : 0;
+      view.x = p.x; view.y = FCAM.eye + bob; view.z = p.y; view.ready = false;   // 換回人的背後時鏡頭重新就位
+      camera.position.set(p.x + jit() * 0.4, FCAM.eye + bob + jit() * 0.4, p.y);
+      camera.lookAt(p.x + fx, FCAM.eye + bob + Math.tan(FCAM.pitch), p.y + fz);
+      viewLamp.grp.position.set(0.3, -0.27 + (RM ? 0 : p.moving ? Math.abs(Math.sin(t * 9)) * 0.015 : 0), -0.6);
+      viewLamp.grp.rotation.z = sw * 0.6;
+      // 劍：剛揮（冷卻剛滿）就從右往左掃過畫面
+      if (p.swordCD > lastCD + 0.05) swingT = 0;
+      lastCD = p.swordCD; swingT += dt;
+      const q = swingT / 0.28;
+      viewSword.visible = q < 1;
+      if (q < 1) { viewSword.position.set(0.32 - q * 0.6, -0.22 - Math.sin(q * Math.PI) * 0.05, -0.45); viewSword.rotation.set(-0.15, 0.9 - q * 1.8, -0.4); }
+    } else {
+      const want = { x: p.x - fx * PCAM.back, y: PCAM.up, z: p.y - fz * PCAM.back, lx: p.x + fx * PCAM.ahead, lz: p.y + fz * PCAM.ahead };
+      const k = !view.ready || w.snap ? 1 : 1 - Math.pow(0.002, dt);
+      for (const key of ['x', 'y', 'z', 'lx', 'lz']) view[key] += (want[key] - view[key]) * k;
+      view.ready = true;
+      camera.position.set(view.x + jit(), view.y + jit(), view.z);
+      camera.lookAt(view.lx, 0.45, view.lz);
+      viewSword.visible = false;
+    }
+    // 手燈的光：第一人稱在畫面右下那盞燈的位置；人的背後在人右手的燈
+    camera.updateMatrixWorld();
+    (fp ? viewLamp.grp : player.lamp.grp).getWorldPosition(player.light.position);
     renderer.render(scene, camera);
-    if (fxCv) root.RENDER.overlayFrame(dt, fxCv, proj);
+    if (fxCv) { root.RENDER.overlayFrame(dt, fxCv, proj); if (fp) fpMarks(); else offscreen = 0; }
+  }
+  // 第一人稱的鏡頭：視角比較寬，近的牆不被切掉
+  function lensFor() {
+    const fp = mode === 'play' && camMode === 'first';
+    camera.fov = mode === 'play' ? (fp ? FCAM.fov : PCAM.fov) : 42;
+    camera.near = fp ? 0.05 : 0.1;
+  }
+  function setCam(m) { camMode = m === 'first' ? 'first' : 'behind'; if (camera) { lensFor(); resize(); } }
+  // 橫的半個視角（弧度）：自動對準只對這個角度以內的魄
+  function hfov() { return Math.atan(Math.tan(camera.fov * Math.PI / 360) * camera.aspect); }
+  // 第一人稱的疊層：中間一點準星；看得見（照引擎）但不在畫面裡的魄，在畫面邊上朝它的方向畫記號，
+  // 要撲的是紅的「噬」。2D 看得到四周，第一人稱只看得到前面，這些記號補回 2D 本來就給的資訊，不多給。
+  function fpMarks() {
+    const c = fxCv.getContext('2d'), W = fxCv.width, H = fxCv.height, p = g.p, u = Math.min(W, H) / 100;
+    c.save();
+    c.fillStyle = 'rgba(236,226,200,.75)'; c.strokeStyle = 'rgba(20,16,12,.7)'; c.lineWidth = u * 0.25;
+    c.beginPath(); c.arc(W / 2, H / 2, u * 0.55, 0, Math.PI * 2); c.fill(); c.stroke();
+    const hf = hfov();
+    offscreen = 0;
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    for (const e of g.pos) {
+      if (e.state === 'gone' || !e.vis) continue;
+      let rel = Math.atan2(e.y - p.y, e.x - p.x) - view.yaw;
+      while (rel > Math.PI) rel -= 2 * Math.PI; while (rel < -Math.PI) rel += 2 * Math.PI;
+      if (Math.abs(rel) < hf * 0.92) continue;
+      offscreen++;
+      const wind = e.state === 'windup' && e.windVisible, pulse = RM ? 1 : 0.75 + 0.25 * Math.sin(t * 12);
+      // 畫在一個橢圓上：左右在兩邊，正後方在畫面中間偏下（避開下面一排工具鈕）
+      const X = W / 2 + Math.sin(rel) * W * 0.44, Y = H / 2 - Math.cos(rel) * H * 0.27, r = u * (wind ? 4.6 : 3.4);
+      c.globalAlpha = wind ? pulse : e.vis.mode === 'silhouette' ? 0.5 : 0.8;
+      c.fillStyle = wind ? 'rgba(180,57,42,.92)' : e.vis.mode === 'dark' ? 'rgba(20,40,38,.75)' : 'rgba(236,226,200,.88)';
+      c.beginPath(); c.arc(X, Y, r, 0, Math.PI * 2); c.fill();
+      c.lineWidth = u * 0.35; c.strokeStyle = wind ? '#f7efe0' : 'rgba(28,26,23,.7)'; c.stroke();
+      const a = Math.atan2(Y - H / 2, X - W / 2);   // 往外指的小三角：魄在那個方向
+      c.beginPath(); c.moveTo(X + Math.cos(a) * r * 1.55, Y + Math.sin(a) * r * 1.55); c.lineTo(X + Math.cos(a + 0.5) * r * 1.05, Y + Math.sin(a + 0.5) * r * 1.05); c.lineTo(X + Math.cos(a - 0.5) * r * 1.05, Y + Math.sin(a - 0.5) * r * 1.05); c.closePath(); c.fill();
+      c.font = `${Math.round(r * 1.25)}px ${FONT}`;
+      c.fillStyle = wind ? '#f7efe0' : e.vis.mode === 'dark' ? '#cfeee6' : e.vis.mode === 'silhouette' ? '#3c3630' : '#2e3338';
+      c.fillText(wind ? '噬' : '魄', X, Y + r * 0.05);
+    }
+    c.restore();
   }
   // 世界上 (x, y)、高 h 的點在疊層畫布的哪裡；k 是那裡一格幾像素
   let v3 = null, v3b = null;
   function proj(x, h, y) {
     v3 = v3 || new THREE.Vector3(); v3b = v3b || new THREE.Vector3();
+    if (mode === 'play' && camMode === 'first' && g && Math.hypot(x - g.p.x, y - g.p.y) < 0.35) {   // 第一人稱：落在自己身上的字（噬、寒 +、取印）放在畫面中間偏下
+      const H = fxCv.height;
+      return { X: fxCv.width / 2, Y: H * (0.6 - (h - 1.25) * 0.12), k: H / 9 };
+    }
     v3.set(x, h, y).project(camera);
     if (v3.z > 1 || v3.z < -1) return null;
     const W = fxCv.width, H = fxCv.height, d = camera.position.distanceTo(v3b.set(x, h, y));
@@ -2840,7 +2929,8 @@ body.touch div.touchkeys { display: grid; }
   function pausePerf() { perf.last = 0; }
 
   root.RENDER3D = {
-    ok, init, setGame, frame, resize, force, pausePerf, toWorld, proj: (x, h, y) => proj(x, h, y), turnBy(rad) { view.yaw += rad; },
+    ok, init, setGame, frame, resize, force, pausePerf, toWorld, proj: (x, h, y) => proj(x, h, y), turnBy(rad) { view.yaw += rad; }, setCam, hfov,
+    get camMode() { return camMode; }, get offscreen() { return offscreen; }, get camPos() { return camera ? { x: camera.position.x, y: camera.position.y, z: camera.position.z } : null; },
     get cam() { return cam; }, get view() { return view; }, get yaw() { return view.yaw; }, get mode() { return mode; }, get game() { return g; },
     get quality() { return perf.q; }, get failed() { return perf.failed; }, get fps() { return perf.fps; }, get keep() { return perf.keep; }
   };
@@ -2880,7 +2970,8 @@ body.touch div.touchkeys { display: grid; }
     gate: '按住 U 推開門閂。推的時候不能動，被咬就要重來。魄在附近時，可以先借火把它引開，或封住它過來的廊口。',
     track: '那隻魄在聞你的腳印（頭上有「嗅」）。腳印新的時候它跟得上；你一直走，它就追不上，停下來就會被追到。掩燈放輕腳步，腳印淡得快；封戶擋得住它，借火也能把它引開。',
     chill: '寒意很高。到燭火或借火旁邊可以取暖，但站在火光裡，魄看得見你。',
-    view3d: '立體：鏡頭在你背後。W 往前、S 往後、A D 往左右；I、O 轉鏡頭，往前走時鏡頭會慢慢跟上。右上角「換成平面」或暫停面板可以換回平面。'
+    view3d: '立體：鏡頭在你背後。W 往前、S 往後、A D 往左右；I、O 轉鏡頭，往前走時鏡頭會慢慢跟上。右上角或暫停面板可以換別的畫面。',
+    viewFp: '第一人稱（試玩）：W 往前、S 往後、A D 往左右，I、O 轉頭；按 M 改用滑鼠轉頭（M 或 Esc 放開）。劍與火符只自動對準面前的魄。看不到的地方有魄時，畫面邊上有記號，紅的「噬」是它要撲了。'
   };
   // 觸控時，提到按鍵的提示換一種說法
   const HINT_TOUCH = {
@@ -2889,7 +2980,8 @@ body.touch div.touchkeys { display: grid; }
     gate: '按住「取」推開門閂。推的時候不能動，被咬就要重來。魄在附近時，可以先借火把它引開，或封住它過來的廊口。',
     whiff: '劍揮空了。看飄出的字：「偏了」是方向不對，「差一步」是不夠近，「隔著」是中間有牆或屏。',
     controls: '左半邊按住拖動就走，推得越遠走得越快。右下角是劍、符、鈴、燈、借火、封戶；走到印臺或大門旁，按住「取」。',
-    view3d: '立體：鏡頭在你背後。左半邊往上推就往鏡頭前方走；右半邊左右滑動轉鏡頭，往前走時鏡頭也會慢慢跟上。右上角「換成平面」可以換回平面。'
+    view3d: '立體：鏡頭在你背後。左半邊往上推就往鏡頭前方走；右半邊左右滑動轉鏡頭，往前走時鏡頭也會慢慢跟上。右上角可以換別的畫面。',
+    viewFp: '第一人稱（試玩）：左半邊推著走，右半邊左右滑動轉頭。劍與火符只自動對準面前的魄。看不到的地方有魄時，畫面邊上有記號，紅的「噬」是它要撲了。'
   };
   const SPELL = { borrow: '借火', seal: '封戶' };
 
@@ -2918,9 +3010,10 @@ body.touch div.touchkeys { display: grid; }
     let t = (touch.on && HINT_TOUCH[key]) || HINT[key]; if (!t) return;
     const in3d = use3d && g && !g.attract;
     if (key === 'start') {   // 開頭的提示順便說怎麼操作：觸控說手指怎麼用；立體版說怎麼走、怎麼轉鏡頭
-      if (touch.on) t += '\n' + (in3d ? HINT_TOUCH.view3d : HINT_TOUCH.controls);
-      else if (in3d) t += '\n' + HINT.view3d;
-      if (in3d) g._hint3d = true;
+      const vk = fpv ? 'viewFp' : 'view3d';
+      if (touch.on) t += '\n' + (in3d ? HINT_TOUCH[vk] : HINT_TOUCH.controls);
+      else if (in3d) t += '\n' + HINT[vk];
+      if (in3d) g._hint3d = vk;
       if (g && g.god) t += '\n第四格是無敵格：被咬、待在魄身邊都不加寒意，不會失魂；出宅不算最快紀錄。';
     }
     const h = $('hint'); h.textContent = t; h.classList.remove('hidden');
@@ -3049,7 +3142,7 @@ body.touch div.touchkeys { display: grid; }
   }
   function setPause(on, why) {
     if (!running) return;
-    paused = on; dropTouch();
+    paused = on; dropTouch(); if (on) unlockMouse();
     if (on) autosave(false);
     SFX.ambient(!on);
     $('pause').classList.toggle('hidden', !on);
@@ -3062,7 +3155,7 @@ body.touch div.touchkeys { display: grid; }
   function best() { return +lsGet('xieyi.deng.best') || 0; }
   function showBest() { const b = best(); $('best').textContent = b ? ' · 最快出宅 ' + fmt(b) : ''; }
   function endGame(win) {
-    running = false;
+    running = false; unlockMouse();
     SFX.ambient(false);
     $('end').classList.toggle('win', win); $('end').classList.toggle('lose', !win);
     const s = g.stats;
@@ -3089,7 +3182,7 @@ body.touch div.touchkeys { display: grid; }
   // 這一局先自動存在自己那格，再回開始畫面；那一格預先選好，Enter 就接著玩。
   function toTitle() {
     if (running && g && g.state === 'play') autosave(false);
-    running = false; paused = false;
+    running = false; paused = false; unlockMouse();
     keys.clear(); holdTake = false; press = {};
     SFX.ambient(false);
     ['pause', 'end'].forEach((id) => $(id).classList.add('hidden'));
@@ -3164,6 +3257,7 @@ body.touch div.touchkeys { display: grid; }
     if (MOVE[ev.code]) keys.add(ev.code);
     if (ev.code === 'KeyI' || ev.code === 'KeyO') keys.add(ev.code);   // 立體版：I、O 轉鏡頭（平面時沒有作用）
     if (ev.repeat) return;
+    if (ev.code === 'KeyM' && use3d && fpv && RENDER3D.mode === 'play') { toggleMouseLook(); return; }   // 第一人稱：M 用滑鼠轉頭
     if (ACT[ev.code]) press[ACT[ev.code]] = true;
     if (ev.code === HOLD) holdTake = true;
   });
@@ -3173,7 +3267,25 @@ body.touch div.touchkeys { display: grid; }
   document.addEventListener('visibilitychange', () => { if (document.hidden) { keys.clear(); holdTake = false; if (running && !paused) setPause(true, 'blur'); } });
   // 手機在手指放開後會補發「假的」滑鼠事件：剛摸過螢幕就不理滑鼠，免得對準跑到按鈕那裡、或點一下就揮劍
   const fromTouch = () => performance.now() - touch.lastT < 900;
-  addEventListener('mousemove', (ev) => { if (fromTouch()) return; mouse.x = ev.clientX; mouse.y = ev.clientY; mouse.t = performance.now(); mouse.in = true; });
+  addEventListener('mousemove', (ev) => {
+    if (mouseLocked()) { if (running && !paused) RENDER3D.turnBy(ev.movementX * 0.0032); return; }   // 第一人稱的滑鼠轉頭
+    if (fromTouch()) return; mouse.x = ev.clientX; mouse.y = ev.clientY; mouse.t = performance.now(); mouse.in = true;
+  });
+  // 第一人稱：M 改用滑鼠轉頭（瀏覽器把滑鼠鎖在畫面裡；M 或 Esc 放開）。瀏覽器不讓鎖就照舊用 I、O
+  function mouseLocked() { return !!document.pointerLockElement && document.pointerLockElement === $('world3d'); }
+  function unlockMouse() { if (mouseLocked() && document.exitPointerLock) document.exitPointerLock(); }
+  function toggleMouseLook() {
+    if (mouseLocked()) { unlockMouse(); return; }
+    const el = $('world3d');
+    try { const r = el.requestPointerLock && el.requestPointerLock(); if (r && r.catch) r.catch(() => log('這個瀏覽器不讓滑鼠轉頭，請用 I、O 轉頭', 'warn')); } catch (e) { log('這個瀏覽器不讓滑鼠轉頭，請用 I、O 轉頭', 'warn'); }
+  }
+  // 鎖滑鼠要等一下才生效：按了 M 馬上暫停或回主頁，鎖可能晚到；晚到的時候已經不在第一人稱玩，就立刻放開
+  document.addEventListener('pointerlockchange', () => {
+    if (!mouseLocked()) return;
+    if (!running || paused || !(use3d && fpv && RENDER3D.mode === 'play')) { unlockMouse(); return; }
+    log('滑鼠轉頭：移動滑鼠就轉；再按 M 或 Esc 放開', 'good');
+  });
+  document.addEventListener('pointerlockerror', () => log('這個瀏覽器不讓滑鼠轉頭，請用 I、O 轉頭', 'warn'));
   document.addEventListener('mouseleave', () => { mouse.in = false; });
   const onDown = (ev) => {
     if (!running || paused || fromTouch()) return;
@@ -3263,23 +3375,25 @@ body.touch div.touchkeys { display: grid; }
       if (d > 10) { const m = Math.min(1, (d - 10) / (STICK_R * 0.7 - 10)); kx += (s.dx / d) * m; ky += (s.dy / d) * m; }
     }
     let mx = kx, my = ky;
-    const in3d = use3d && RENDER3D.mode === 'play';
+    const in3d = use3d && RENDER3D.mode === 'play', fp = in3d && fpv;
     cam3.turn = in3d ? (keys.has('KeyO') ? 1 : 0) - (keys.has('KeyI') ? 1 : 0) : 0;
     cam3.follow = null;
     if (in3d && (kx || ky)) {   // 立體：W 是鏡頭看的方向，S 往回，A、D 往左右
       const yaw = RENDER3D.yaw, fx = Math.cos(yaw), fy = Math.sin(yaw);
       mx = fx * -ky - fy * kx; my = fy * -ky + fx * kx;
-      if (ky < -0.3) cam3.follow = Math.atan2(my, mx);   // 往前走（帶一點左右也算）時，鏡頭慢慢轉到人走的方向
+      if (ky < -0.3 && !fp) cam3.follow = Math.atan2(my, mx);   // 往前走（帶一點左右也算）時，鏡頭慢慢轉到人走的方向（第一人稱不跟，只照你轉頭）
     }
     if (mx || my) moveDir = Math.atan2(my, mx);
-    const now = performance.now(), useMouse = mouse.in && now - mouse.t < 2500;
+    const locked = fp && mouseLocked();
+    const now = performance.now(), useMouse = !locked && mouse.in && now - mouse.t < 2500;
     let aim = null, target = null;
     if (useMouse) {
       const d = Math.min(2, window.devicePixelRatio || 1), w = in3d ? RENDER3D.toWorld(mouse.x, mouse.y) : RD.toWorld(mouse.x * d, mouse.y * d);
       if (w) { aim = Math.atan2(w.y - g.p.y, w.x - g.p.x); target = w; }
-    } else if (mx || my) aim = moveDir;
-    aimAuto = !useMouse;   // 沒用滑鼠：劍與火符自動對準看得見的魄
-    return { mx, my, aim, target, autoAim: aimAuto, press, hold: { take: holdTake || touch.take } };
+    } else if (fp) aim = RENDER3D.yaw;   // 第一人稱：面向你看的方向（橫著走也不轉身）
+    else if (mx || my) aim = moveDir;
+    aimAuto = !useMouse;   // 沒用滑鼠：劍與火符自動對準看得見的魄（第一人稱只對準面前的）
+    return { mx, my, aim, target, autoAim: aimAuto, aimCone: fp && aimAuto ? Math.min(0.8, RENDER3D.hfov()) : 0, press, hold: { take: holdTake || touch.take } };
   }
 
   // ---------- HUD ----------
@@ -3329,7 +3443,8 @@ body.touch div.touchkeys { display: grid; }
     $('t-sword').classList.toggle('off', reading); $('t-fire').classList.toggle('off', reading || p.talismans <= 0);
     $('t-bell').classList.toggle('busy', reading);
     $('t-lamp').classList.toggle('covered', !p.lampOn); $('lamp-s').textContent = p.lampOn ? '點著' : '掩著';
-    setHTML('aimmode', aimAuto ? '<b>對準</b>自動（看得見的魄）' : '<b>對準</b>跟著滑鼠');
+    const fpNow = use3d && fpv && RENDER3D.mode === 'play';
+    setHTML('aimmode', fpNow ? (mouseLocked() ? '<b>對準</b>面前（滑鼠轉頭，M 放開）' : aimAuto ? '<b>對準</b>面前看得見的魄（M 用滑鼠轉頭）' : '<b>對準</b>跟著滑鼠') : aimAuto ? '<b>對準</b>自動（看得見的魄）' : '<b>對準</b>跟著滑鼠');
     if (touch.on) {   // 觸控的「取」：站在印臺或大門旁才亮；正在取就是紅的
       const near = takeNear();
       takeBtn.classList.toggle('ready', !!near);
@@ -3360,9 +3475,12 @@ body.touch div.touchkeys { display: grid; }
   // 自己換成平面時說原因；按「立體」再試就不再自動換。按過的選擇記在 xieyi.deng.view（'3d'／'2d'）。網址 ?flat=1 只管這一次。
   const FLAT_URL = /[?&]flat=1/.test(location.search);
   let r3ready = false, r3game = null, viewWhy = FLAT_URL || lsGet('xieyi.deng.view') === '2d' ? '' : 'loading';
+  let fpv = lsGet('xieyi.deng.view') === 'fp';   // 第一人稱（2026-11-24 試玩）：立體裡的另一種鏡頭；記成 'fp'
+
   const can3d = () => !!(RENDER3D && RENDER3D.ok());
   // 立體那邊蓋的是不是現在這一局、是開始畫面還是玩的那一種
   function sync3d() {
+    RENDER3D.setCam(fpv ? 'first' : 'behind');
     const want = g.attract ? 'attract' : 'play';
     if (r3game !== g || RENDER3D.mode !== want) { RENDER3D.setGame(g, want); r3game = g; snap = true; }
   }
@@ -3372,7 +3490,7 @@ body.touch div.touchkeys { display: grid; }
     $('world3dfx').classList.toggle('hidden', !(use3d && g && !g.attract));
     cv.classList.toggle('hidden', use3d);
   }
-  function hint3d() { if (g && !g._hint3d) { g._hint3d = true; showHint('view3d'); } }
+  function hint3d() { const k = fpv ? 'viewFp' : 'view3d'; if (g && g._hint3d !== k) { g._hint3d = k; showHint(k); } }
   function set3d(on, save, force) {
     if (on) {
       if (!can3d()) { renderView(); return false; }
@@ -3387,15 +3505,26 @@ body.touch div.touchkeys { display: grid; }
     } else {
       use3d = false; canvases(); snap = true;
     }
-    if (save) lsSet('xieyi.deng.view', on ? '3d' : '2d');
+    if (!(use3d && fpv)) unlockMouse();
+    if (save) lsSet('xieyi.deng.view', on ? (fpv ? 'fp' : '3d') : '2d');
     renderView();
     return true;
   }
+  // 三種畫面：平面、立體（人的背後）、第一人稱。右上角的鈕照這個順序輪著換
+  const VIEW_NAME = { '2d': '平面', '3d': '立體', fp: '第一人稱' }, VIEW_NEXT = { '2d': '3d', '3d': 'fp', fp: '2d' };
+  const curView = () => (!use3d ? '2d' : fpv ? 'fp' : '3d');
+  function setView(v, save) {
+    if (v === '2d') { viewWhy = ''; return set3d(false, save); }
+    fpv = v === 'fp';
+    if (r3ready) RENDER3D.setCam(fpv ? 'first' : 'behind');
+    return set3d(true, save, true);
+  }
   function renderView() {
-    const can = can3d();
-    for (const [a, b] of [['vm-3d', 'vm-2d'], ['pv-3d', 'pv-2d']]) { $(a).classList.toggle('on', use3d); $(b).classList.toggle('on', !use3d); $(a).disabled = !can; }
-    $('btn-view').textContent = use3d ? '換成平面' : '換成立體';
-    $('btn-view').disabled = !can && !use3d;
+    const can = can3d(), cur = curView();
+    for (const pre of ['vm', 'pv']) for (const v of ['2d', '3d', 'fp']) { const b = $(`${pre}-${v}`); b.classList.toggle('on', cur === v); if (v !== '2d') b.disabled = !can; }
+    const next = can ? VIEW_NEXT[cur] : '2d';
+    $('btn-view').textContent = '換成' + VIEW_NAME[next]; $('btn-view').dataset.next = next;
+    $('btn-view').disabled = !can && cur === '2d';
     const fps = RENDER3D && RENDER3D.fps ? Math.round(RENDER3D.fps) : 0;
     const note = viewWhy === 'loading' && can ? '立體的宅子載入中……'
       : !window.THREE ? '立體要用的 three.js 沒載到，先用平面。'
@@ -3462,12 +3591,11 @@ body.touch div.touchkeys { display: grid; }
   const muteBtns = () => ['btn-mute', 'btn-mute2'].forEach((id) => { $(id).classList.toggle('off', SFX.muted); $(id).textContent = SFX.muted ? '音效關' : '音效'; });
   ['btn-mute', 'btn-mute2'].forEach((id) => $(id).addEventListener('click', (ev) => { SFX.unlock(); SFX.toggle(); muteBtns(); ev.currentTarget.blur(); }));
   muteBtns(); showBest();
-  const pickView = (on) => { if (on) set3d(true, true, true); else { viewWhy = ''; set3d(false, true); } };
-  ['vm-3d', 'pv-3d', 'vm-2d', 'pv-2d'].forEach((id) => $(id).addEventListener('click', (ev) => { ev.currentTarget.blur(); pickView(id.endsWith('3d')); }));
-  $('btn-view').addEventListener('click', (ev) => { ev.currentTarget.blur(); pickView(!use3d); });
+  ['vm-2d', 'vm-3d', 'vm-fp', 'pv-2d', 'pv-3d', 'pv-fp'].forEach((id) => $(id).addEventListener('click', (ev) => { ev.currentTarget.blur(); setView(id.slice(3), true); }));
+  $('btn-view').addEventListener('click', (ev) => { ev.currentTarget.blur(); setView(ev.currentTarget.dataset.next || '3d', true); });
 
   // 先在背景擺好宅子（開始畫面後面看得到一點點）
-  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, continueGame, setPause, toTitle, saveAs, readSlot, canSave, snap() { snap = true; }, tour, get use3d() { return use3d; }, set3d, get touch() { return touch; }, get slot() { return slot; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
+  window.DENG = { R, ENGINE: E, RENDER: RD, newGame, continueGame, setPause, toTitle, saveAs, readSlot, canSave, snap() { snap = true; }, tour, get use3d() { return use3d; }, set3d, setView, get fpv() { return fpv; }, get touch() { return touch; }, get slot() { return slot; }, get paused() { return paused; }, get running() { return running; }, keys, g: null };
   showcase();
   renderSlots(); renderView();
   if (!canSave) $('slot-msg').textContent = '這個瀏覽器存不了檔（例如無痕視窗）：照樣能玩，只是關掉就沒了。';
