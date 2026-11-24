@@ -184,7 +184,8 @@
 
   function emit(g, type, o) { const e = Object.assign({ type, t: g.t }, o || {}); g.events.push(e); if (g.events.length > 400) g.events.splice(0, g.events.length - 400); return e; }
   function hint(g, key, o) { if (g.hints.has(key)) return; g.hints.add(key); emit(g, 'hint', Object.assign({ key }, o || {})); }
-  function addChill(g, amt) { const p = g.p; p.chill = clamp(p.chill + amt, 0, R.P.chillMax); if (p.chill > g.stats.maxChill) g.stats.maxChill = p.chill; }
+  // 無敵格（g.god，擁有者 2026-11-24 要的第四格）：寒意只退不加，所以不會失魂
+  function addChill(g, amt) { if (g.god && amt > 0) return; const p = g.p; p.chill = clamp(p.chill + amt, 0, R.P.chillMax); if (p.chill > g.stats.maxChill) g.stats.maxChill = p.chill; }
   const tangible = (e) => e.state !== 'gone';
   const awake = (e) => e.state !== 'gone' && e.state !== 'dormant';
   const dist = (a, b) => hyp(a.x - b.x, a.y - b.y);
@@ -278,13 +279,13 @@
   function resolveBite(g, e) {
     const p = g.p, d = dist(p, e);
     if (d <= R.PO.biteR && hitClear(g, e.x, e.y, p.x, p.y)) {
-      const a = Math.min(p.armor, R.PO.bite);
-      p.armor -= a; g.stats.armorLost += a; addChill(g, R.PO.bite - a);
+      const a = g.god ? 0 : Math.min(p.armor, R.PO.bite), c = g.god ? 0 : R.PO.bite - a;   // 無敵格：照樣被咬、被推開，但不扣護持、不加寒意
+      p.armor -= a; g.stats.armorLost += a; addChill(g, c);
       p.bitten = true; g.stats.bites++;
       if (d > 1e-6) moveEnt(g, p, ((p.x - e.x) / d) * R.P.biteKnock, ((p.y - e.y) / d) * R.P.biteKnock);
       e.state = 'recoil'; e.stateT = R.PO.recoilT;
-      emit(g, 'bite', { id: e.id, absorbed: a, chill: R.PO.bite - a, x: p.x, y: p.y });
-      hint(g, a > 0 ? 'bite' : 'biteBare');
+      emit(g, 'bite', { id: e.id, absorbed: a, chill: c, god: !!g.god, x: p.x, y: p.y });
+      if (!g.god) hint(g, a > 0 ? 'bite' : 'biteBare');
     } else {
       g.stats.whiffs++; e.state = 'recover'; e.stateT = R.PO.whiffT;
       emit(g, 'whiff', { id: e.id, x: e.x, y: e.y, visible: e.windVisible });

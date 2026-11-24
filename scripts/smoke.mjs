@@ -243,7 +243,7 @@ try {
   const still = () => sev(() => { const g = DENG.g; g.pos.forEach((e, i) => { g.place(e, 2.5 + i, 25.5, 'recover'); e.stateT = 999; }); });
   await open();
   let tx = await slotTexts();
-  ok('存檔：三格一開始都是空的', tx.length === 3 && tx.every((t) => t.includes('空')), tx);
+  ok('存檔：四格一開始都是空的（第四格標著無敵）', tx.length === 4 && tx.every((t) => t.includes('空')) && await sev(() => document.querySelectorAll('#slots .slot')[3].textContent.includes('無敵')), tx);
   await sp.screenshot({ path: path.join(out, '17-slots-empty.png') });
   // 第一格開一局，走一下，暫停（自動存）
   await sp.keyboard.press('KeyU'); await sp.keyboard.press('Enter'); await sw(300);
@@ -325,6 +325,28 @@ try {
   ok('存檔：壞掉的格顯示讀不出來，Enter 在那一格從頭', tx[2].includes('讀不出來') && await sev(() => DENG.slot === 3 && DENG.readSlot(3).kind === 'run'), tx[2]);
   await sctx.close();
 } catch (e) { ok('三格存檔整套', false, String(e && e.message || e)); }
+
+// 無敵格（第四格，擁有者 2026-11-24）：P 選第四格；被咬不扣護持、不加寒意；出宅不算最快紀錄
+try {
+  const gctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const gp = await gctx.newPage(); watch(gp);
+  const gev = (f) => gp.evaluate(f), gw = (ms) => gp.waitForTimeout(ms);
+  await gp.goto(base + Q + 'seed=7&flat=1');
+  await gp.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 30000 });
+  await gp.keyboard.press('KeyP'); await gp.keyboard.press('Enter'); await gw(300);
+  const g0 = await gev(() => ({ slot: DENG.slot, god: DENG.g.god, goal: document.getElementById('goal').textContent, hint: document.getElementById('hint').textContent }));
+  ok('無敵格：P 選第四格、Enter 入宅；右上寫著無敵，開頭提示說明', g0.slot === 4 && g0.god && g0.goal.includes('無敵') && g0.hint.includes('無敵格'), g0);
+  await gev(() => { const g = DENG.g; g.tp(19.5, 3.5); const e = g.pos[0]; g.place(e, 20.4, 3.5, 'chase'); e.lastKnown = { x: 19.5, y: 3.5 }; e.stateT = 0; });
+  await gp.waitForFunction(() => DENG.g.stats.bites >= 2, null, { timeout: 15000 });
+  const g1 = await gev(() => ({ bites: DENG.g.stats.bites, chill: Math.round(DENG.g.p.chill), armor: DENG.g.p.armor, st: DENG.g.state }));
+  ok('無敵格：被咬兩次，寒意 0、護持不少、照樣在玩', g1.bites >= 2 && g1.chill === 0 && g1.armor === 54 && g1.st === 'play', g1);
+  await gev(() => { const g = DENG.g; g.pos.forEach((e, i) => { g.place(e, 2.5 + i, 25.5, 'recover'); e.stateT = 999; }); g.seals.name = g.seals.breath = true; g.altars.forEach((a) => { a.taken = true; }); g.exitReady = true; g.tp(20.0, 26.4); });
+  await gp.keyboard.down('KeyU'); await gw(1750); await gp.keyboard.up('KeyU');
+  await gp.keyboard.down('KeyS'); await gw(600); await gp.keyboard.up('KeyS'); await gw(300);
+  const g2 = await gev(() => ({ st: DENG.g.state, best: localStorage.getItem('xieyi.deng.best'), rows: document.getElementById('end-stats').textContent, done: DENG.readSlot(4).kind }));
+  ok('無敵格：出宅不算最快紀錄，第四格記下出宅過', g2.st === 'win' && !g2.best && g2.rows.includes('無敵格') && g2.done === 'done', g2);
+  await gctx.close();
+} catch (e) { ok('無敵格整套', false, String(e && e.message || e)); }
 
 // 存不了檔的瀏覽器（例如無痕視窗擋掉 localStorage）：照樣能玩
 try {
@@ -478,6 +500,8 @@ try {
   const hint = await mp.evaluate(() => ({ running: DENG.running, hint: document.getElementById('hint').textContent, tools: getComputedStyle(document.getElementById('tools')).display, take: getComputedStyle(document.getElementById('t-take')).display }));
   await mp.screenshot({ path: path.join(out, '28-phone-play.png') });
   ok('手機：入宅後右下角是一叢按鈕、有「取」，提示說手指怎麼用', hint.running && hint.tools === 'grid' && hint.take !== 'none' && hint.hint.includes('左半邊'), hint);
+  const sz = await mp.evaluate(() => { const r = (id) => document.getElementById(id).getBoundingClientRect(); return { sword: Math.round(r('t-sword').width), takeH: Math.round(r('t-take').height), bell: Math.round(r('t-bell').width) }; });
+  ok('手機：按鈕照 2026-11-22 的大小（直拿時劍約 106、其他約 50 像素）', Math.abs(sz.sword - 106) <= 2 && Math.abs(sz.takeH - 50) <= 2 && Math.abs(sz.bell - 50) <= 2, sz);
   const tz = (type, id, x, y) => mp.evaluate(([type, id, x, y]) => { document.getElementById('touchzone').dispatchEvent(new PointerEvent(type, { pointerId: id, pointerType: 'touch', clientX: x, clientY: y, bubbles: true })); }, [type, id, x, y]);
   const y0 = await mp.evaluate(() => DENG.g.p.y);
   await tz('pointerdown', 3, 70, 500); await tz('pointermove', 3, 70, 440);

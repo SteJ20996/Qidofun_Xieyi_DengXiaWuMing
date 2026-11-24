@@ -140,7 +140,11 @@ button.big { font: 22px var(--font); padding: 6px 34px; margin: 10px 6px 6px; ba
 button.big:hover { background: var(--red); border-color: var(--red); }
 .panel .row button:not(.big) { font: 17px var(--font); padding: 6px 18px; margin: 10px 4px 6px; background: transparent; border: 1.5px solid var(--ink); border-radius: 4px; cursor: pointer; color: var(--ink); }
 /* 三格存檔 */
-.slots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 14px 0 6px; }
+.slots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 14px 0 6px; }
+/* 第四格：無敵格 */
+.godtag { display: inline-block; font: normal 12px/1.5 var(--font); font-style: normal; color: #f7efe0; background: #8a6a1c; border-radius: 3px; padding: 0 5px; margin-left: 6px; letter-spacing: 1px; vertical-align: middle; }
+.slot.god { border-color: rgba(138,106,28,.6); background: rgba(232,200,96,.14); position: relative; }
+.slot.god .godtag { position: absolute; top: 7px; right: 7px; margin: 0; }
 .slot { border: 1.5px solid rgba(28,26,23,.45); border-radius: 5px; padding: 8px 10px; background: rgba(255,255,255,.28); text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .slot.sel { border-color: var(--red); box-shadow: 0 0 0 2px rgba(180,57,42,.35); background: rgba(255,255,255,.5); }
 .slot-h { font-size: 17px; display: flex; align-items: center; gap: 6px; }
@@ -163,7 +167,7 @@ button.big:hover { background: var(--red); border-color: var(--red); }
 #save-msg { min-height: 1.4em; color: var(--red-2); }
 #goal .slotlab { font-size: 13px; color: var(--dim); }
 .panel .row button.plain { font: 17px var(--font); padding: 6px 18px; margin: 10px 4px 6px; background: transparent; border: 1.5px solid var(--ink); border-radius: 4px; cursor: pointer; color: var(--ink); }
-@media (max-width: 640px) { .slots { grid-template-columns: 1fr; } .slot-b { min-height: 0; } }
+@media (max-width: 640px) { .slots { grid-template-columns: repeat(2, minmax(0, 1fr)); } .slot-b { min-height: 0; } }
 ul.rules { text-align: left; font-size: 15px; line-height: 1.6; margin: 12px 0 0; padding-left: 1.2em; }
 ul.rules b { color: var(--red-2); font-weight: normal; }
 .endseal { width: 70px; height: 70px; margin: 0 auto; background: var(--red); color: #f7efe0; display: grid; place-items: center; font: 34px var(--font); border-radius: 5px; transform: rotate(-4deg); }
@@ -311,7 +315,7 @@ body.touch #goal { font-size: 13px; padding: 3px 8px; gap: 8px; }
 body.touch #goal .s i { width: 18px; height: 18px; font-size: 12px; }
 body.touch .hudbtns { gap: 4px; }
 body.touch .hudbtns button { font-size: 13px; padding: 6px 9px; }
-body.touch #minimap { width: 112px; height: 78px; right: calc(8px + env(safe-area-inset-right, 0px)); top: calc(84px + env(safe-area-inset-top, 0px)); bottom: auto; }
+body.touch #minimap { width: 112px; height: 78px; right: calc(8px + env(safe-area-inset-right, 0px)); top: calc(84px + env(safe-area-inset-top, 0px)); bottom: auto; pointer-events: none !important; }
 body.touch #log { left: calc(8px + env(safe-area-inset-left, 0px)); top: calc(106px + env(safe-area-inset-top, 0px)); max-width: 44vw; }
 body.touch #log div { font-size: 12.5px; padding: 2px 8px; }
 body.touch #hint { top: calc(8px + env(safe-area-inset-top, 0px)); bottom: auto; min-width: 0; width: max-content; max-width: max(240px, calc(100vw - 480px)); font-size: 13.5px; line-height: 1.5; padding: 6px 10px 6px 34px; }

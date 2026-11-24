@@ -71,16 +71,19 @@
       if (touch.on) t += '\n' + (in3d ? HINT_TOUCH.view3d : HINT_TOUCH.controls);
       else if (in3d) t += '\n' + HINT.view3d;
       if (in3d) g._hint3d = true;
+      if (g && g.god) t += '\n第四格是無敵格：被咬、待在魄身邊都不加寒意，不會失魂；出宅不算最快紀錄。';
     }
     const h = $('hint'); h.textContent = t; h.classList.remove('hidden');
     clearTimeout(hintTimer); hintTimer = setTimeout(() => h.classList.add('hidden'), 9000);
   }
   $('hint').addEventListener('click', () => $('hint').classList.add('hidden'));
 
-  // ---------- 存檔：三格 ----------
+  // ---------- 存檔：四格（第四格是無敵格，擁有者 2026-11-24：「在我本地增設一個無敵存檔格子」） ----------
+  // 無敵是「那一格」的事：從第四格開始或接著玩的局，被咬、待在魄身邊都不加寒意、不扣護持，不會失魂；出宅不算最快紀錄。
+  // 抄到別格去的就是一般的局；別格抄進第四格，從第四格接著玩就是無敵。
   // 每一格存一局。這一局自動存在自己那格（取印、推開門閂、暫停、關頁面時）；暫停面板「存到」可以把這一刻抄進別格。
   // 別局的存檔要按兩次才蓋掉（頁面裡不能跳確認框）。瀏覽器存不了（無痕視窗等）時照樣能玩，只是存不下來。
-  const SLOTS = 3, CN = ['', '一', '二', '三'], SLOT_KEY = { KeyU: 1, KeyI: 2, KeyO: 3 }, KEY_OF = ['', 'U', 'I', 'O'];
+  const SLOTS = 4, GOD = 4, CN = ['', '一', '二', '三', '四'], SLOT_KEY = { KeyU: 1, KeyI: 2, KeyO: 3, KeyP: 4 }, KEY_OF = ['', 'U', 'I', 'O', 'P'];
   const skey = (n) => 'xieyi.deng.save.' + n;
   const lsGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
   const lsSet = (k, v) => { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } };
@@ -119,14 +122,15 @@
     armTimer = setTimeout(() => { disarm(); if (!$('start').classList.contains('hidden')) renderSlots(); if (!$('pause').classList.contains('hidden')) renderSaveRow(); }, 4000);
   }
   function disarm() { armed = { start: 0, pause: 0, restart: false }; clearTimeout(armTimer); $('btn-restart').textContent = '重來'; }
-  // 開始畫面：三格
+  // 開始畫面：四格（P 選第四格；暫停時 P 是繼續，所以第四格要用點的）
   function renderSlots() {
     const box = $('slots'); box.innerHTML = '';
     for (let n = 1; n <= SLOTS; n++) {
       const r = readSlot(n), isRun = r.kind === 'run';
       const d = document.createElement('div');
       d.className = 'slot' + (n === sel ? ' sel' : ''); d.dataset.n = n;
-      d.innerHTML = `<div class="slot-h"><kbd>${KEY_OF[n]}</kbd>第${CN[n]}格</div><div class="slot-b">${slotInfo(r)}</div>` +
+      d.className += n === GOD ? ' god' : '';
+      d.innerHTML = `<div class="slot-h"><kbd>${KEY_OF[n]}</kbd>第${CN[n]}格${n === GOD ? '<span class="godtag">無敵</span>' : ''}</div><div class="slot-b">${r.kind === 'empty' && n === GOD ? '空的<br><span class="dim">不會失魂</span>' : slotInfo(r)}</div>` +
         `<div class="slot-btns"><button class="go">${isRun ? '繼續' : '入宅'}</button>${isRun ? `<button class="fresh">${armed.start === n ? '再按一次，從頭' : '從頭'}</button>` : ''}</div>`;
       d.addEventListener('click', () => { if (sel !== n) { sel = n; disarm(); renderSlots(); } });
       d.querySelector('.go').addEventListener('click', (ev) => { ev.stopPropagation(); sel = n; startSel(); });
@@ -144,7 +148,7 @@
       const b = document.createElement('button');
       b.className = 'savebtn' + (mine ? ' mine' : ''); b.disabled = !canSave; b.dataset.slot = n;
       const sub = !canSave ? '存不了' : armed.pause === n ? '再按一次覆蓋' : mine ? '這一局' : r.kind === 'run' ? '另一局' : r.kind === 'done' ? '出宅過' : r.kind === 'bad' ? '壞了' : '空的';
-      b.innerHTML = `<span><kbd>${KEY_OF[n]}</kbd>第${CN[n]}格</span><small>${sub}</small>`;
+      b.innerHTML = `<span>${n < GOD ? `<kbd>${KEY_OF[n]}</kbd>` : ''}第${CN[n]}格${n === GOD ? '<i class="godtag">無敵</i>' : ''}</span><small>${sub}</small>`;
       b.addEventListener('click', (ev) => { ev.currentTarget.blur(); saveAs(n); });
       box.appendChild(b);
     }
@@ -155,7 +159,7 @@
     if (n === slot) { msg.textContent = saveTo(slot) ? `已存到第${CN[n]}格。` : '存不進去。'; disarm(); renderSaveRow(); return; }
     const r = readSlot(n);
     if (r.kind === 'run' && armed.pause !== n) { arm('pause', n); msg.textContent = `第${CN[n]}格是另一局的存檔，再按一次就蓋掉它。`; renderSaveRow(); return; }
-    msg.textContent = saveTo(n, newId()) ? `這一刻抄到第${CN[n]}格了。這一局之後還是自動存在第${CN[slot]}格。` : '存不進去。';
+    msg.textContent = saveTo(n, newId()) ? `這一刻抄到第${CN[n]}格了${n === GOD ? '（無敵格：從那一格接著玩就是無敵）' : slot === GOD ? '（從那一格接著玩就是一般的局）' : ''}。這一局之後還是自動存在第${CN[slot]}格。` : '存不進去。';
     disarm(); renderSaveRow();
   }
 
@@ -163,6 +167,7 @@
   function seedFromUrl() { const m = /[?&]seed=(\d+)/.exec(location.search); return m ? +m[1] : (Date.now() % 100000) | 0; }
   function enter(gg) {
     g = gg; window.DENG.g = g;
+    g.god = slot === GOD;   // 第四格：無敵
     RD.setGame(g);
     if (use3d) { try { sync3d(); } catch (e) { use3d = false; viewWhy = 'broken'; } }   // 立體版：鏡頭在人背後
     canvases(); renderView();
@@ -212,7 +217,8 @@
     $('end').classList.toggle('win', win); $('end').classList.toggle('lose', !win);
     const s = g.stats;
     let rec = '';
-    if (win) { const b = best(); if (!b || g.t < b) { lsSet('xieyi.deng.best', String(g.t)); rec = '（新紀錄）'; } }
+    if (win && g.god) rec = '（無敵格，不算紀錄）';
+    else if (win) { const b = best(); if (!b || g.t < b) { lsSet('xieyi.deng.best', String(g.t)); rec = '（新紀錄）'; } }
     if (win) lsSet(skey(slot), JSON.stringify({ done: true, id: runId, t: g.t, at: Date.now() }));   // 這一夜結束了，這一格留下出宅的紀錄
     const r = readSlot(slot), canLoad = !win && r.kind === 'run';
     $('end-seal').textContent = win ? '出' : '失';
@@ -296,7 +302,7 @@
   const HOLD = 'KeyU';
   addEventListener('keydown', (ev) => {
     if (ev.code.startsWith('Arrow') || ev.code === 'Space') ev.preventDefault();
-    if (!$('start').classList.contains('hidden')) {   // 開始畫面：U、I、O 選格，Enter 開始或繼續
+    if (!$('start').classList.contains('hidden')) {   // 開始畫面：U、I、O、P 選格（P 是無敵格），Enter 開始或繼續
       if (SLOT_KEY[ev.code]) { sel = SLOT_KEY[ev.code]; disarm(); renderSlots(); return; }
       if (ev.code === 'Enter' || ev.code === 'NumpadEnter') { ev.preventDefault(); startSel(); }
       return;
@@ -449,7 +455,7 @@
     xe.className = ex ? 'on' : 'off';
     setHTML('expose', ex ? '<b>顯</b>' + (p.lampOn ? '燈亮著，魄從遠處看得見你' : '你站在光裡，魄看得見你') : '<b>隱</b>魄要靠很近才察覺');
     if (!$('goal-name')) $('goal').innerHTML = '<span class="slotlab" id="goal-slot"></span><span class="s" id="goal-name"><i>名</i>印</span><span class="s" id="goal-breath"><i>息</i>印</span><span class="door" id="goal-door"></span>';
-    $('goal-slot').textContent = `第${CN[slot]}格`;
+    $('goal-slot').textContent = `第${CN[slot]}格${g.god ? '・無敵' : ''}`;
     for (const [id, got] of [['goal-name', g.seals.name], ['goal-breath', g.seals.breath]]) {
       const el = $(id), was = el.classList.contains('got');
       el.classList.toggle('got', got);

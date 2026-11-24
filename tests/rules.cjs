@@ -518,5 +518,22 @@ const wallRoom = (set) => { for (let y = 1; y <= 7; y++) set(10, y, '#'); };
   ok('超出範圍的數值收回範圍內', over && over.p.chill === 100 && over.p.ink === R.P.inkMax && over.p.talismans === 0, over && [over.p.chill, over.p.ink, over.p.talismans]);
 }
 
+// ---------- 無敵格（第四格，擁有者 2026-11-24：「在我本地增設一個無敵存檔格子」） ----------
+{
+  const trial = (god) => {
+    const g = mkArena(); g.god = god;
+    const a0 = g.p.armor;
+    put(g, g.pos[0], g.p.x + 0.8, g.p.y, 'chase');
+    run(g, 15, {});   // 站著不動，讓魄一直撲、一直待在身邊
+    return { bites: g.stats.bites, chill: Math.round(g.p.chill), armor: g.p.armor, a0, state: g.state, knock: g.stats.bites > 0 };
+  };
+  const plain = trial(false), god = trial(true);
+  ok('無敵格：照樣被咬，但不扣護持、不加寒意，不會失魂', god.bites > 0 && god.chill === 0 && god.armor === god.a0 && god.state === 'play', god);
+  ok('一般的格同樣的情形會扣護持、加寒意（對照）', plain.bites > 0 && (plain.armor < plain.a0 || plain.chill > 0), plain);
+  const g = mk(); g.god = true; g.p.chill = 40;
+  const s0 = g.serialize(), back = ENGINE.restore(s0);
+  ok('無敵是那一格的事，不寫進存檔（讀回來是一般的局，由介面看格子再設）', back && !back.god && back.p.chill === 40);
+}
+
 const s = summary();
 process.exit(s.fail ? 1 : 0);
