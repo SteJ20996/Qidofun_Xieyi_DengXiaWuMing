@@ -184,7 +184,8 @@
 
   function emit(g, type, o) { const e = Object.assign({ type, t: g.t }, o || {}); g.events.push(e); if (g.events.length > 400) g.events.splice(0, g.events.length - 400); return e; }
   function hint(g, key, o) { if (g.hints.has(key)) return; g.hints.add(key); emit(g, 'hint', Object.assign({ key }, o || {})); }
-  // 無敵格（g.god，擁有者 2026-11-24 要的第四格）：寒意只退不加，所以不會失魂
+  // 無敵格（g.god，擁有者 2026-11-24 要的第四格）：寒意只退不加，所以不會失魂；
+  // 劍、鈴沒有冷卻，火符、書墨用不完（擁有者：「無敵版本所有工具無限使用沒有cd」）。起手、讀咒要的時間照舊（那是動作，不是冷卻）
   function addChill(g, amt) { if (g.god && amt > 0) return; const p = g.p; p.chill = clamp(p.chill + amt, 0, R.P.chillMax); if (p.chill > g.stats.maxChill) g.stats.maxChill = p.chill; }
   const tangible = (e) => e.state !== 'gone';
   const awake = (e) => e.state !== 'gone' && e.state !== 'dormant';
@@ -492,7 +493,7 @@
   function tryRead(g, spell, target) {
     const p = g.p, B = R.BOOK[spell];
     if (p.reading || p.act || p.taking) { emit(g, 'busy', { what: spell }); return; }
-    if (p.ink < B.cost) { emit(g, 'noInk', { spell }); return; }
+    if (!g.god && p.ink < B.cost) { emit(g, 'noInk', { spell }); return; }   // 無敵格：墨用不完
     if (nearPo(g)) { emit(g, 'readBlocked', { spell }); return; }
     let spot = null;
     if (spell === 'seal') { const f = findDoor(g); if (!f.ok) { emit(g, 'sealNoDoor', { why: f.why }); return; } spot = f.door; }
@@ -517,14 +518,15 @@
       g.stats.lures++;
       emit(g, 'borrowDone', { x: r.spot.x, y: r.spot.y });
     }
-    p.ink -= B.cost; g.stats.reads++;
+    if (!g.god) p.ink -= B.cost;
+    g.stats.reads++;
   }
   function tryBell(g) {
     const p = g.p;
     if (p.bellCD > 1e-6) { emit(g, 'cooldown', { what: 'bell', left: p.bellCD }); return; }
     if (p.reading) cancelRead(g, 'bell');   // 先合書（不耗墨）再搖鈴
     if (p.taking) cancelTake(g, 'bell');
-    p.bellCD = R.BELL.cd; g.stats.bells++;
+    p.bellCD = g.god ? 0 : R.BELL.cd; g.stats.bells++;   // 無敵格：沒有冷卻
     emit(g, 'bell', { x: p.x, y: p.y });
     for (const e of g.pos) {
       if (!tangible(e)) continue;
@@ -564,15 +566,15 @@
     if (p.reading || p.taking) { emit(g, 'busy', { what: 'sword' }); return; }
     if (p.act) return;
     if (p.swordCD > 1e-6) { emit(g, 'cooldown', { what: 'sword', left: p.swordCD }); return; }
-    p.swordCD = R.SWORD.cd;
+    p.swordCD = g.god ? 0 : R.SWORD.cd;   // 無敵格：沒有冷卻（起手那一下照舊）
     p.act = { kind: 'sword', t: R.SWORD.windup, dir: aimFor(g, 'sword') };   // 方向在起手時定，位置用出手那一刻的
   }
   function tryFire(g) {
     const p = g.p;
     if (p.reading || p.taking) { emit(g, 'busy', { what: 'fire' }); return; }
     if (p.act) return;
-    if (p.talismans <= 0) { emit(g, 'noTalisman'); return; }
-    p.talismans--;
+    if (!g.god && p.talismans <= 0) { emit(g, 'noTalisman'); return; }
+    if (!g.god) p.talismans--;   // 無敵格：火符用不完
     p.act = { kind: 'fire', t: R.FIRE.windup, dir: aimFor(g, 'fire') };
   }
   function swordRelease(g, dir) {

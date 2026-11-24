@@ -141,7 +141,8 @@ button.big:hover { background: var(--red); border-color: var(--red); }
 .panel .row button:not(.big) { font: 17px var(--font); padding: 6px 18px; margin: 10px 4px 6px; background: transparent; border: 1.5px solid var(--ink); border-radius: 4px; cursor: pointer; color: var(--ink); }
 /* 三格存檔 */
 .slots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 14px 0 6px; }
-/* 第四格：無敵格 */
+/* 第四格：無敵格（火符、墨用不完時寫「∞」） */
+.inf { font: 15px/1 var(--font); color: #8a6a1c; font-style: normal; }
 .godtag { display: inline-block; font: normal 12px/1.5 var(--font); font-style: normal; color: #f7efe0; background: #8a6a1c; border-radius: 3px; padding: 0 5px; margin-left: 6px; letter-spacing: 1px; vertical-align: middle; }
 .slot.god { border-color: rgba(138,106,28,.6); background: rgba(232,200,96,.14); position: relative; }
 .slot.god .godtag { position: absolute; top: 7px; right: 7px; margin: 0; }

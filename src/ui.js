@@ -258,6 +258,7 @@
   function handle(evs) {
     for (const e of evs) {
       RD.event(e);
+      if (use3d && RENDER3D.mode === 'play') RENDER3D.event(e);   // 立體版：劍、鈴、符的立體效果
       switch (e.type) {
         case 'hint': showHint(e.key); break;
         case 'windup': SFX.play('hiss', e.dist, e.dx); if (e.visible) log('魄在蓄撲，退出紅圈', 'warn'); break;
@@ -490,17 +491,19 @@
     $('t-sword').style.setProperty('--cd', p.swordCD / R.SWORD.cd);
     $('t-bell').style.setProperty('--cd', p.bellCD / R.BELL.cd);
     if (prev.bell > 0 && p.bellCD <= 0) flash($('t-bell'), 'ready', 800);   // 鈴好了：亮一下
-    setHTML('fire-n', '<b class="strip"></b>'.repeat(p.talismans) || '<span class="none">無</span>');
-    $('t-fire').title = `火符：還有 ${p.talismans} 張。朝對準的方向丟出去，碰到第一隻魄或牆就燒起來。`;
-    setHTML('ink-n', '墨' + [...Array(R.P.inkMax)].map((_, k) => `<i class="drop${k < p.ink ? ' on' : ''}"></i>`).join(''));
-    if (p.ink < prev.ink) flash($('ink-n').children[p.ink], 'drip', 700);
+    // 無敵格：火符、墨用不完，寫成「∞」
+    setHTML('fire-n', g.god ? '<span class="inf">∞</span>' : '<b class="strip"></b>'.repeat(p.talismans) || '<span class="none">無</span>');
+    $('t-fire').title = g.god ? '火符：無敵格，用不完。' : `火符：還有 ${p.talismans} 張。朝對準的方向丟出去，碰到第一隻魄或牆就燒起來。`;
+    setHTML('ink-n', '墨' + (g.god ? '<span class="inf">∞</span>' : [...Array(R.P.inkMax)].map((_, k) => `<i class="drop${k < p.ink ? ' on' : ''}"></i>`).join('')));
+    if (!g.god && p.ink < prev.ink) flash($('ink-n').children[p.ink], 'drip', 700);
     const door = g.findDoor();
-    $('pg-seal').classList.toggle('off', !door.ok || p.ink <= 0);
-    $('pg-borrow').classList.toggle('off', p.ink <= 0);
+    const noInk = !g.god && p.ink <= 0;
+    $('pg-seal').classList.toggle('off', !door.ok || noInk);
+    $('pg-borrow').classList.toggle('off', noInk);
     $('pg-borrow').classList.toggle('reading', !!(p.reading && p.reading.spell === 'borrow'));
     $('pg-seal').classList.toggle('reading', !!(p.reading && p.reading.spell === 'seal'));
     const reading = !!p.reading;
-    $('t-sword').classList.toggle('off', reading); $('t-fire').classList.toggle('off', reading || p.talismans <= 0);
+    $('t-sword').classList.toggle('off', reading); $('t-fire').classList.toggle('off', reading || (!g.god && p.talismans <= 0));
     $('t-bell').classList.toggle('busy', reading);
     $('t-lamp').classList.toggle('covered', !p.lampOn); $('lamp-s').textContent = p.lampOn ? '點著' : '掩著';
     const fpNow = use3d && fpv && RENDER3D.mode === 'play';

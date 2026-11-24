@@ -544,6 +544,24 @@ const wallRoom = (set) => { for (let y = 1; y <= 7; y++) set(10, y, '#'); };
   const plain = trial(false), god = trial(true);
   ok('無敵格：照樣被咬，但不扣護持、不加寒意，不會失魂', god.bites > 0 && god.chill === 0 && god.armor === god.a0 && god.state === 'play', god);
   ok('一般的格同樣的情形會扣護持、加寒意（對照）', plain.bites > 0 && (plain.armor < plain.a0 || plain.chill > 0), plain);
+  { // 無敵格的工具：劍、鈴沒有冷卻，火符、墨用不完
+    const t = mkArena(); t.god = true; const p = t.p, f0 = p.talismans, i0 = p.ink;
+    let swings = 0, bells = 0, throws = 0;
+    for (let k = 0; k < 6; k++) {
+      const once = (key) => (gg, i) => ({ aim: 0, press: i === 0 ? { [key]: true } : {} });   // 按一下就放
+      run(t, R.SWORD.windup + R.STEP * 3, once('sword'));
+      run(t, R.STEP, once('bell'));
+      run(t, R.FIRE.windup + R.STEP * 3, once('fire'));
+      for (const e of t.drain()) { if (e.type === 'swing') swings++; if (e.type === 'bell') bells++; if (e.type === 'fireThrow') throws++; }
+    }
+    ok('無敵格：劍、鈴連著用沒有冷卻，火符用不完', swings === 6 && bells === 6 && throws === 6 && p.talismans === f0 && p.swordCD === 0 && p.bellCD === 0, { swings, bells, throws, tal: p.talismans });
+    const r = mkArena(); r.god = true; put(r, r.pos[0], 2, 2, 'recover');   // 讀咒：魄在遠處（鈴聲會把魄引來，貼身就不能讀，那是規則）
+    const ink0 = r.p.ink;
+    for (let k = 0; k < 5; k++) { run(r, R.STEP, { press: { read1: true } }); run(r, R.BOOK.borrow.read + 0.1, {}); }
+    ok('無敵格：書墨用不完（連讀五次借火）', r.stats.reads === 5 && r.p.ink === ink0, { reads: r.stats.reads, ink: r.p.ink, ink0 });
+    const n = mkArena(); run(n, R.STEP, { press: { bell: true } }); run(n, R.STEP, { press: { bell: true } });
+    ok('一般的格：鈴有冷卻（對照）', n.stats.bells === 1 && n.p.bellCD > 0);
+  }
   const g = mk(); g.god = true; g.p.chill = 40;
   const s0 = g.serialize(), back = ENGINE.restore(s0);
   ok('無敵是那一格的事，不寫進存檔（讀回來是一般的局，由介面看格子再設）', back && !back.god && back.p.chill === 40);

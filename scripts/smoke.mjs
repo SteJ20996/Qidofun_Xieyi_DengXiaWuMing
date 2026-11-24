@@ -340,6 +340,13 @@ try {
   await gp.waitForFunction(() => DENG.g.stats.bites >= 2, null, { timeout: 15000 });
   const g1 = await gev(() => ({ bites: DENG.g.stats.bites, chill: Math.round(DENG.g.p.chill), armor: DENG.g.p.armor, st: DENG.g.state }));
   ok('無敵格：被咬兩次，寒意 0、護持不少、照樣在玩', g1.bites >= 2 && g1.chill === 0 && g1.armor === 54 && g1.st === 'play', g1);
+  // 工具用不完、沒有冷卻（擁有者 2026-11-24：「無敵版本所有工具無限使用沒有cd」）
+  await gev(() => { const g = DENG.g; g.pos.forEach((e, i) => { g.place(e, 2.5 + i, 25.5, 'recover'); e.stateT = 999; }); });
+  const t0 = await gev(() => ({ tal: DENG.g.p.talismans, fires: DENG.g.stats.fires, bells: DENG.g.stats.bells }));
+  for (let k = 0; k < 4; k++) { await gp.keyboard.press('KeyL'); await gw(250); }
+  await gp.keyboard.press('KeyK'); await gw(80); await gp.keyboard.press('KeyK'); await gw(200);
+  const t1 = await gev(() => ({ tal: DENG.g.p.talismans, fires: DENG.g.stats.fires, bells: DENG.g.stats.bells, bellCD: DENG.g.p.bellCD, fireN: document.getElementById('fire-n').textContent, ink: document.getElementById('ink-n').textContent }));
+  ok('無敵格：火符連丟四張還是一樣多、鈴連搖兩下沒有冷卻，畫面寫 ∞', t1.fires - t0.fires === 4 && t1.tal === t0.tal && t1.bells - t0.bells === 2 && t1.bellCD === 0 && t1.fireN.includes('∞') && t1.ink.includes('∞'), { t0, t1 });
   await gev(() => { const g = DENG.g; g.pos.forEach((e, i) => { g.place(e, 2.5 + i, 25.5, 'recover'); e.stateT = 999; }); g.seals.name = g.seals.breath = true; g.altars.forEach((a) => { a.taken = true; }); g.exitReady = true; g.tp(20.0, 26.4); });
   await gp.keyboard.down('KeyU'); await gw(1750); await gp.keyboard.up('KeyU');
   await gp.keyboard.down('KeyS'); await gw(600); await gp.keyboard.up('KeyS'); await gw(300);
@@ -402,6 +409,13 @@ try {
   await tp.mouse.move(900, 300); await tp.mouse.down(); await tp.mouse.up(); await tp.waitForTimeout(400);
   const sw1 = await tp.evaluate(() => ({ n: DENG.g.stats.swordHits + DENG.g.stats.swordMiss, aim: document.getElementById('aimmode').textContent }));
   ok('立體版：滑鼠左鍵揮劍、改成跟著滑鼠對準', sw1.n === sw0 + 1 && sw1.aim.includes('滑鼠'), { sw0, sw1 });
+  // 劍、鈴、符的立體效果（2026-11-24）：搖鈴有效果；火符炸開有火球與照亮四周的一閃；過一會兒全部收掉
+  await tp.keyboard.press('KeyK');
+  const bellFx = await tp.waitForFunction(() => window.RENDER3D.fxCount > 0, null, { timeout: 5000 }).then(() => true).catch(() => false);
+  await tp.evaluate(() => window.RENDER3D.event({ type: 'fireBoom', x: DENG.g.p.x, y: DENG.g.p.y - 2, hit: [] }));
+  const boomFx = await tp.evaluate(() => ({ fx: window.RENDER3D.fxCount, flash: window.RENDER3D.flash }));
+  const cleared = await tp.waitForFunction(() => window.RENDER3D.fxCount === 0 && window.RENDER3D.flash === 0, null, { timeout: 20000 }).then(() => true).catch(() => false);
+  ok('立體版：搖鈴、火符炸開有立體效果（火球、火、照亮四周），過一會兒全部收掉', bellFx && boomFx.fx > 10 && boomFx.flash > 0.3 && cleared, { bellFx, boomFx, cleared });
   // 蓄撲：引擎照舊判定，立體版看得到（字在上面那層、紅圈在地板）
   await tp.evaluate(() => { const g = DENG.g; g.tp(19.5, 3.5); const e = g.pos[0]; g.place(e, 21.0, 3.5, 'chase'); e.lastKnown = { x: 19.5, y: 3.5 }; e.stateT = 0; });
   await tp.waitForFunction(() => DENG.g.pos[0].state === 'windup', null, { timeout: 8000 });
