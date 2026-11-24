@@ -257,10 +257,10 @@ const doorRoom = (set) => { for (let y = 1; y < 15; y++) set(5, y, '#'); set(5, 
 }
 { // 取第一印，另一隻魄醒來；取兩印，大門開
   const g = mk(), p = g.p, a = g.altars.find((q) => q.key === 'name');
-  g.tp(a.x + 0.8, a.y); run(g, R.TAKE.t + 0.05, { hold: { take: true } });
+  g.tp(a.x + 0.85, a.y); run(g, R.TAKE.t + 0.05, { hold: { take: true } });
   ok('取第一印：補給、另一隻魄醒來', g.seals.name && g.pos[1].state !== 'dormant' && p.talismans === 4 && p.ink === 3, { seals: g.seals, s2: g.pos[1].state });
   const b = g.altars.find((q) => q.key === 'breath');
-  g.tp(b.x - 0.8, b.y); run(g, R.TAKE.t + 0.05, { hold: { take: true } });
+  g.tp(b.x - 0.85, b.y); run(g, R.TAKE.t + 0.05, { hold: { take: true } });
   ok('取兩印：可以推門，但門還關著', g.exitReady && !g.exitOpen);
   g.tp(20, 26.4); run(g, 0.5, { mx: 0, my: 1 });
   ok('沒推門閂，走不出去', g.state === 'play' && g.p.y < 27, +g.p.y.toFixed(2));
@@ -454,7 +454,7 @@ const wallRoom = (set) => { for (let y = 1; y <= 7; y++) set(10, y, '#'); };
     // 先玩一陣：把人放到魄附近、偶爾取印，製造各種狀態
     const f0 = floors[Math.floor(rnd() * floors.length)]; g.tp(f0[0], f0[1]);
     if (k % 3 === 0) { const e = g.pos[0]; g.place(e, g.p.x + 1.1, g.p.y, 'chase'); e.lastKnown = { x: g.p.x, y: g.p.y }; }
-    if (k % 4 === 1) { const a = g.altars[k % 2]; g.tp(a.x + 0.7, a.y); }
+    if (k % 4 === 1) { const a = g.altars[k % 2]; g.tp(a.x + 0.85, a.y); }
     const s0 = script(k);
     run(g, 1 + (k % 5) * 0.7, (gg, i) => s0(i));
     for (const e of g.pos) kinds.add(e.state);
@@ -477,8 +477,8 @@ const wallRoom = (set) => { for (let y = 1; y <= 7; y++) set(10, y, '#'); };
     '魄正在蓄撲': (g) => { const e = g.pos[0]; g.tp(19.5, 3.5); g.place(e, 20.2, 3.5, 'chase'); e.lastKnown = { x: 19.5, y: 3.5 }; run(g, 0.2, {}, () => e.state === 'windup'); run(g, 0.1, {}); return e.state === 'windup'; },
     '讀借火讀到一半': (g) => { g.tp(14.5, 13.5); run(g, R.STEP, { aim: 0, press: { read1: true } }); run(g, 0.5, {}); return !!g.p.reading; },
     '讀封戶讀到一半': (g) => { g.tp(18.5, 17.4); run(g, R.STEP, { press: { read2: true } }); run(g, 0.4, {}); return !!g.p.reading && g.p.reading.spell === 'seal'; },
-    '取印取到一半': (g) => { const a = g.altars[0]; g.tp(a.x + 0.7, a.y); run(g, 0.5, { hold: { take: true } }); return !!g.p.taking; },
-    '推門閂推到一半': (g) => { for (const a of g.altars) { g.tp(a.x + 0.7, a.y); run(g, 1.1, { hold: { take: true } }); } for (const e of g.pos) g.place(e, 2.5 + e.id, 2.5, 'recover'), (e.stateT = 99); g.tp(20, 26.4); run(g, 0.7, { hold: { take: true } }); return !!(g.p.taking && g.p.taking.gate); },
+    '取印取到一半': (g) => { const a = g.altars[0]; g.tp(a.x + 0.85, a.y); run(g, 0.5, { hold: { take: true } }); return !!g.p.taking; },
+    '推門閂推到一半': (g) => { for (const a of g.altars) { g.tp(a.x + 0.85, a.y); run(g, 1.1, { hold: { take: true } }); } for (const e of g.pos) g.place(e, 2.5 + e.id, 2.5, 'recover'), (e.stateT = 99); g.tp(20, 26.4); run(g, 0.7, { hold: { take: true } }); return !!(g.p.taking && g.p.taking.gate); },
     '火符飛在半空': (g) => { g.tp(14.5, 13.5); run(g, 0.2, { aim: 0, press: { fire: true } }); return g.shots.length > 0; },
     '魄被擊退、還在燒': (g) => { const e = g.pos[0]; g.tp(19.5, 3.5); g.place(e, 20.5, 3.5, 'recover'); e.stateT = 99; e.burnT = 2; run(g, R.SWORD.windup + R.STEP * 3, { aim: 0, press: { sword: true } }); return e.kt > 0 && e.burnT > 0; },
     '廊口封著、魄在封印格裡': (g) => { const e = g.pos[0]; g.place(e, 19.5, 18.5, 'investigate'); e.lastKnown = { x: 19.5, y: 21.5 }; g.sealed.set(18 * g.m.W + 19, { id: 77, x: 19, y: 18, t: 6, exempt: new Set([e.id]) }); return g.sealed.size === 1; },
@@ -516,6 +516,19 @@ const wallRoom = (set) => { for (let y = 1; y <= 7; y++) set(10, y, '#'); };
   ok('加腳印以前的存檔也讀得回來（沒有腳印）', old && old.prints.length === 0 && old.pos.every((e) => e.trail === 0));
   const over = ENGINE.restore(mut((d) => { d.p.chill = 500; d.p.ink = 9; d.p.talismans = -3; }));
   ok('超出範圍的數值收回範圍內', over && over.p.chill === 100 && over.p.ink === R.P.inkMax && over.p.talismans === 0, over && [over.p.chill, over.p.ink, over.p.talismans]);
+}
+
+// ---------- 印臺、燭臺是實心的矮家具（2026-11-24，立體版看得到它們，就要撞得到） ----------
+{
+  const g = mkArena((set) => { set(8, 5, '1'); set(5, 8, 'c'); }), p = g.p;
+  run(g, 1.2, { mx: 0, my: -1 });   // 從 (8.5, 8.5) 往北走向印臺 (8, 5)
+  const stopY = p.y;
+  g.tp(8.5, 8.5); run(g, 1.2, { mx: -1, my: 0 });   // 往西走向燭臺 (5, 8)
+  const stopX = p.x;
+  ok('印臺、燭臺擋住走路：停在家具外面一個身子寬', Math.abs(stopY - (6 + R.P.r)) < 0.03 && Math.abs(stopX - (6 + R.P.r)) < 0.03, { stopY: +stopY.toFixed(3), stopX: +stopX.toFixed(3) });
+  ok('印臺、燭臺不擋視線與光（矮家具）', g.sightLine(8.5, 7, 8.5, 3.5) === 'clear' && g.sightLine(6.6, 8.5, 3, 8.5) === 'clear');
+  const a = g.altars[0]; g.tp(a.x, a.y + 0.85); run(g, R.TAKE.t + 0.05, { hold: { take: true } });
+  ok('站在印臺邊照樣取得到印', a.taken);
 }
 
 // ---------- 第一人稱（2026-11-24）：自動對準只對面前的魄 ----------

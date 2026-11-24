@@ -15,6 +15,7 @@
   const RM = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   let THREE, renderer, scene, camera, cv, fxCv = null, g = null, t = 0, mode = 'attract';
   let lantern, lanternLight, lanternGlow, candles = [], poSprites = [], screens = [], doors = null, motes, moteData = [];
+  let sealTex = null, sealPanels = [];   // 封戶：廊口立起來的一張大符紙（引擎裡封住的廊口擋住整格）
   let walls = [], wallMesh = null, altars3 = [], wellMats = [], lureSprites = [], shotSprites = [], player = null, floorCv = null, floorTex = null, shadowPlane = null, flameTex = null, fireGlyph = null;
   let cam = null;   // 開始畫面的鏡頭：位置、看的點、朝向（平滑跟著燈）
   const view = { yaw: -Math.PI / 2, x: 0, y: 0, z: 0, lx: 0, lz: 0, ready: false };   // 立體版的鏡頭：yaw 是人的背後朝哪個方向看
@@ -64,6 +65,56 @@
     x.strokeStyle = 'rgba(40,28,18,.9)'; x.lineWidth = 7; x.strokeRect(3, 3, 122, 122);
     return c;
   }
+  // 牆的側面：墨色灰牆，刷痕；牆腳木踢腳、牆頭一道樑
+  function plasterCanvas() {
+    const c = document.createElement('canvas'); c.width = 128; c.height = 192;
+    const x = c.getContext('2d');
+    x.fillStyle = '#3d352d'; x.fillRect(0, 0, 128, 192);
+    for (let k = 0; k < 90; k++) { x.fillStyle = `rgba(${Math.random() < 0.5 ? '20,16,12' : '90,80,68'},${0.05 + Math.random() * 0.08})`; x.fillRect(Math.random() * 128, Math.random() * 170, 2 + Math.random() * 10, 10 + Math.random() * 50); }
+    x.fillStyle = '#24190f'; x.fillRect(0, 168, 128, 24);   // 踢腳
+    x.fillStyle = 'rgba(120,90,60,.25)'; x.fillRect(0, 168, 128, 2);
+    x.fillStyle = '#2a1f15'; x.fillRect(0, 0, 128, 12);     // 樑
+    return c;
+  }
+  // 牆頂：一排排的瓦
+  function roofCanvas() {
+    const c = document.createElement('canvas'); c.width = 128; c.height = 128;
+    const x = c.getContext('2d');
+    x.fillStyle = '#26272b'; x.fillRect(0, 0, 128, 128);
+    for (let row = 0; row < 8; row++) for (let k = 0; k < 4; k++) {
+      const cx = k * 32 + (row % 2) * 16 + 16, cy = row * 16 + 12;
+      const gr = x.createLinearGradient(cx - 14, 0, cx + 14, 0);
+      gr.addColorStop(0, '#1c1d21'); gr.addColorStop(0.5, '#43454c'); gr.addColorStop(1, '#1c1d21');
+      x.fillStyle = gr; x.beginPath(); x.ellipse(cx, cy, 14, 9, 0, Math.PI, 0); x.lineTo(cx + 14, cy + 4); x.lineTo(cx - 14, cy + 4); x.closePath(); x.fill();
+    }
+    return c;
+  }
+  // 井欄的石頭
+  function stoneCanvas() {
+    const c = document.createElement('canvas'); c.width = 128; c.height = 64;
+    const x = c.getContext('2d');
+    x.fillStyle = '#4a453e'; x.fillRect(0, 0, 128, 64);
+    x.strokeStyle = 'rgba(20,18,15,.6)'; x.lineWidth = 2;
+    for (let row = 0; row < 2; row++) for (let k = 0; k < 4; k++) { x.strokeRect(k * 32 + (row % 2) * 16 - 16, row * 32 + 1, 32, 31); }
+    for (let k = 0; k < 60; k++) { x.fillStyle = `rgba(${Math.random() < 0.5 ? '20,18,15' : '110,104,94'},.15)`; x.fillRect(Math.random() * 128, Math.random() * 64, 2 + Math.random() * 4, 2 + Math.random() * 3); }
+    return c;
+  }
+  function skyCanvas() {
+    const c = document.createElement('canvas'); c.width = 4; c.height = 256;
+    const x = c.getContext('2d'), gr = x.createLinearGradient(0, 0, 0, 256);
+    gr.addColorStop(0, '#1b2030'); gr.addColorStop(0.45, '#11131a'); gr.addColorStop(0.7, '#0b0a09'); gr.addColorStop(1, '#0b0a09');
+    x.fillStyle = gr; x.fillRect(0, 0, 4, 256);
+    return c;
+  }
+  // 封戶：一張寫著「封」的大符紙
+  function sealCanvas() {
+    const c = document.createElement('canvas'); c.width = 128; c.height = 160;
+    const x = c.getContext('2d');
+    x.fillStyle = '#f0deb0'; x.fillRect(0, 0, 128, 160);
+    x.strokeStyle = '#b4392a'; x.lineWidth = 6; x.strokeRect(6, 6, 116, 148);
+    x.fillStyle = '#b4392a'; x.font = `96px ${FONT}`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('封', 64, 84);
+    return c;
+  }
   function radial(color) {
     const c = document.createElement('canvas'); c.width = c.height = 64;
     const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -78,6 +129,7 @@
     renderer.setPixelRatio(Math.min(1.5, root.devicePixelRatio || 1));
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.2;   // 亮處不死白、暗處留層次（地板那一層不套，平面版的樣子照舊）
     camera = new THREE.PerspectiveCamera(42, 1, 0.1, 90);
     resize();
   }
@@ -111,6 +163,7 @@
     g = game; mode = md === 'play' ? 'play' : 'attract';
     candles = []; poSprites = []; screens = []; doors = null; cam = null; walls = []; altars3 = []; wellMats = []; lureSprites = []; shotSprites = []; player = null; shadowPlane = null;
     fx3 = []; parts = []; flashLight = null; kit = null;   // 劍鈴符的立體效果：舊的跟著舊宅子一起放掉
+    sealPanels = []; sealTex = null;
     view.ready = false; view.yaw = g.p.aim;
     while (camera.children.length) camera.remove(camera.children[0]);   // 第一人稱拿在手上的燈與劍：重蓋時拿掉舊的
     if (camera.parent) camera.parent.remove(camera);   // 鏡頭還掛在舊宅子上的話拿下來，不然新宅子裡它不會跟著動
@@ -118,14 +171,14 @@
     const play = mode === 'play', m = g.m, W = m.W, H = m.H;
     lensFor(); resize();
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0b0a09);
+    scene.background = tex(skyCanvas());   // 牆頭上面是夜空：上面一點點靛青，往下沉到墨色
     scene.fog = new THREE.FogExp2(0x0b0a09, play ? 0.03 : 0.065);
     scene.add(new THREE.AmbientLight(play ? 0xc8c0b0 : 0x1c2232, play ? 0.75 : 0.3));
     // 地板。開始畫面：2D 的宣紙底圖，照燈光亮。立體版：每一幀由 2D 畫地上那一層（墨、光、腳印、紅圈……），不再受燈光影響
     if (play) {
       floorCv = document.createElement('canvas'); floorCv.width = W * FS; floorCv.height = H * FS;
       floorTex = tex(floorCv);
-      const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshBasicMaterial({ map: floorTex }));
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshBasicMaterial({ map: floorTex, toneMapped: false }));
       floor.rotation.x = -Math.PI / 2; floor.position.set(W / 2, 0, H / 2);
       scene.add(floor);
       // 手燈讓牆投在地上的影子（關影子那一級就不畫）
@@ -137,61 +190,76 @@
       floor.rotation.x = -Math.PI / 2; floor.position.set(W / 2, 0, H / 2); floor.receiveShadow = true;
       scene.add(floor);
     }
-    // 牆：墨色的塊，深淺稍微不一，像墨暈
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (m.at(x, y) === T.WALL) walls.push({ x, y, i: y * W + x, k: 0.78 + Math.random() * 0.3 });
-    wallMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, WALL_H, 1), new THREE.MeshStandardMaterial({ color: 0x2b241d, roughness: 0.92 }), walls.length);
+    // ---- 2026-11-24 擁有者：「三維模式下能不能優化一下整體美術和撞擊空間盒子」 ----
+    // 立起來的東西照引擎擋住的範圍蓋：紙屏擋整格就蓋成整格厚的紙屏、井欄是 2×2 的方井、印臺與燭臺是實心的矮家具、
+    // 大門貼著門裡那一面。看到撞得到的地方，就是撞得到的地方。
+    // 牆：墨色的灰牆，牆腳一道木踢腳、牆頭一道樑；牆頂鋪瓦。深淺照引擎的「看得見」（instanceColor 乘在貼圖上）
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (m.at(x, y) === T.WALL) walls.push({ x, y, i: y * W + x, k: 0.82 + Math.random() * 0.26 });
+    const wallSide = new THREE.MeshStandardMaterial({ map: tex(plasterCanvas()), roughness: 0.93 }), wallTop = new THREE.MeshStandardMaterial({ map: tex(roofCanvas()), roughness: 0.8 });
+    wallMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, WALL_H, 1), [wallSide, wallSide, wallTop, wallSide, wallSide, wallSide], walls.length);
     const o = new THREE.Object3D(), col = new THREE.Color();
-    walls.forEach((q, i) => { o.position.set(q.x + 0.5, WALL_H / 2, q.y + 0.5); o.updateMatrix(); wallMesh.setMatrixAt(i, o.matrix); wallMesh.setColorAt(i, col.setRGB(q.k, q.k * 0.96, q.k * 0.9)); });
+    walls.forEach((q, i) => { o.position.set(q.x + 0.5, WALL_H / 2, q.y + 0.5); o.updateMatrix(); wallMesh.setMatrixAt(i, o.matrix); wallMesh.setColorAt(i, col.setRGB(q.k, q.k * 0.97, q.k * 0.93)); });
     wallMesh.castShadow = true; wallMesh.receiveShadow = true;
     scene.add(wallMesh);
-    // 紙屏：格子紙，半透；被哪一邊的光照到都會亮（亮度照引擎的光），後面的魄看得到影子
-    const lat = tex(latticeCanvas());
+    // 紙屏：引擎裡紙屏擋住整格，所以蓋成 0.8 格厚的紙屏（兩面糊紙、木頭的頂與邊；平面版也畫 0.76 格寬）。
+    // 被哪一邊的光照到都會亮（亮度照引擎的光），後面的魄看得到影子
+    const lat = tex(latticeCanvas()), SCR_T = 0.8;
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       if (m.at(x, y) !== T.SCREEN) continue;
-      const horiz = m.at(x - 1, y) === T.SCREEN || m.at(x + 1, y) === T.SCREEN;
-      const mat = new THREE.MeshStandardMaterial({ map: lat, transparent: true, opacity: 0.86, side: THREE.DoubleSide, roughness: 1, emissive: new THREE.Color(0xffb565), emissiveMap: lat, emissiveIntensity: 0 });
-      const mesh = new THREE.Mesh(new THREE.BoxGeometry(horiz ? 1 : 0.1, SCREEN_H, horiz ? 0.1 : 1), mat);
-      mesh.position.set(x + 0.5, SCREEN_H / 2, y + 0.5); mesh.receiveShadow = true;
-      scene.add(mesh); screens.push({ mesh, i: y * W + x });
+      const horiz = m.at(x - 1, y) === T.SCREEN || m.at(x + 1, y) === T.SCREEN || !(m.at(x, y - 1) === T.SCREEN || m.at(x, y + 1) === T.SCREEN);
+      const paper = new THREE.MeshStandardMaterial({ map: lat, transparent: true, opacity: 0.88, side: THREE.DoubleSide, roughness: 1, emissive: new THREE.Color(0xffb565), emissiveMap: lat, emissiveIntensity: 0 });
+      const wood = new THREE.MeshStandardMaterial({ color: 0x4a2f1c, roughness: 0.8 });
+      const mats = horiz ? [wood, wood, wood, wood, paper, paper] : [paper, paper, wood, wood, wood, wood];
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(horiz ? 1 : SCR_T, SCREEN_H, horiz ? SCR_T : 1), mats);
+      mesh.position.set(x + 0.5, SCREEN_H / 2, y + 0.5); mesh.receiveShadow = true; mesh.castShadow = true;
+      scene.add(mesh); screens.push({ mesh, paper, wood, i: y * W + x });
     }
-    // 井
+    // 井：引擎裡井欄是 2×2 的一塊，所以蓋成方井：石井欄圍一圈、裡面黑水，上面一個木頭的「井」字架
     const wl = [];
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (m.at(x, y) === T.LOW) wl.push([x, y]);
     if (wl.length) {
-      const cx = wl.reduce((a, q) => a + q[0], 0) / wl.length + 0.5, cz = wl.reduce((a, q) => a + q[1], 0) / wl.length + 0.5;
-      const rimM = new THREE.MeshStandardMaterial({ color: 0x3a332c, roughness: 0.95, side: THREE.DoubleSide }), topM = new THREE.MeshStandardMaterial({ color: 0x4a423a, roughness: 0.9 });
-      const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 1.0, 0.45, 28, 1, true), rimM);
-      rim.position.set(cx, 0.225, cz); rim.castShadow = true; rim.receiveShadow = true; scene.add(rim);
-      const top = new THREE.Mesh(new THREE.RingGeometry(0.62, 0.98, 28), topM);
-      top.rotation.x = -Math.PI / 2; top.position.set(cx, 0.451, cz); scene.add(top);
-      const hole = new THREE.Mesh(new THREE.CircleGeometry(0.62, 28), new THREE.MeshBasicMaterial({ color: 0x050404 }));
-      hole.rotation.x = -Math.PI / 2; hole.position.set(cx, 0.44, cz); scene.add(hole);
-      wellMats = [{ mat: rimM, base: new THREE.Color(0x3a332c), i: Math.floor(cz) * W + Math.floor(cx) }, { mat: topM, base: new THREE.Color(0x4a423a), i: Math.floor(cz) * W + Math.floor(cx) }];
+      const x0 = Math.min(...wl.map((q) => q[0])), x1 = Math.max(...wl.map((q) => q[0])) + 1, z0 = Math.min(...wl.map((q) => q[1])), z1 = Math.max(...wl.map((q) => q[1])) + 1;
+      const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, wx = x1 - x0, wz = z1 - z0, th = 0.2, hh = 0.45;
+      const stone = new THREE.MeshStandardMaterial({ map: tex(stoneCanvas()), roughness: 0.95 }), beam = new THREE.MeshStandardMaterial({ color: 0x5a3a22, roughness: 0.85 });
+      const box = (w, h, d, x, y, z, mt) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mt); b.position.set(x, y, z); b.castShadow = true; b.receiveShadow = true; scene.add(b); return b; };
+      box(wx, hh, th, cx, hh / 2, z0 + th / 2, stone); box(wx, hh, th, cx, hh / 2, z1 - th / 2, stone);
+      box(th, hh, wz - th * 2, x0 + th / 2, hh / 2, cz, stone); box(th, hh, wz - th * 2, x1 - th / 2, hh / 2, cz, stone);
+      const water = new THREE.Mesh(new THREE.PlaneGeometry(wx - th * 2, wz - th * 2), new THREE.MeshBasicMaterial({ color: 0x050607 }));
+      water.rotation.x = -Math.PI / 2; water.position.set(cx, 0.2, cz); scene.add(water);
+      for (const f of [-0.28, 0.28]) { box(wx + 0.3, 0.07, 0.09, cx, hh + 0.04, cz + f * wz / 2 * 1.4, beam); box(0.09, 0.07, wz + 0.3, cx + f * wx / 2 * 1.4, hh + 0.1, cz, beam); }
+      const wi = Math.floor(cz) * W + Math.floor(cx);
+      wellMats = [{ mat: stone, base: new THREE.Color(0xffffff), i: wi }, { mat: beam, base: new THREE.Color(0x5a3a22), i: wi }];
     }
-    // 燭：一根蠟燭、一朵火；開始畫面還有一盞會跳的光（立體版的燭光已經畫在地板上）
+    // 燭：放在一張矮燭臺上（引擎裡燭臺擋住那一格）；一根蠟燭、一朵火；開始畫面還有一盞會跳的光（立體版的燭光已經畫在地板上）
     flameTex = tex(radial('rgba(255,190,90,A)'));
+    const STAND_H = 0.32;
     for (const c of m.candles) {
+      const standM = new THREE.MeshStandardMaterial({ color: 0x3b2a1e, roughness: 0.85 });
+      const stand = new THREE.Mesh(new THREE.BoxGeometry(0.7, STAND_H, 0.7), standM);
+      stand.position.set(c.x, STAND_H / 2, c.y); stand.castShadow = true; stand.receiveShadow = true; scene.add(stand);
       const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.38, 10), new THREE.MeshStandardMaterial({ color: 0xefe6d2, roughness: 0.8, emissive: 0x3a2a10, emissiveIntensity: 0.4 }));
-      stick.position.set(c.x, 0.19, c.y); scene.add(stick);
+      stick.position.set(c.x, STAND_H + 0.19, c.y); scene.add(stick);
       const flame = new THREE.Sprite(new THREE.SpriteMaterial({ map: flameTex, color: 0xffc070, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
-      flame.position.set(c.x, 0.47, c.y); flame.scale.set(0.32, 0.42, 1); scene.add(flame);
+      flame.position.set(c.x, STAND_H + 0.47, c.y); flame.scale.set(0.32, 0.42, 1); scene.add(flame);
       let light = null;
-      if (!play) { light = new THREE.PointLight(0xffa04a, 1.0, 5.0, 2); light.position.set(c.x, 0.6, c.y); scene.add(light); }
-      candles.push({ c, stick, flame, light, ph: Math.random() * 6 });
+      if (!play) { light = new THREE.PointLight(0xffa04a, 1.0, 5.0, 2); light.position.set(c.x, STAND_H + 0.6, c.y); scene.add(light); }
+      candles.push({ c, stick, stand, standM, flame, light, ph: Math.random() * 6 });
     }
-    // 印臺：取走了印就不見
+    // 印臺：一張鋪紅布的供桌（引擎裡擋住那一格）；取走了印就不見
     for (const a of g.altars) {
-      const tableM = new THREE.MeshStandardMaterial({ color: 0x3b2a1e, roughness: 0.85 });
-      const table = new THREE.Mesh(new THREE.BoxGeometry(0.84, 0.5, 0.6), tableM);
-      table.position.set(a.x, 0.25, a.y); table.castShadow = true; table.receiveShadow = true; scene.add(table);
+      const tableM = new THREE.MeshStandardMaterial({ color: 0x3b2a1e, roughness: 0.85 }), clothM = new THREE.MeshStandardMaterial({ color: 0x8a2a1e, roughness: 0.9 });
+      const table = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.55, 0.8), tableM);
+      table.position.set(a.x, 0.275, a.y); table.castShadow = true; table.receiveShadow = true; scene.add(table);
+      const cloth = new THREE.Mesh(new THREE.BoxGeometry(0.94, 0.03, 0.44), clothM);
+      cloth.position.set(a.x, 0.565, a.y); scene.add(cloth);
       const sealMs = [0, 0, 1, 0, 0, 0].map((k) => new THREE.MeshStandardMaterial(k ? { map: tex(glyphCanvas(a.glyph, 128, '#f6ecd8', { bg: '#b4392a' })), roughness: 0.6 } : { color: 0xb4392a, roughness: 0.6 }));
       const seal = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.14, 0.42), sealMs);
-      seal.position.set(a.x, 0.57, a.y); seal.castShadow = true; scene.add(seal);
-      altars3.push({ a, table, seal, mats: [{ mat: tableM, base: new THREE.Color(0x3b2a1e) }].concat(sealMs.map((mt) => ({ mat: mt, base: mt.color.clone() }))), i: Math.floor(a.y) * W + Math.floor(a.x) });
+      seal.position.set(a.x, 0.65, a.y); seal.castShadow = true; scene.add(seal);
+      altars3.push({ a, table, seal, mats: [{ mat: tableM, base: new THREE.Color(0x3b2a1e) }, { mat: clothM, base: new THREE.Color(0x8a2a1e) }].concat(sealMs.map((mt) => ({ mat: mt, base: mt.color.clone() }))), i: Math.floor(a.y) * W + Math.floor(a.x) });
     }
-    // 大門：兩扇門板繞著門軸往外開，裡面那一面寫「門」
+    // 大門：兩扇門板貼著門裡那一面（引擎裡關著的大門擋住整格），繞著門軸往外開，裡面那一面寫「門」
     if (m.exits.length) {
-      const ex = m.exits, x0 = ex[0].x, x1 = ex[ex.length - 1].x + 1, z = ex[0].y + 0.2, dw = (x1 - x0) / 2;
+      const ex = m.exits, x0 = ex[0].x, x1 = ex[ex.length - 1].x + 1, z = ex[0].y + 0.07, dw = (x1 - x0) / 2;
       const doorMat = new THREE.MeshStandardMaterial({ color: 0x4a2618, roughness: 0.8 });
       const mk = (hx, off) => { const pv = new THREE.Group(); pv.position.set(hx, 0, z); const d = new THREE.Mesh(new THREE.BoxGeometry(dw, WALL_H * 0.95, 0.14), doorMat); d.position.set(off, WALL_H * 0.475, 0); d.castShadow = true; pv.add(d); scene.add(pv); return pv; };
       const left = mk(x0, dw / 2), right = mk(x1, -dw / 2);
@@ -199,6 +267,7 @@
       sign.position.set((x0 + x1) / 2, WALL_H * 0.55, z - 0.08); sign.rotation.y = Math.PI; scene.add(sign);
       doors = { left, right, sign, mat: doorMat, open: 0, idx: ex.map((e) => e.y * W + e.x) };
     }
+    sealTex = tex(sealCanvas());
     // 魄：字的貼圖；照見是墨，黑暗裡是微光，隔紙屏是影子（從半透的紙屏後面看得到）
     const looks = {
       lit: tex(glyphCanvas('魄', 256, '#2e3338', { glow: 'rgba(235,242,245,.95)' })),
@@ -469,7 +538,7 @@
     lanternLight.intensity = 1.9 * fl; lanternGlow.material.opacity = 0.7 * fl;
     for (const c of candles) { const f = RM ? 1 : 0.85 + 0.15 * Math.sin(t * 11 + c.ph) * Math.sin(t * 7 + c.ph * 2); c.light.intensity = 1.0 * f; c.flame.scale.set(0.3, 0.42 * f, 1); }
     // 紙屏：照引擎算的光發亮（哪一邊照到都算）
-    for (const s of screens) s.mesh.material.emissiveIntensity = Math.min(0.9, (v.light[s.i] || 0) * 0.9);
+    for (const s of screens) s.paper.emissiveIntensity = Math.min(0.9, (v.light[s.i] || 0) * 0.9);
     poStep(1);
     moteStep(p.x, p.y);
     // 鏡頭：在燈的後上方，朝著燈要去的方向；位置與朝向都慢慢跟，一路平順
@@ -498,14 +567,16 @@
     walls.forEach((q, k) => { const f = seen(q.i); wallMesh.setColorAt(k, col.setRGB(q.k * f, q.k * 0.96 * f, q.k * 0.9 * f)); });
     wallMesh.instanceColor.needsUpdate = true;
     // 紙屏：看得見才看得到紙，被照到才發亮
-    for (const s of screens) { const f = seen(s.i); s.mesh.material.color.setScalar(f); s.mesh.material.emissiveIntensity = f > 0.1 ? Math.min(0.9, (v.light[s.i] || 0) * 0.9) : 0; }
+    for (const s of screens) { const f = seen(s.i); s.paper.color.setScalar(f); s.wood.color.setHex(0x4a2f1c).multiplyScalar(Math.max(f, 0.03)); s.paper.emissiveIntensity = f > 0.1 ? Math.min(0.9, (v.light[s.i] || 0) * 0.9) : 0; }
     for (const wm of wellMats) wm.mat.color.copy(wm.base).multiplyScalar(seen(wm.i));
     for (const q of altars3) { const f = seen(q.i); q.seal.visible = !q.a.taken; for (const mm of q.mats) mm.mat.color.copy(mm.base).multiplyScalar(Math.max(f, 0.02)); }
     // 燭：火苗直接看得到才畫（隔著紙屏只有地板上那一團暈）
     for (const c of candles) {
       const line = g.sightLine(p.x, p.y, c.c.x, c.c.y), near = Math.hypot(c.c.x - p.x, c.c.y - p.y) < 14, f = RM ? 1 : 0.85 + 0.15 * Math.sin(t * 11 + c.ph) * Math.sin(t * 7 + c.ph * 2);
       c.flame.visible = line === 'clear' && near; c.flame.scale.set(0.3, 0.42 * f, 1);
-      c.stick.visible = line !== 'blocked' && near; c.stick.material.color.setScalar(Math.max(0.15, seen(Math.floor(c.c.y) * g.m.W + Math.floor(c.c.x))));
+      const cf = seen(Math.floor(c.c.y) * g.m.W + Math.floor(c.c.x));
+      c.stick.visible = line !== 'blocked' && near; c.stick.material.color.setScalar(Math.max(0.15, cf));
+      c.standM.color.setHex(0x3b2a1e).multiplyScalar(Math.max(cf, 0.03));
     }
     // 大門：推開門閂後兩扇往外開
     if (doors) {
@@ -514,6 +585,18 @@
       const f = Math.max(...doors.idx.map((i) => seen(i)), 0.02);
       doors.mat.color.setRGB(0.29 * f, 0.15 * f, 0.094 * f);
     }
+    // 封戶：廊口立起一張大符紙擋住整格（和引擎一樣）；快沒了會閃
+    const sl = [...g.sealed.values()];
+    while (sealPanels.length < sl.length) { const mesh = new THREE.Mesh(new THREE.PlaneGeometry(0.96, 1.25), new THREE.MeshStandardMaterial({ map: sealTex, side: THREE.DoubleSide, transparent: true, roughness: 0.9, emissive: 0x3a1a08, emissiveIntensity: 0.35 })); scene.add(mesh); sealPanels.push(mesh); }
+    sealPanels.forEach((mesh, k) => {
+      const q = sl[k]; mesh.visible = !!q; if (!q) return;
+      const across = g.m.at(q.x, q.y - 1) === T.WALL || g.m.at(q.x, q.y - 1) === T.SCREEN;   // 上下是牆：廊口東西向，符紙南北向擋著
+      mesh.position.set(q.x + 0.5, 0.66, q.y + 0.5);
+      mesh.rotation.set(0, across ? Math.PI / 2 : 0, RM ? 0 : Math.sin(t * 1.7 + k) * 0.02);
+      const W0 = g.m.W, f = Math.max(0.06, ...[[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dy]) => seen((q.y + dy) * W0 + q.x + dx)));
+      mesh.material.color.setScalar(f);
+      mesh.material.opacity = q.t < 2 && !RM ? 0.45 + 0.55 * Math.abs(Math.sin(t * 9)) : 1;
+    });
     // 借火的火、飛出去的火符
     spritePool(lureSprites, g.lures.length, () => new THREE.Sprite(new THREE.SpriteMaterial({ map: fireGlyph, transparent: true, depthWrite: false })));
     g.lures.forEach((l, k) => {
@@ -689,7 +772,7 @@
 
   root.RENDER3D = {
     ok, init, setGame, frame, event, resize, force, pausePerf, toWorld, proj: (x, h, y) => proj(x, h, y), turnBy(rad) { view.yaw += rad; }, setCam, hfov,
-    get camMode() { return camMode; }, get offscreen() { return offscreen; }, get fxCount() { return fx3.length + parts.filter((q) => q.alive).length; }, get flash() { return flashLight ? flashLight.intensity : 0; }, get camPos() { return camera ? { x: camera.position.x, y: camera.position.y, z: camera.position.z } : null; },
+    get camMode() { return camMode; }, get offscreen() { return offscreen; }, get sealShown() { return sealPanels.filter((q) => q.visible).length; }, get fxCount() { return fx3.length + parts.filter((q) => q.alive).length; }, get flash() { return flashLight ? flashLight.intensity : 0; }, get camPos() { return camera ? { x: camera.position.x, y: camera.position.y, z: camera.position.z } : null; },
     get cam() { return cam; }, get view() { return view; }, get yaw() { return view.yaw; }, get mode() { return mode; }, get game() { return g; },
     get quality() { return perf.q; }, get failed() { return perf.failed; }, get fps() { return perf.fps; }, get keep() { return perf.keep; }
   };

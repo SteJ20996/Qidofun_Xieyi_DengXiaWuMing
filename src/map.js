@@ -1,6 +1,7 @@
 // 燈下無明 —— 紙宅的地圖與格子走訪。
 // 地圖記號：# 牆　= 紙屏　o 井欄（矮，只擋走路）　d 廊口（可封戶）　X 大門（兩印到手才開）
 //           S 起點　1 名印　2 息印　c 燭　p 魄（醒著）　q 魄（睡著）　f 火符
+//           印臺（1、2）與燭臺（c）是矮家具：和井欄一樣只擋走路（m.solid），不擋視線與光
 (function (root) {
   const ROWS = [
     '########################################',  // 0
@@ -47,7 +48,8 @@
     const H = rows.length, W = rows[0].length;
     for (const r of rows) if (r.length !== W) throw new Error('地圖每列要一樣寬');
     const t = new Uint8Array(W * H);
-    const m = { W, H, t, start: null, altars: [], candles: [], po: [], pickups: [], exits: [], doors: [] };
+    // solid：印臺、燭臺這些矮家具（2026-11-24）：和井欄一樣只擋走路，不擋視線、光、劍與火符
+    const m = { W, H, t, solid: new Uint8Array(W * H), start: null, altars: [], candles: [], po: [], pickups: [], exits: [], doors: [] };
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       const ch = rows[y][x], i = y * W + x;
       let k = T.FLOOR;
@@ -57,9 +59,9 @@
       else if (ch === 'd') { k = T.DOOR; m.doors.push({ x, y, i }); }
       else if (ch === 'X') { k = T.EXIT; m.exits.push({ x, y, i }); }
       else if (ch === 'S') m.start = { x: x + 0.5, y: y + 0.5 };
-      else if (ch === '1') m.altars.push({ key: 'name', glyph: '名', x: x + 0.5, y: y + 0.5 });
-      else if (ch === '2') m.altars.push({ key: 'breath', glyph: '息', x: x + 0.5, y: y + 0.5 });
-      else if (ch === 'c') m.candles.push({ x: x + 0.5, y: y + 0.5 });
+      else if (ch === '1') { m.altars.push({ key: 'name', glyph: '名', x: x + 0.5, y: y + 0.5 }); m.solid[i] = 1; }
+      else if (ch === '2') { m.altars.push({ key: 'breath', glyph: '息', x: x + 0.5, y: y + 0.5 }); m.solid[i] = 1; }
+      else if (ch === 'c') { m.candles.push({ x: x + 0.5, y: y + 0.5 }); m.solid[i] = 1; }
       else if (ch === 'p') m.po.push({ x: x + 0.5, y: y + 0.5, dormant: false });
       else if (ch === 'q') m.po.push({ x: x + 0.5, y: y + 0.5, dormant: true });
       else if (ch === 'f') m.pickups.push({ kind: 'talisman', x: x + 0.5, y: y + 0.5 });

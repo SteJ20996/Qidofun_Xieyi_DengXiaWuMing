@@ -114,6 +114,8 @@ function bfs(g, sx, sy, gx, gy) {
 function escapeRun(o) {
   const g = mk({ seed: o.seed, loadout: o.empty ? { armor: 0, talismans: 0, ink: 0 } : undefined }), p = g.p;
   const alt = (k) => g.altars.find((a) => a.key === k);
+  // 印臺是實心的（2026-11-24 起擋走路）：走到它旁邊空著的那一格、離印 0.85 格的地方取印
+  const standFor = (a) => { const ax = Math.floor(a.x), ay = Math.floor(a.y); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) if (!g.blocksMove(ax + dx, ay + dy, p)) return { x: a.x + dx * 0.85, y: a.y + dy * 0.85 }; return { x: a.x, y: a.y }; };
   const goals = (o.order === 'name' ? ['name', 'breath'] : ['breath', 'name']).map((k) => ({ k, a: alt(k) })).concat([{ k: 'exit' }]);
   let gi = 0, pth = null, replan = 0, ctx = {}, dodgeT = 0, dodgeDir = null, lastPos = { x: p.x, y: p.y, t: 0 }, stalls = 0;
   const frame = o.dt;
@@ -126,7 +128,7 @@ function escapeRun(o) {
     // 猶豫的玩家：每走一陣就停下來看看（o.hesitate = [每幾秒, 停幾秒]）
     if (o.hesitate) { sincePause += frame; if (sincePause >= o.hesitate[0]) { hold = o.hesitate[1]; sincePause = 0; } }
     const goal = goals[gi];
-    const tgt = goal.k === 'exit' ? (g.exitOpen ? { x: 19.5, y: 27.3 } : { x: g.gate.x, y: g.gate.y - 0.5 }) : { x: goal.a.x, y: goal.a.y };
+    const tgt = goal.k === 'exit' ? (g.exitOpen ? { x: 19.5, y: 27.3 } : { x: g.gate.x, y: g.gate.y - 0.5 }) : standFor(goal.a);
     const { e, d } = nearest(g);
     // 防禦
     let defending = false;
@@ -147,7 +149,7 @@ function escapeRun(o) {
       if (!(e && d < 2.2 && e.state !== 'search')) inp.hold.take = true;   // 推門閂
     } else if (!(defending && e && open(e))) {
       replan -= frame;
-      if (!pth || replan <= 0) { pth = bfs(g, Math.floor(p.x), Math.floor(p.y), Math.floor(tgt.x), Math.floor(tgt.y)); replan = 0.5; }
+      if (!pth || replan <= 0) { pth = bfs(g, Math.floor(p.x), Math.floor(p.y), Math.floor(tgt.x), Math.floor(tgt.y)); if (pth) pth.push([tgt.x, tgt.y]); replan = 0.5; }
       if (pth) {
         while (pth.length > 1 && hyp(pth[0][0] - p.x, pth[0][1] - p.y) < 0.35) pth.shift();
         let k = 0; for (let i = Math.min(pth.length - 1, 4); i > 0; i--) { const n = pth[i]; if (g.hitClear(p.x, p.y, n[0], n[1]) && !MAP.walk(p.x, p.y, n[0], n[1], (tx, ty) => g.blocksMove(tx, ty, p))) { k = i; break; } }
@@ -240,7 +242,7 @@ function stress() {
       if (g.t >= next) { const a = rnd() * 6.283; cur = rnd() < 0.2 ? { mx: 0, my: 0 } : { mx: Math.cos(a), my: Math.sin(a) }; hold = rnd() < 0.15; next = g.t + 0.3 + rnd() * 0.7; }
       for (const k of ['sword', 'bell', 'fire', 'lamp', 'read1', 'read2']) if (rnd() < 0.012) pr[k] = true;
       if (rnd() < 0.002) { const f = floors[Math.floor(rnd() * floors.length)]; g.tp(f[0], f[1]); }
-      if (rnd() < 0.0015) { const a = g.altars[Math.floor(rnd() * 2)]; if (!a.taken) { g.tp(a.x + 0.6, a.y); hold = true; cur = { mx: 0, my: 0 }; next = g.t + 1.3; } }
+      if (rnd() < 0.0015) { const a = g.altars[Math.floor(rnd() * 2)]; if (!a.taken) { g.tp(a.x + 0.85, a.y); hold = true; cur = { mx: 0, my: 0 }; next = g.t + 1.3; } }
       const dt = [1 / 144, 1 / 60, 0.04, 0.05][i % 4];
       g.advance(dt, { mx: cur.mx, my: cur.my, aim: rnd() * 6.283, target: { x: g.p.x + rnd() * 6 - 3, y: g.p.y + rnd() * 6 - 3 }, press: pr, hold: { take: hold } });
       steps++;

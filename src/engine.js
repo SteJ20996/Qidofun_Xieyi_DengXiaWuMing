@@ -22,6 +22,7 @@
     if (k === T.WALL || k === T.SCREEN || k === T.LOW) return true;
     if (k === T.EXIT) return !(g.exitOpen && ent === g.p);
     if (k === T.DOOR) { const s = g.sealed.get(ty * g.m.W + tx); if (s) return !(ent && ent.kind === 'po' && s.exempt.has(ent.id)); }
+    if (g.m.solid && g.m.solid[ty * g.m.W + tx]) return true;   // 印臺、燭臺：人與魄都走不過去（2026-11-24，立體版看得到它們是實心的）
     return false;
   }
   // 擋劍、鈴、符、咬、寒意：牆、紙屏、關著的大門、封戶（井欄矮，不擋）

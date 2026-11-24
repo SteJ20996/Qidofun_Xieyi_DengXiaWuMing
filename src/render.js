@@ -206,8 +206,11 @@
   // 地上的東西：先畫，讓墨蓋過去
   function drawFloorThings(v) {
     const p = g.p;
+    // 印臺、燭臺是實心的矮家具（2026-11-24 起擋走路）：照擋住的大小畫
+    for (const c of g.m.candles) { ctx.fillStyle = '#3b2a1e'; ctx.fillRect(sx(c.x - 0.35), sy(c.y - 0.35), 0.7 * cam.s, 0.7 * cam.s); ctx.strokeStyle = 'rgba(20,12,6,.6)'; ctx.lineWidth = 2; ctx.strokeRect(sx(c.x - 0.35), sy(c.y - 0.35), 0.7 * cam.s, 0.7 * cam.s); }
     for (const a of g.altars) {
-      ctx.fillStyle = '#3b2a1e'; ctx.fillRect(sx(a.x - 0.42), sy(a.y - 0.3), 0.84 * cam.s, 0.6 * cam.s);
+      ctx.fillStyle = '#3b2a1e'; ctx.fillRect(sx(a.x - 0.45), sy(a.y - 0.4), 0.9 * cam.s, 0.8 * cam.s);
+      ctx.fillStyle = '#8a2a1e'; ctx.fillRect(sx(a.x - 0.47), sy(a.y - 0.22), 0.94 * cam.s, 0.44 * cam.s);
       if (!a.taken) {
         ctx.fillStyle = C.red; ctx.fillRect(sx(a.x - 0.24), sy(a.y - 0.24), 0.48 * cam.s, 0.48 * cam.s);
         glyph(a.glyph, a.x, a.y + 0.02, 0.36, '#f6ecd8');
@@ -291,6 +294,7 @@
       const dorm = e.state === 'dormant';
       if (floor) {
         if (vis.mode === 'silhouette') continue;
+        inkShadow(e.x, e.y, e.r * 1.15, 0.55 * Math.min(1, vis.a * 1.2));   // 立體版：魄腳下一團墨影，就是它身子的大小（劍要碰到這圈才算）
         if (e.state === 'windup' && e.windVisible) windRing(e);
         if (e.state === 'track') sniffDots(e);
         continue;
@@ -323,6 +327,11 @@
         sniffDots(e);
       }
     }
+  }
+  function inkShadow(x, y, r, a) {
+    const X = sx(x), Y = sy(y), rr = r * cam.s, gr = ctx.createRadialGradient(X, Y, rr * 0.2, X, Y, rr);
+    gr.addColorStop(0, `rgba(12,10,8,${a})`); gr.addColorStop(0.75, `rgba(12,10,8,${a * 0.6})`); gr.addColorStop(1, 'rgba(12,10,8,0)');
+    ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(X, Y, rr, 0, Math.PI * 2); ctx.fill();
   }
   // 蓄撲的撲擊範圍：虛線紅圈，裡面一圈紅慢慢填滿（填滿就撲）
   function windRing(e) {
@@ -427,6 +436,7 @@
       if (!floor) glyph(progLabel(p), x, y - 0.85, 0.3, '#7a2a1e', { stroke: 3 });
     }
     if (floor) {
+      inkShadow(x, y, p.r * 1.15, 0.45);   // 立體版：腳下一團影，就是你的身子有多寬
       ctx.strokeStyle = 'rgba(180,57,42,.9)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
       ctx.beginPath(); ctx.moveTo(sx(x + Math.cos(p.aim) * 0.38), sy(y + Math.sin(p.aim) * 0.38)); ctx.lineTo(sx(x + Math.cos(p.aim) * 0.62), sy(y + Math.sin(p.aim) * 0.62)); ctx.stroke();
       return;

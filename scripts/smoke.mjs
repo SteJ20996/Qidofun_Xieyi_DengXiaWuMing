@@ -183,7 +183,7 @@ try {
   ok('P 也能暫停與繼續', pp && await ev(() => !DENG.paused));
   // 舊的鍵（F、空白、E、1、2）已拿掉：按了不該有作用
   // 站在名印旁邊按舊鍵：E 按住一秒多也取不到印，F、空白不會掩燈，1、2 不會讀咒
-  await ev(() => { const g = DENG.g; const a = g.altars.find((q) => q.key === 'name'); g.tp(a.x + 0.8, a.y); DENG.snap(); g.p.ink = 3; });
+  await ev(() => { const g = DENG.g; const a = g.altars.find((q) => q.key === 'name'); g.tp(a.x + 0.85, a.y); DENG.snap(); g.p.ink = 3; });
   const before = await ev(() => ({ lamp: DENG.g.p.lampOn, ink: DENG.g.p.ink }));
   for (const k of ['KeyF', 'Space', 'Digit1', 'Digit2']) { await page.keyboard.press(k); await wait(60); }
   await page.keyboard.down('KeyE'); await wait(1300); await page.keyboard.up('KeyE');
@@ -200,11 +200,11 @@ try {
   await page.keyboard.press('Escape'); await wait(100);
 
   // 取兩印、推門閂、出宅
-  await ev(() => { const g = DENG.g; const a = g.altars.find((q) => q.key === 'name'); g.tp(a.x + 0.8, a.y); });
+  await ev(() => { const g = DENG.g; const a = g.altars.find((q) => q.key === 'name'); g.tp(a.x + 0.85, a.y); });
   await page.keyboard.down('KeyU'); await wait(1150); await page.keyboard.up('KeyU');
   ok('取印：大印蓋在畫面正中', await ev(() => !document.getElementById('bigstamp').classList.contains('hidden') && document.querySelector('#bigstamp span').textContent === '名'));
   await wait(100);
-  await ev(() => { const g = DENG.g; const a = g.altars.find((q) => q.key === 'breath'); g.tp(a.x - 0.8, a.y); });
+  await ev(() => { const g = DENG.g; const a = g.altars.find((q) => q.key === 'breath'); g.tp(a.x - 0.85, a.y); });
   await page.keyboard.down('KeyU'); await wait(1250); await page.keyboard.up('KeyU');
   await calm();
   const seals = await ev(() => ({ s: DENG.g.seals, ready: DENG.g.exitReady, goal: document.getElementById('goal').textContent }));
@@ -256,7 +256,7 @@ try {
   await sp.keyboard.press('KeyI'); await sp.keyboard.press('Enter'); await sw(300);
   ok('存檔：I 選第二格開新局', await sev(() => DENG.slot === 2));
   await still();
-  await sev(() => { const g = DENG.g; const a = g.altars.find((q) => q.key === 'name'); g.tp(a.x + 0.8, a.y); DENG.snap(); });
+  await sev(() => { const g = DENG.g; const a = g.altars.find((q) => q.key === 'name'); g.tp(a.x + 0.85, a.y); DENG.snap(); });
   await sp.keyboard.down('KeyU'); await sw(1250); await sp.keyboard.up('KeyU'); await sw(100);
   const auto = await sev(() => ({ log: document.getElementById('log').textContent, sum: DENG.readSlot(2).d && DENG.readSlot(2).d.sum }));
   ok('存檔：取印時自動存（旁側文字說存到第二格）', auto.log.includes('已自動存到第二格') && auto.sum && auto.sum.name, auto);
@@ -306,7 +306,7 @@ try {
   ok('存檔：失魂後 Enter 從第二格的存檔接著', lose.load && lose.text.includes('第二格存著') && again.st === 'play' && again.name && again.chill < 99 && again.slot === 2, { lose, again });
   // 出宅：這一格記下出宅
   await still();
-  await sev(() => { const g = DENG.g; const a = g.altars.find((q) => q.key === 'breath'); g.tp(a.x - 0.8, a.y); });
+  await sev(() => { const g = DENG.g; const a = g.altars.find((q) => q.key === 'breath'); g.tp(a.x - 0.85, a.y); });
   await sp.keyboard.down('KeyU'); await sw(1250); await sp.keyboard.up('KeyU');
   await still();
   await sev(() => { DENG.g.tp(20.0, 26.4); });
@@ -409,6 +409,11 @@ try {
   await tp.mouse.move(900, 300); await tp.mouse.down(); await tp.mouse.up(); await tp.waitForTimeout(400);
   const sw1 = await tp.evaluate(() => ({ n: DENG.g.stats.swordHits + DENG.g.stats.swordMiss, aim: document.getElementById('aimmode').textContent }));
   ok('立體版：滑鼠左鍵揮劍、改成跟著滑鼠對準', sw1.n === sw0 + 1 && sw1.aim.includes('滑鼠'), { sw0, sw1 });
+  // 封戶在立體版是立起來的一張大符紙（引擎裡封住的廊口擋住整格）
+  await tp.evaluate(() => { const g = DENG.g; g.sealed.set(4 * g.m.W + 9, { id: 99, x: 9, y: 4, t: 6, exempt: new Set() }); });
+  const sealShown = await tp.waitForFunction(() => window.RENDER3D.sealShown >= 1, null, { timeout: 5000 }).then(() => true).catch(() => false);
+  await tp.evaluate(() => { DENG.g.sealed.delete(4 * DENG.g.m.W + 9); });
+  ok('立體版：封住的廊口立起一張大符紙', sealShown);
   // 劍、鈴、符的立體效果（2026-11-24）：搖鈴有效果；火符炸開有火球與照亮四周的一閃；過一會兒全部收掉
   await tp.keyboard.press('KeyK');
   const bellFx = await tp.waitForFunction(() => window.RENDER3D.fxCount > 0, null, { timeout: 5000 }).then(() => true).catch(() => false);
@@ -577,7 +582,7 @@ try {
   await mp.tap('#t-sword'); await mp.waitForTimeout(400);
   const sw1 = await mp.evaluate(() => ({ n: DENG.g.stats.swordHits + DENG.g.stats.swordMiss, bites: DENG.g.stats.bites }));
   ok('手機：點一下劍就揮一劍（不會因為補發的滑鼠事件多揮一次）', sw1.n === sw0 + 1, { sw0, sw1 });
-  await mp.evaluate(() => { const g = DENG.g; g.pos.forEach((e, i) => { g.place(e, 2.5 + i, 25.5, 'recover'); e.stateT = 999; }); const a = g.altars.find((q) => q.key === 'name'); g.tp(a.x + 0.8, a.y); DENG.snap(); });
+  await mp.evaluate(() => { const g = DENG.g; g.pos.forEach((e, i) => { g.place(e, 2.5 + i, 25.5, 'recover'); e.stateT = 999; }); const a = g.altars.find((q) => q.key === 'name'); g.tp(a.x + 0.85, a.y); DENG.snap(); });
   await mp.waitForTimeout(300);
   const ready = await mp.evaluate(() => ({ ready: document.getElementById('t-take').classList.contains('ready'), label: document.getElementById('take-s').textContent }));
   await mp.evaluate(() => document.getElementById('t-take').dispatchEvent(new PointerEvent('pointerdown', { pointerId: 5, pointerType: 'touch', bubbles: true })));
