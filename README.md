@@ -48,7 +48,7 @@
 - `src/rules.js`：所有數值
 - `src/map.js`：紙宅地圖、格子走訪
 - `src/engine.js`：規則與狀態（不碰畫面，Node 直接跑）
-- `src/render.js`：畫面；`src/sfx.js`：聲音（WebAudio 合成）；`src/ui.js`：按鍵、HUD、主迴圈
+- `src/render.js`：畫面；`src/render3d.js`：立體版與第一人稱；`src/moves.js`：劍、鈴、符的玩家動作（三種畫面共用）；`src/sfx.js`：聲音（WebAudio 合成）；`src/ui.js`：按鍵、HUD、主迴圈
 - `docs/DESIGN.md`：設計書，含每個決定的理由與測試結果
 - `docs/stejoy-mockup/`：放進長風網站（SteJoy）的排版示意圖與說明（2026-11-24，還沒寫進網站）
 - `tests/`：規則回歸、攻防對照、完整逃脫、壓力檢查；`scripts/`：瀏覽器煙霧測試、字體檢查、單檔打包

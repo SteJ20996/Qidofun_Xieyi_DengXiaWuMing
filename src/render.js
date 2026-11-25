@@ -7,7 +7,7 @@
   const RM = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;   // 減少動態：不抖、不晃
   const hyp = Math.hypot;
 
-  let cv, ctx, g, art, mask, mctx, warm, wctx, cam = { x: 0, y: 0, s: 40, ox: 0, oy: 0 }, fx = [], floats = [], t = 0;
+  let cv, ctx, g, art, mask, mctx, warm, wctx, cam = { x: 0, y: 0, s: 40, ox: 0, oy: 0 }, fx = [], floats = [], t = 0, mv = null;   // mv：劍、鈴、符的玩家動作（src/moves.js）
   // 生動的小東西：光裡的灰塵、腳印、魄拖著的墨煙、被咬時鏡頭一震
   let motes = [], wisps = [], shake = 0, lastPo = {};
 
@@ -122,6 +122,7 @@
   function float(text, x, y, color, o) { floats.push(Object.assign({ text, x, y, oy: 0, color: color || C.ink, t: 0, life: 1.1, size: 0.55 }, o || {})); }
   function event(e) {
     const p = g.p;
+    if (mv) mv.event(e, g);
     switch (e.type) {
       case 'swing': fx.push({ k: 'swing', x: e.x, y: e.y, dir: e.dir, t: 0, life: 0.2 }); break;
       case 'swordHit': fx.push({ k: 'splash', x: e.x, y: e.y, t: 0, life: 0.35, c: '20,18,16' }); break;
@@ -145,6 +146,7 @@
     w = w || {};
     t += dt;
     const W = cv.width, H = cv.height, m = g.m, p = g.p;
+    if (mv && !w.attract) mv.step(g, dt);
     shake = Math.max(0, shake - dt);
     const sh = RM ? 0 : shake / 0.3;
     cam.ox = sh ? (Math.random() - 0.5) * 16 * sh : 0; cam.oy = sh ? (Math.random() - 0.5) * 16 * sh : 0;
@@ -441,19 +443,79 @@
       ctx.beginPath(); ctx.moveTo(sx(x + Math.cos(p.aim) * 0.38), sy(y + Math.sin(p.aim) * 0.38)); ctx.lineTo(sx(x + Math.cos(p.aim) * 0.62), sy(y + Math.sin(p.aim) * 0.62)); ctx.stroke();
       return;
     }
+    // 出招的時候身子往出招的方向踏一小步（只是畫面，引擎裡的人沒動）
+    const mp = mv ? mv.pose('body') : null, face = mv ? mv.face(p.aim) : p.aim;
+    const lunge = mp && !RM ? mp.step + mp.lean * 0.25 : 0;
+    const bx = x + Math.cos(face) * lunge, by = y + Math.sin(face) * lunge;
     ctx.fillStyle = C.paper; ctx.strokeStyle = '#1c1a17'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(sx(x), sy(y), p.r * cam.s, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    glyph('人', x, y + 0.02, 0.42, '#1c1a17');
+    ctx.beginPath(); ctx.arc(sx(bx), sy(by), p.r * cam.s, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    glyph('人', bx, by + 0.02, 0.42, '#1c1a17');
     // 對準方向：一小撇
-    const ax = x + Math.cos(p.aim) * 0.5, ay = y + Math.sin(p.aim) * 0.5;
+    const ax = bx + Math.cos(p.aim) * 0.5, ay = by + Math.sin(p.aim) * 0.5;
     ctx.strokeStyle = 'rgba(180,57,42,.9)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(sx(x + Math.cos(p.aim) * 0.36), sy(y + Math.sin(p.aim) * 0.36)); ctx.lineTo(sx(ax), sy(ay)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(sx(bx + Math.cos(p.aim) * 0.36), sy(by + Math.sin(p.aim) * 0.36)); ctx.lineTo(sx(ax), sy(ay)); ctx.stroke();
+    if (mp && mv.kind) drawMove(mp, mv.kind, bx, by, face);
     // 手燈：掛在身側
     const bob = RM ? 0 : p.moving ? Math.sin(t * 10) * 0.05 : Math.sin(t * 2) * 0.02;   // 手燈隨腳步晃
     const lx = x + Math.cos(p.aim + 1.9) * 0.36, ly = y + Math.sin(p.aim + 1.9) * 0.36 + bob;
     if (p.lampOn) { glow(lx, ly, 0.55, 'rgba(255,190,90,A)', RM ? 0.8 : 0.7 + 0.15 * Math.sin(t * 13) * Math.sin(t * 7.3 + 1)); ctx.fillStyle = '#ffdc96'; }
     else ctx.fillStyle = '#2a2420';
     ctx.strokeStyle = '#5a3a1e'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(sx(lx), sy(ly), 0.11 * cam.s, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  }
+
+  // 劍、鈴、符的動作（平面）：左手從左肩伸出去，手上拿著劍、鈴或符；手往上舉時看起來短一點、往畫面上方挪一點
+  function drawMove(mp, kind, x, y, face) {
+    const I = root.MOVES.IDLE, s = cam.s;
+    const shA = face - Math.PI / 2, shx = x + Math.cos(shA) * 0.17, shy = y + Math.sin(shA) * 0.17;
+    const aa = face + mp.arm[0], ar = 0.3 * Math.max(0.5, Math.cos(mp.arm[1]));
+    const hx = shx + Math.cos(aa) * ar, hy = shy + Math.sin(aa) * ar - Math.max(0, Math.sin(mp.arm[1])) * 0.2;
+    const armA = Math.min(1, (Math.abs(mp.arm[0] - I.arm[0]) + Math.abs(mp.arm[1] - I.arm[1])) / 0.6);
+    ctx.save(); ctx.lineCap = 'round';
+    if (armA > 0.02) {   // 袖子與手
+      ctx.globalAlpha = armA;
+      ctx.strokeStyle = '#1c1a17'; ctx.lineWidth = 0.075 * s;
+      ctx.beginPath(); ctx.moveTo(sx(shx), sy(shy)); ctx.lineTo(sx(hx), sy(hy)); ctx.stroke();
+    }
+    ctx.globalAlpha = mp.show;
+    const pa = face + mp.prop[0], pc = Math.cos(pa), ps = Math.sin(pa), pl = Math.max(0.3, Math.cos(mp.prop[1]));
+    if (kind === 'sword' && mp.show > 0.01) {   // 桃木劍：木色的劍身、深色的護手、紅色的柄
+      const L = 0.66 * pl, tx = hx + pc * L, ty = hy + ps * L - Math.max(0, Math.sin(mp.prop[1])) * 0.1;
+      ctx.strokeStyle = '#b4392a'; ctx.lineWidth = 0.07 * s;
+      ctx.beginPath(); ctx.moveTo(sx(hx - pc * 0.1), sy(hy - ps * 0.1)); ctx.lineTo(sx(hx), sy(hy)); ctx.stroke();
+      ctx.strokeStyle = '#5a3a1e'; ctx.lineWidth = 0.1 * s;
+      ctx.beginPath(); ctx.moveTo(sx(hx), sy(hy)); ctx.lineTo(sx(tx), sy(ty)); ctx.stroke();
+      ctx.strokeStyle = '#a9773f'; ctx.lineWidth = 0.055 * s;
+      ctx.beginPath(); ctx.moveTo(sx(hx), sy(hy)); ctx.lineTo(sx(tx), sy(ty)); ctx.stroke();
+      ctx.strokeStyle = '#3a2412'; ctx.lineWidth = 0.05 * s;
+      ctx.beginPath(); ctx.moveTo(sx(hx - ps * 0.09), sy(hy + pc * 0.09)); ctx.lineTo(sx(hx + ps * 0.09), sy(hy - pc * 0.09)); ctx.stroke();
+    } else if (kind === 'bell' && mp.show > 0.01) {   // 銅鈴：舉在面前搖，旁邊兩道聲音
+      const wob = RM ? 0 : mp.shake * Math.sin(mv.t * 32) * 0.55, r = 0.2 * s;
+      ctx.translate(sx(hx), sy(hy - 0.06)); ctx.rotate(wob);
+      ctx.fillStyle = '#c89a3a'; ctx.strokeStyle = '#5a3a1e'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(-r * 0.9, r * 0.75); ctx.quadraticCurveTo(-r * 0.75, -r * 0.1, -r * 0.45, -r * 0.6); ctx.quadraticCurveTo(0, -r * 1.05, r * 0.45, -r * 0.6);
+      ctx.quadraticCurveTo(r * 0.75, -r * 0.1, r * 0.9, r * 0.75); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#5a3a1e'; ctx.beginPath(); ctx.arc(Math.sin(wob) * r * 0.5, r * 0.95, r * 0.2, 0, Math.PI * 2); ctx.fill();
+      if (mp.shake > 0.3 && !RM) {
+        ctx.rotate(-wob); ctx.strokeStyle = `rgba(160,120,40,${0.8 * mp.shake})`; ctx.lineWidth = 2;
+        const k = Math.sin(mv.t * 32) > 0 ? 1 : 0.6;
+        for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(0, 0, r * (1.6 + 0.3 * k), sd > 0 ? -0.6 : Math.PI - 0.6, sd > 0 ? 0.6 : Math.PI + 0.6); ctx.stroke(); }
+      }
+    } else if (kind === 'fire' && mp.show > 0.01) {   // 火符：黃紙紅框，符尖點著火
+      const cx = hx + pc * 0.12 * pl, cy = hy + ps * 0.12 * pl;
+      if (mp.glow > 0.02) { const fx2 = hx + pc * 0.28 * pl, fy2 = hy + ps * 0.28 * pl; glow(fx2, fy2, 0.42 * mp.glow, 'rgba(255,140,50,A)', 0.85 * mp.show); }
+      ctx.translate(sx(cx), sy(cy)); ctx.rotate(pa + Math.PI / 2);
+      const w2 = 0.07 * s, h2 = 0.15 * s * pl;
+      ctx.fillStyle = '#e8c860'; ctx.strokeStyle = '#b4392a'; ctx.lineWidth = 1.5;
+      ctx.fillRect(-w2, -h2, w2 * 2, h2 * 2); ctx.strokeRect(-w2, -h2, w2 * 2, h2 * 2);
+      ctx.beginPath(); ctx.moveTo(0, -h2 * 0.6); ctx.lineTo(0, h2 * 0.6); ctx.stroke();
+      if (mp.glow > 0.02) { ctx.fillStyle = `rgba(255,${150 + 60 * mp.glow | 0},60,${mp.glow})`; ctx.beginPath(); ctx.ellipse(0, -h2 - 0.05 * s * mp.glow, 0.05 * s * mp.glow, 0.09 * s * mp.glow, 0, 0, Math.PI * 2); ctx.fill(); }
+    }
+    ctx.restore();
+    if (armA > 0.02 || mp.show > 0.01) {   // 手：紙色的一點
+      ctx.save(); ctx.globalAlpha = Math.max(armA, mp.show);
+      ctx.fillStyle = C.paper; ctx.strokeStyle = '#1c1a17'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(sx(hx), sy(hy), 0.055 * s, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); ctx.restore();
+    }
   }
 
   function drawShots(floor) {
@@ -466,10 +528,10 @@
   function drawFx(dt, floor) {
     for (const f of fx) {
       f.t += dt;
-      const q = f.t / f.life;
+      const q = Math.min(1, f.t / f.life);   // 一幀補很多時間時也不畫出負的半徑
       if (f.k === 'swing') {
         ctx.save(); ctx.strokeStyle = `rgba(30,24,18,${0.85 * (1 - q)})`; ctx.lineCap = 'round'; ctx.lineWidth = 0.16 * cam.s * (1 - q * 0.6);
-        const a0 = f.dir - 1.0 + q * 0.5, a1 = f.dir + 1.0;
+        const a0 = f.dir - 1.0, a1 = f.dir + 1.0 - q * 0.5;   // 劍從右手邊（dir+）劈到左手邊（dir−）：起手那一端先淡
         ctx.beginPath(); ctx.arc(sx(f.x), sy(f.y), R.SWORD.reach * 0.85 * cam.s, a0, a1); ctx.stroke(); ctx.restore();
       } else if (f.k === 'splash') {
         for (let k = 0; k < 7; k++) { const a = k * 0.9, r = 0.2 + q * 0.6; ctx.fillStyle = `rgba(${f.c},${0.7 * (1 - q)})`; ctx.beginPath(); ctx.arc(sx(f.x + Math.cos(a) * r), sy(f.y + Math.sin(a) * r), (0.09 - 0.05 * q) * cam.s, 0, Math.PI * 2); ctx.fill(); }
@@ -563,6 +625,7 @@
     let v = null;
     try {
       t += dt; shake = Math.max(0, shake - dt);
+      if (mv) mv.step(g, dt);   // 立體版不畫平面的人，但照樣跟著走，換回平面時不會播舊的動作
       const m = g.m, p = g.p;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.fillStyle = C.ink; ctx.fillRect(0, 0, cv.width, cv.height);
@@ -631,6 +694,7 @@
   }
   function setGame(game) {
     g = game; fx = []; floats = [];
+    mv = root.MOVES ? root.MOVES.tracker() : null;
     art = art || buildArt(g.m);
     const mc = document.createElement('canvas'); mc.width = g.m.W; mc.height = g.m.H; mctx = mc.getContext('2d'); mask = mctx.createImageData(g.m.W, g.m.H);
     const wc = document.createElement('canvas'); wc.width = g.m.W; wc.height = g.m.H; wctx = wc.getContext('2d'); warm = wctx.createImageData(g.m.W, g.m.H);
@@ -639,5 +703,5 @@
   }
   function toWorld(px, py) { return { x: (px - cv.width / 2) / cam.s + cam.x, y: (py - cv.height / 2) / cam.s + cam.y }; }
   let floorArt = null;
-  root.RENDER = { init, setGame, frame, floorFrame, overlayFrame, event, minimap, toWorld, FONT, cam, get shake() { return RM ? 0 : shake; }, rebuild() { art = null; floorArt = null; if (g) art = buildArt(g.m); }, floorCanvas(m) { return floorArt || (floorArt = buildArt(m, true)); } };
+  root.RENDER = { init, setGame, frame, floorFrame, overlayFrame, event, minimap, toWorld, FONT, cam, get move() { return mv; }, get shake() { return RM ? 0 : shake; }, rebuild() { art = null; floorArt = null; if (g) art = buildArt(g.m); }, floorCanvas(m) { return floorArt || (floorArt = buildArt(m, true)); } };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

@@ -580,5 +580,47 @@ const wallRoom = (set) => { for (let y = 1; y <= 7; y++) set(10, y, '#'); };
   ok('無敵是那一格的事，不寫進存檔（讀回來是一般的局，由介面看格子再設）', back && !back.god && back.p.chill === 40);
 }
 
+// ---------- 劍、鈴、符的玩家動作（2026-11-25）：只是畫面，跟著引擎的起手與出手走 ----------
+{
+  require('vm').runInThisContext(require('fs').readFileSync(require('path').join(__dirname, '..', 'src', 'moves.js'), 'utf8'), { filename: 'moves.js' });
+  const M = globalThis.MOVES;
+  // 用真的引擎走：起手時手上的東西出現、姿勢走到「舉起」，出手事件後劈過去，時間到回到站姿
+  const g = mkArena(), tr = M.tracker();
+  const feed = () => { for (const e of g.drain()) tr.event(e, g); tr.step(g, STEP); };
+  run(g, STEP, { aim: 0, press: { sword: true } }); feed();
+  ok('動作：起手時就開始劍的起手式', tr.kind === 'sword' && tr.phase === 'wind', { kind: tr.kind, phase: tr.phase });
+  let up = null;
+  for (let i = 0; i < 40 && tr.phase === 'wind'; i++) { up = tr.pose('body'); run(g, STEP, {}); feed(); }
+  ok('動作：起手結束時劍舉到右肩、劍尖朝右後、看得到劍', up && up.show === 1 && up.arm[0] > 0.6 && up.prop[0] > 1.5, up && { arm: up.arm, prop: up.prop, show: up.show });
+  ok('動作：出手（swing 事件）後換成劈的那一段', tr.kind === 'sword' && tr.phase === 'go');
+  const seen = []; for (let i = 0; i < 80 && tr.kind; i++) { seen.push(tr.pose('body').prop[0]); tr.step(g, STEP); }
+  ok('動作：劍從右往左劈過去（劍的方向一路往左）', seen[0] > 1.5 && Math.min(...seen) < -1.5, { first: +seen[0].toFixed(2), min: +Math.min(...seen).toFixed(2) });
+  const end = tr.pose('body');
+  ok('動作：收劍後回到站姿、劍收起來', !tr.kind && end.show === 0 && Math.abs(end.arm[1] - M.IDLE.arm[1]) < 1e-9);
+  // 符：起手往後拉、符尖點火；出手那一刻符離手
+  run(g, STEP, { aim: 0, press: { fire: true } }); feed();
+  let back = null; for (let i = 0; i < 40 && tr.phase === 'wind'; i++) { back = tr.pose('body'); run(g, STEP, {}); feed(); }
+  const thrown = tr.pose('body');
+  ok('動作：符起手時手往後拉（左後方）、火點起來', back && back.arm[0] < -1.5 && back.glow > 0.8, back && { arm: back.arm, glow: back.glow });
+  ok('動作：符出手那一刻離手（手上不再畫符）', tr.kind === 'fire' && tr.phase === 'go' && thrown.show === 0 && g.shots.length === 1);
+  // 鈴：沒有起手，出手就舉鈴、搖、放下
+  for (let i = 0; i < 80 && tr.kind; i++) tr.step(g, STEP);
+  run(g, STEP, { press: { bell: true } }); feed();
+  let maxShake = 0, maxEl = -9; for (let i = 0; i < 140 && tr.kind; i++) { const q = tr.pose('body'); maxShake = Math.max(maxShake, q.shake); maxEl = Math.max(maxEl, q.arm[1]); tr.step(g, STEP); }
+  ok('動作：搖鈴時鈴舉起來、搖，再放下', maxShake > 0.9 && maxEl > 0.6 && !tr.kind, { maxShake, maxEl });
+  // 自動對準：劈向對準的那隻，不是平常面向的方向
+  const h = mkArena(), th = M.tracker(); h.autoAim = true;
+  const e2 = put(h, h.pos[0], h.p.x, h.p.y - 1.0, 'recover');
+  run(h, STEP, { aim: 0, autoAim: true }); h.drain();   // 先走一步，引擎才知道看得見哪隻
+  run(h, STEP, { aim: 0, autoAim: true, press: { sword: true } }); for (const e of h.drain()) th.event(e, h); th.step(h, STEP);
+  for (let i = 0; i < 12; i++) { run(h, STEP, { aim: 0, autoAim: true }); for (const e of h.drain()) th.event(e, h); th.step(h, STEP); }
+  ok('動作：自動對準時身子轉向對準的那隻', Math.abs(th.face(0) - aimAt(h, e2)) < 0.05, { face: +th.face(0).toFixed(2), want: +aimAt(h, e2).toFixed(2) });
+  // 連著出招不會跳：新的一動從上一動當下的姿勢接著走
+  const c = M.tracker(), cg = mkArena();
+  c.event({ type: 'swing', dir: 0 }, cg); for (let i = 0; i < 12; i++) c.step(cg, STEP);
+  const mid = c.pose('body'); c.event({ type: 'bell' }, cg); c.step(cg, 0); const next = c.pose('body');
+  ok('動作：中途換招從當下的姿勢接著走（不跳）', Math.abs(mid.arm[0] - next.arm[0]) < 1e-9 && Math.abs(mid.arm[1] - next.arm[1]) < 1e-9);
+}
+
 const s = summary();
 process.exit(s.fail ? 1 : 0);

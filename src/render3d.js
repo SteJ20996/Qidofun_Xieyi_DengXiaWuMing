@@ -25,7 +25,7 @@
   const CAM = { back: 4.8, up: 7.0, ahead: 1.6 };          // 開始畫面
   const PCAM = { back: 4.3, up: 4.4, ahead: 2.6, fov: 55 }; // 立體版：人的背後、高過牆頭，往前多看一點（人在畫面下方三分之一）
   const FCAM = { eye: 1.05, pitch: -0.16, fov: 72 };       // 第一人稱（2026-11-24 試玩）：眼睛的高度，微微往下看，看得到腳前的地
-  let camMode = 'behind', viewLamp = null, viewSword = null, swingT = 9, offscreen = 0;
+  let camMode = 'behind', viewLamp = null, viewSword = null, viewHand = null, offscreen = 0, mv = null;   // mv：劍、鈴、符的玩家動作（src/moves.js）
 
   // 能不能跑 3D：只試一次（每試一次就多開一個 WebGL，開太多瀏覽器會把舊的關掉），試完就放掉
   let okCache = null;
@@ -167,7 +167,8 @@
     view.ready = false; view.yaw = g.p.aim;
     while (camera.children.length) camera.remove(camera.children[0]);   // 第一人稱拿在手上的燈與劍：重蓋時拿掉舊的
     if (camera.parent) camera.parent.remove(camera);   // 鏡頭還掛在舊宅子上的話拿下來，不然新宅子裡它不會跟著動
-    viewLamp = null; viewSword = null; swingT = 9;
+    viewLamp = null; viewSword = null; viewHand = null;
+    mv = root.MOVES ? root.MOVES.tracker() : null;
     const play = mode === 'play', m = g.m, W = m.W, H = m.H;
     lensFor(); resize();
     scene = new THREE.Scene();
@@ -330,25 +331,55 @@
     const hat = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.14, 24), new THREE.MeshStandardMaterial({ color: 0x5a4630, roughness: 0.95 })); hat.position.y = 1.13;
     const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.04, 0.42, 8), robeM); arm.position.set(0.04, 0.72, 0.24); arm.rotation.x = -0.5;
     grp.add(robe, collar, head, hat, arm);
+    buildKit();   // 鈴與符的形狀要先有
+    moveVecs();
+    // 左臂（2026-11-25 劍鈴符的動作）：袖子從左肩伸到手，照 MOVES 的姿勢擺；手上的劍、鈴、符照姿勢拿
+    const skinM = new THREE.MeshStandardMaterial({ color: 0xefe3c8, roughness: 0.85, emissive: 0x2a2418, emissiveIntensity: 0.5 });
+    const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.042, 1, 8), robeM);
+    const handL = new THREE.Mesh(new THREE.SphereGeometry(0.045, 10, 8), skinM);
+    const held = { sword: swordModel(), bell: bellModel(), tal: talModel() };
+    grp.add(armL, handL, held.sword, held.bell.grp, held.tal.grp);
     const L = lanternModel(0.62);   // 手燈：提在右手前方
     L.grp.position.set(0.16, 0.55, 0.34);
     grp.add(L.grp);
     const light = lampLight(1.5, 7.5);   // 燈光放在場景裡，每一幀照手燈在哪裡擺（第一人稱時人不畫，光照樣要有）
     scene.add(grp, light);
     lanternLight = light; lanternGlow = L.glow; lantern = null;
-    player = { grp, lamp: L, light, robe };
-    // 第一人稱：右手提的燈在畫面右下，左手的桃木劍揮的時候才掃過畫面
+    player = { grp, lamp: L, light, robe, armL, handL, held };
+    // 第一人稱：右手提的燈在畫面右下；左手平常在畫面外，出招時伸進來（拿劍、搖鈴、甩符）
     const VL = lanternModel(0.3);
     VL.handle.visible = false;   // 提把在畫面外，不畫
     VL.grp.position.set(0.3, -0.27, -0.6);
     viewLamp = VL;
     const sw = swordModel(); sw.visible = false;
     viewSword = sw;
-    camera.add(VL.grp, sw);
-    buildKit();
+    const vb = bellModel(), vt = talModel();
+    const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.05, 1, 10), robeM), vh = new THREE.Mesh(new THREE.SphereGeometry(0.04, 12, 10), skinM);
+    viewHand = { sleeve, hand: vh, bell: vb, tal: vt };
+    camera.add(VL.grp, sw, sleeve, vh, vb.grp, vt.grp);
     scene.add(camera);
     // 借火的火、飛出去的火符：立起來的一團火（字在地板那層也有光）
     fireGlyph = tex(glyphCanvas('火', 128, '#c8461f', { glow: 'rgba(255,150,60,.95)' }));
+  }
+  // 銅鈴：提把在上（0,0,0 是手握的地方），鈴口朝下
+  function bellModel() {
+    const grp = new THREE.Group(), body = new THREE.Group();
+    const cup = new THREE.Mesh(kit.bellGeo, kit.bellMat), clap = new THREE.Mesh(new THREE.SphereGeometry(0.035, 10, 8), kit.bellMat);
+    const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.08, 8), new THREE.MeshStandardMaterial({ color: 0x3a2412, roughness: 0.7 }));
+    handle.position.y = 0.24; clap.position.y = -0.12;
+    body.add(cup, clap, handle); body.position.y = -0.28;   // 手握著提把，鈴掛在下面
+    grp.add(body); grp.visible = false;
+    return { grp, body, clap };
+  }
+  // 火符：一張黃紙符（長邊沿 +y），符尖一團火
+  function talModel() {
+    const grp = new THREE.Group();
+    const paper = new THREE.Mesh(kit.talGeo, new THREE.MeshBasicMaterial({ map: kit.talisman, side: THREE.DoubleSide, transparent: true }));
+    paper.position.y = 0.2;
+    const flame = new THREE.Sprite(new THREE.SpriteMaterial({ map: flameTex, color: 0xff8a30, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+    flame.position.y = 0.44;
+    grp.add(paper, flame); grp.visible = false;
+    return { grp, paper, flame };
   }
   // 桃木劍：劍身沿著 -z（第一人稱拿在手上；人的背後那種會轉成朝外）
   function swordModel() {
@@ -433,17 +464,17 @@
   function event(e) {
     if (mode !== 'play' || !scene || !kit) return;
     const fp = camMode === 'first';
+    if (mv) mv.event(e, g);   // 劍、鈴、符的玩家動作
     if (e.type === 'swing') {
-      if (fp) swingT = 0;   // 第一人稱：手上的劍掃過畫面
-      slash(e.x, e.y, e.dir, fp);
+      slash(e.x, e.y, e.dir);
     } else if (e.type === 'swordHit') {
       burst(e.x, 0.75, e.y, 12, { color: 0xfff0d0, speed: 2.2, up: 0.8, life: 0.35, size: 0.14, grav: 3 });
       burst(e.x, 0.75, e.y, 6, { color: 0x3a3a44, speed: 1.2, up: 0.4, life: 0.5, size: 0.22, shrink: 1.4 });   // 魄被打出來的墨
-    } else if (e.type === 'bell') ring(e.x, e.y, fp);
+    } else if (e.type === 'bell') ring(e.x, e.y);
     else if (e.type === 'fireBoom') boom3(e.x, e.y);
   }
-  // 揮劍：一道淡淡的光弧從右往左掃過（腰的高度）；人的背後那種還看得到手上那把劍跟著掃
-  function slash(x, y, dir, fp) {
+  // 揮劍：一道淡淡的光弧從右往左掃過（腰的高度）；劍在人手上（見 MOVES 與 poseHeld）
+  function slash(x, y, dir) {
     const half = 1.1, r0 = R.SWORD.reach * 0.62, r1 = R.SWORD.reach * 0.95;   // 細細的一彎
     const geo = new THREE.RingGeometry(r0, r1, 28, 1, -(dir + half), half * 2), mat = addMat(0xffe2b0, 0.5);
     const arc = new THREE.Mesh(geo, mat);
@@ -451,21 +482,9 @@
     const total = geo.index.count;
     geo.setDrawRange(0, 0);
     addFx(arc, 0.34, (o, q) => { const r = Math.min(1, q / 0.4); geo.setDrawRange(0, Math.ceil(total * r / 6) * 6); mat.opacity = 0.5 * (q < 0.4 ? 1 : 1 - (q - 0.4) / 0.6); }, [geo, mat]);
-    if (fp) return;
-    const pivot = new THREE.Group(), sw = swordModel();
-    sw.rotation.y = -Math.PI / 2; sw.position.set(0.12, 0, 0);   // 劍身朝外（沿 +x）
-    pivot.add(sw); pivot.position.set(x, 0.74, y);
-    const own = []; sw.traverse((o) => { if (o.geometry) own.push(o.geometry); if (o.material) own.push(o.material); });
-    addFx(pivot, 0.3, (o, q) => { const r = Math.min(1, q / 0.55); o.rotation.y = -(dir + half - r * half * 2); o.rotation.z = 0.15; o.visible = q < 0.9; }, own);
   }
-  // 鈴：一口銅鈴搖起來；三道金圈與一層薄光往外擴到震得開的距離
-  function ring(x, y, fp) {
-    const bell = new THREE.Group(), cup = new THREE.Mesh(kit.bellGeo, kit.bellMat), clap = new THREE.Mesh(new THREE.SphereGeometry(0.035, 10, 8), kit.bellMat);
-    clap.position.y = -0.12; bell.add(cup, clap);
-    const own = [clap.geometry];
-    if (fp) { bell.position.set(-0.3, -0.2, -0.75); bell.scale.setScalar(0.42); }   // 第一人稱：左手搖的鈴，在畫面左下
-    else bell.position.set(x, 1.55, y);
-    addFx(bell, 0.7, (o, q, tt) => { o.rotation.z = Math.sin(tt * 32) * 0.55 * (1 - q); o.visible = q < 0.95; }, own, fp ? camera : scene);
+  // 鈴：銅鈴在人手上搖（見 MOVES 與 poseHeld）；三道金圈與一層薄光往外擴到震得開的距離
+  function ring(x, y) {
     const R0 = R.BELL.r;
     [0.55, 0.85, 1.15].forEach((h, k) => {
       const mat = addMat(0xd9a030, 0.9, true), tor = new THREE.Mesh(kit.torus, mat);
@@ -558,6 +577,7 @@
   const angDiff = (a, b) => { let d = a - b; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return d; };
   function framePlay(dt, w) {
     const p = g.p;
+    if (mv) mv.step(g, dt);
     const v = root.RENDER.floorFrame(dt, floorCv, FS, { autoAim: w.autoAim });
     floorTex.needsUpdate = true;
     t += dt;
@@ -619,9 +639,13 @@
     // 人：面向對準的方向；走路時身子微微起伏，手燈晃
     const fp = camMode === 'first';
     const walk = RM ? 0 : p.moving ? Math.abs(Math.sin(t * 9)) * 0.04 : 0;
-    player.grp.position.set(p.x, walk, p.y);
-    player.grp.rotation.y = -p.aim;
+    // 出招時身子轉向出招的方向、往前踏一小步、前傾（只是畫面，引擎裡的人沒動）
+    const mp = mv ? mv.pose('body') : null, face = mv ? mv.face(p.aim) : p.aim, mk = mv ? mv.kind : null;
+    const stepF = mp && !RM ? mp.step : 0;
+    player.grp.position.set(p.x + Math.cos(face) * stepF, walk, p.y + Math.sin(face) * stepF);
+    player.grp.rotation.set(0, -face, mp && !RM ? -mp.lean : 0);
     player.grp.visible = !fp;
+    if (mp) poseHeld(mp, mk);
     const sw = RM ? 0 : p.moving ? Math.sin(t * 9) * 0.12 : Math.sin(t * 2) * 0.03;
     player.lamp.grp.rotation.x = sw;
     const fl = RM ? 1 : 0.9 + 0.1 * Math.sin(t * 13) * Math.sin(t * 7.3 + 1);
@@ -648,11 +672,7 @@
       camera.lookAt(p.x + fx, FCAM.eye + bob + Math.tan(FCAM.pitch), p.y + fz);
       viewLamp.grp.position.set(0.3, -0.27 + (RM ? 0 : p.moving ? Math.abs(Math.sin(t * 9)) * 0.015 : 0), -0.6);
       viewLamp.grp.rotation.z = sw * 0.6;
-      // 劍：揮的那一下（引擎的 swing 事件，見 event）從右往左掃過畫面；無敵格沒有冷卻也照樣掃
-      swingT += dt;
-      const q = swingT / 0.28;
-      viewSword.visible = q < 1;
-      if (q < 1) { viewSword.position.set(0.32 - q * 0.6, -0.22 - Math.sin(q * Math.PI) * 0.05, -0.45); viewSword.rotation.set(-0.15, 0.9 - q * 1.8, -0.4); }
+      poseView(mv ? mv.pose('fp') : null, mk);   // 左手：出招時伸進畫面（無敵格沒有冷卻也照樣每一下都做）
     } else {
       const want = { x: p.x - fx * PCAM.back, y: PCAM.up, z: p.y - fz * PCAM.back, lx: p.x + fx * PCAM.ahead, lz: p.y + fz * PCAM.ahead };
       const k = !view.ready || w.snap ? 1 : 1 - Math.pow(0.002, dt);
@@ -660,13 +680,61 @@
       view.ready = true;
       camera.position.set(view.x + jit(), view.y + jit(), view.z);
       camera.lookAt(view.lx, 0.45, view.lz);
-      viewSword.visible = false;
+      poseView(null, null);
     }
     // 手燈的光：第一人稱在畫面右下那盞燈的位置；人的背後在人右手的燈
     camera.updateMatrixWorld();
     (fp ? viewLamp.grp : player.lamp.grp).getWorldPosition(player.light.position);
     renderer.render(scene, camera);
     if (fxCv) { root.RENDER.overlayFrame(dt, fxCv, proj); if (fp) fpMarks(); else offscreen = 0; }
+  }
+  // ---------- 劍、鈴、符的玩家動作（2026-11-25，擁有者：「劍鈴符請嘗試分別做一個玩家動作技能動畫」） ----------
+  // 姿勢在 src/moves.js（三種畫面共用同一套時間）。這裡把姿勢擺到立體的人身上：以人為準，+x 是前、+z 是右手邊。
+  const ARM_L = 0.36;
+  let SHOULDER, UPV, FWD, FP_SHOULDER, _d, _h, _b;   // three.js 載好後（buildPlayer）才建
+  function moveVecs() {
+    if (SHOULDER) return;
+    SHOULDER = new THREE.Vector3(0.0, 0.84, -0.16); UPV = new THREE.Vector3(0, 1, 0); FWD = new THREE.Vector3(0, 0, -1);
+    FP_SHOULDER = new THREE.Vector3(-0.36, -0.66, -0.12);
+    _d = new THREE.Vector3(); _h = new THREE.Vector3(); _b = new THREE.Vector3();
+  }
+  function dirOf(v, [az, el]) { return v.set(Math.cos(el) * Math.cos(az), Math.sin(el), Math.cos(el) * Math.sin(az)); }
+  function poseHeld(mp, kind) {
+    const P = player;
+    dirOf(_d, mp.arm); _h.copy(SHOULDER).addScaledVector(_d, ARM_L);
+    P.armL.position.copy(SHOULDER).addScaledVector(_d, ARM_L / 2); P.armL.quaternion.setFromUnitVectors(UPV, _d); P.armL.scale.set(1, ARM_L, 1);
+    P.handL.position.copy(_h);
+    const sc = 0.55 + 0.45 * mp.show, wob = RM ? 0 : mp.shake * Math.sin(mv.t * 32) * 0.55;
+    const H = P.held;
+    H.sword.visible = kind === 'sword' && mp.show > 0.01;
+    if (H.sword.visible) { H.sword.position.copy(_h); H.sword.quaternion.setFromUnitVectors(FWD, dirOf(_b, mp.prop)); H.sword.scale.setScalar(1.2 * sc); }
+    H.bell.grp.visible = kind === 'bell' && mp.show > 0.01;
+    if (H.bell.grp.visible) { H.bell.grp.position.copy(_h); H.bell.grp.rotation.set(wob * 0.4, 0, wob); H.bell.grp.scale.setScalar(0.8 * sc); H.bell.clap.position.x = -wob * 0.06; }
+    H.tal.grp.visible = kind === 'fire' && mp.show > 0.01;
+    if (H.tal.grp.visible) {
+      H.tal.grp.position.copy(_h); H.tal.grp.quaternion.setFromUnitVectors(UPV, dirOf(_b, mp.prop)); H.tal.grp.scale.setScalar(0.8 * sc);
+      const fl = RM ? 1 : 0.85 + 0.15 * Math.sin(t * 23); H.tal.flame.visible = mp.glow > 0.02; H.tal.flame.scale.set(0.5 * mp.glow * fl, 0.7 * mp.glow * fl, 1);
+    }
+  }
+  // 第一人稱：鏡頭座標（x 右、y 上、看出去是 -z）。袖子從畫面左下外面伸到手；平常整隻手在畫面外，不畫
+  function poseView(f, kind) {
+    const V = viewHand, on = !!(f && kind);
+    V.sleeve.visible = V.hand.visible = on;
+    viewSword.visible = on && kind === 'sword' && f.show > 0.01;
+    V.bell.grp.visible = on && kind === 'bell' && f.show > 0.01;
+    V.tal.grp.visible = on && kind === 'fire' && f.show > 0.01;
+    if (!on) return;
+    _h.set(f.hand[0], f.hand[1], f.hand[2]);
+    _d.copy(_h).sub(FP_SHOULDER); const len = _d.length(); _d.normalize();
+    V.sleeve.position.copy(FP_SHOULDER).addScaledVector(_d, len / 2); V.sleeve.quaternion.setFromUnitVectors(UPV, _d); V.sleeve.scale.set(1, len, 1);
+    V.hand.position.copy(_h);
+    const sc = 0.55 + 0.45 * f.show, wob = RM ? 0 : f.shake * Math.sin(mv.t * 32) * 0.55;
+    if (viewSword.visible) { viewSword.position.copy(_h); viewSword.rotation.set(f.rot[0], f.rot[1], f.rot[2]); viewSword.scale.setScalar(sc); }
+    if (V.bell.grp.visible) { V.bell.grp.position.copy(_h); V.bell.grp.rotation.set(wob * 0.4, 0, wob); V.bell.grp.scale.setScalar(0.42 * sc); V.bell.clap.position.x = -wob * 0.06; }
+    if (V.tal.grp.visible) {
+      V.tal.grp.position.copy(_h); V.tal.grp.rotation.set(f.rot[0], f.rot[1], f.rot[2]); V.tal.grp.scale.setScalar(0.45 * sc);
+      const fl = RM ? 1 : 0.85 + 0.15 * Math.sin(t * 23); V.tal.flame.visible = f.glow > 0.02; V.tal.flame.scale.set(0.5 * f.glow * fl, 0.7 * f.glow * fl, 1);
+    }
   }
   // 第一人稱的鏡頭：視角比較寬，近的牆不被切掉
   function lensFor() {
@@ -774,6 +842,8 @@
     ok, init, setGame, frame, event, resize, force, pausePerf, toWorld, proj: (x, h, y) => proj(x, h, y), turnBy(rad) { view.yaw += rad; }, setCam, hfov,
     get camMode() { return camMode; }, get offscreen() { return offscreen; }, get sealShown() { return sealPanels.filter((q) => q.visible).length; }, get fxCount() { return fx3.length + parts.filter((q) => q.alive).length; }, get flash() { return flashLight ? flashLight.intensity : 0; }, get camPos() { return camera ? { x: camera.position.x, y: camera.position.y, z: camera.position.z } : null; },
     get cam() { return cam; }, get view() { return view; }, get yaw() { return view.yaw; }, get mode() { return mode; }, get game() { return g; },
-    get quality() { return perf.q; }, get failed() { return perf.failed; }, get fps() { return perf.fps; }, get keep() { return perf.keep; }
+    get quality() { return perf.q; }, get failed() { return perf.failed; }, get fps() { return perf.fps; }, get keep() { return perf.keep; },
+    get move() { return mv; },   // 劍、鈴、符的玩家動作（測試用）
+    get heldShown() { if (!player || !viewHand) return null; const H = player.held, b = player.grp.visible; return { sword: b && H.sword.visible, bell: b && H.bell.grp.visible, tal: b && H.tal.grp.visible, flame: b && H.tal.flame.visible && H.tal.grp.visible, vSword: viewSword.visible, vBell: viewHand.bell.grp.visible, vTal: viewHand.tal.grp.visible, vHand: viewHand.hand.visible }; }
   };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

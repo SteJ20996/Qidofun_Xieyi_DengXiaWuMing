@@ -541,6 +541,65 @@ try {
   await fctx.close();
 } catch (e) { ok('第一人稱', false, String(e && e.message || e)); }
 
+// ---------- 劍、鈴、符的玩家動作（2026-11-25） ----------
+// 暫停後一步一步走引擎、送事件、畫幀（無頭瀏覽器的立體太慢，照真的時間等會漏掉那半秒），三種畫面各看一次
+try {
+  const mctx2 = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const vp = await mctx2.newPage();
+  const errsM = [];
+  vp.on('pageerror', (e) => errsM.push('pageerror: ' + e.message));
+  vp.on('console', (m) => { if (m.type() === 'error' && !/fonts\.g/.test(m.text())) errsM.push('console: ' + m.text()); });
+  await vp.goto(base + Q + 'seed=7&keep3d=1');
+  await vp.waitForFunction(() => window.DENG && DENG.ready, null, { timeout: 40000 });
+  await vp.keyboard.press('Enter'); await vp.waitForTimeout(1200);
+  const setup = (view) => vp.evaluate((view) => {
+    DENG.setView(view, false);
+    const g = DENG.g; g.tp(19.5, 16.6); g.p.aim = -Math.PI / 2; g.p.lampOn = true;
+    g.pos.forEach((e, i) => { g.place(e, 2.5 + i, 25.5, 'recover'); e.stateT = 999; });
+    if (window.RENDER3D.view) window.RENDER3D.view.yaw = -Math.PI / 2;
+    DENG.setPause(true); document.getElementById('pause').style.visibility = 'hidden';
+    window.__go = (n, press) => {
+      const R = DENG.R;
+      if (press) { DENG.g.p.swordCD = 0; DENG.g.p.bellCD = 0; }
+      for (let i = 0; i < n; i++) {
+        DENG.g.step(R.STEP, { aim: DENG.g.p.aim, press: i === 0 && press ? { [press]: true } : {} });
+        for (const e of DENG.g.drain()) { window.RENDER.event(e); if (DENG.use3d) window.RENDER3D.event(e); }
+      }
+      for (let left = n * R.STEP; left > 1e-9; left -= 0.25) { const d = Math.min(0.25, left); if (DENG.use3d) window.RENDER3D.frame(d, {}); else window.RENDER.frame(d, {}); }
+      const m = DENG.use3d ? window.RENDER3D.move : window.RENDER.move;
+      return { kind: m.kind, phase: m.phase, held: DENG.use3d ? window.RENDER3D.heldShown : null, shots: DENG.g.shots.length };
+    };
+    window.__go(30);
+    return { use3d: DENG.use3d, cam: window.RENDER3D.camMode };
+  }, view);
+  const go = (n, press) => vp.evaluate(([n, press]) => window.__go(n, press), [n, press || null]);
+  // 平面
+  const v2 = await setup('2d');
+  const a1 = await go(12, 'sword'), a2 = await go(14), a3 = await go(60);
+  await go(30); const b1 = await go(17, 'fire');
+  await vp.screenshot({ path: path.join(out, '34-move-2d-fire.png') });
+  const b2 = await go(3), b3 = await go(80);
+  ok('動作（平面）：劍起手、劈、收；符起手後出手', !v2.use3d && a1.kind === 'sword' && a1.phase === 'wind' && a2.phase === 'go' && !a3.kind && b1.kind === 'fire' && b1.phase === 'wind' && b2.phase === 'go' && b2.shots === 1 && !b3.kind, { a1, a2, a3, b1, b2, b3 });
+  // 人的背後
+  const v3 = await setup('3d');
+  const c1 = await go(12, 'sword'), c2 = await go(7);
+  await vp.screenshot({ path: path.join(out, '32-move-3d-sword.png') });
+  const c3 = await go(60);
+  const d1 = await go(24, 'bell'), d2 = await go(120);
+  const e1 = await go(17, 'fire'), e2 = await go(3); await go(80);
+  ok('動作（立體）：劍拿在手上劈過去、收劍；鈴舉起來搖、放下；符點著火、出手就離手', v3.use3d && v3.cam === 'behind' && c1.held.sword && c2.held.sword && c2.phase === 'go' && !c3.held.sword && !c3.kind && d1.held.bell && !d2.held.bell && e1.held.tal && e1.held.flame && !e2.held.tal && e2.shots === 1, { c1: c1.held, c2: c2.held, c3: c3.held, d1: d1.held, d2: d2.held, e1: e1.held, e2: e2.held });
+  // 第一人稱
+  const vf = await setup('fp');
+  const f1 = await go(12, 'sword'), f2 = await go(60);
+  const g1 = await go(30, 'bell');
+  await vp.screenshot({ path: path.join(out, '33-move-fp-bell.png') });
+  const g2 = await go(120);
+  const h1 = await go(17, 'fire'), h2 = await go(3), h3 = await go(80);
+  ok('動作（第一人稱）：左手伸進畫面拿劍、搖鈴、拿符，平常手在畫面外不畫', vf.cam === 'first' && f1.held.vSword && f1.held.vHand && !f1.held.sword && !f2.held.vHand && g1.held.vBell && !g2.held.vBell && h1.held.vTal && !h2.held.vTal && h2.held.vHand && !h3.held.vHand, { f1: f1.held, f2: f2.held, g1: g1.held, h1: h1.held, h2: h2.held, h3: h3.held });
+  ok('動作：三種畫面都沒有報錯', errsM.length === 0, errsM.slice(0, 3));
+  await mctx2.close();
+} catch (e) { ok('劍、鈴、符的動作', false, String(e && e.message || e)); }
+
 // 減少動態：照樣能玩、不報錯
 try {
   const rctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce' });
